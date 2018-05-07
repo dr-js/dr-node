@@ -1,0 +1,45 @@
+{
+  "private": true,
+  "name": "dr-server",
+  "version": "0.0.0",
+  "author": "dr-js",
+  "license": "MIT",
+  "description": "A collection of strange functions, for server",
+  "keywords": [
+    "Dr",
+    "Dr-js",
+    "JavaScript"
+  ],
+  "repository": "github:dr-js/dr-server",
+  "bin": "bin/index.js",
+  "main": "library/index.js",
+  "scripts": {
+    "// script ======================": "",
+    "script-base": "babel-node ./script quiet",
+    "script-pack": "babel-node ./script quiet pack",
+    "script-publish": "babel-node ./script pack publish",
+    "script-publish-dev": "babel-node ./script pack publish-dev",
+    "script-generate-spec": "babel-node ./script/generateSpec",
+    "// build-dev ===================": "",
+    "build-library-dev": "cross-env BABEL_ENV=dev npm run build-library -- --watch",
+    "// build =======================": "",
+    "build-library": "babel ./source --out-dir ./output-gitignore/library --copy-files",
+    "build-module": "cross-env BABEL_ENV=module babel ./source --out-dir ./output-gitignore/module",
+    "// =============================": "",
+    "analyze-stat": "webpack-bundle-analyzer ./profile-stat-gitignore.json",
+    "prepack": "echo \"Error: pack with script-*\" && exit 1"
+  },
+  "engines": {
+    "node": ">=8.8",
+    "npm": ">=5"
+  },
+  "peerDependencies": {
+    "dr-js": "0.15.0-dev.5"
+  },
+  "devDependencies": {
+    "dr-js": "0.15.0-dev.5",
+    "dev-dep-tool": "0.2.2-dev.5",
+    "dev-dep-babel": "0.2.2-dev.5",
+    "webpack-bundle-analyzer": "^2.11.1"
+  }
+}
