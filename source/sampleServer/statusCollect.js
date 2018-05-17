@@ -1,5 +1,11 @@
 import { createRequestListener } from 'dr-js/module/node/server/Server'
-import { responderEnd, createResponderParseURL, createResponderLog, createResponderLogEnd } from 'dr-js/module/node/server/Responder/Common'
+import {
+  responderEnd,
+  responderEndWithStatusCode,
+  createResponderParseURL,
+  createResponderLog,
+  createResponderLogEnd
+} from 'dr-js/module/node/server/Responder/Common'
 import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
 
 import { configureLogger } from 'source/configure/logger'
@@ -16,20 +22,23 @@ const createServer = async ({
   filePid,
   fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
-  url, pathFactDirectory, delay
+  statusCollectPath, statusCollectUrl, statusCollectInterval
 }) => {
   const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
 
   await configureFilePid({ filePid })
 
-  const { assignAuthHeader, wrapResponderAuthTimedLookup } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
+  const {
+    assignAuthHeader,
+    wrapResponderAuthTimedLookup
+  } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
 
   const { server, start, stop, option } = await configureServerBase({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
 
   const { factDB, timer } = await configureStatusCollector({
-    url,
-    pathFactDirectory,
-    delay,
+    collectPath: statusCollectPath,
+    collectUrl: statusCollectUrl,
+    collectInterval: statusCollectInterval,
     getExtraHeaders: () => {
       const [ key, value ] = assignAuthHeader()
       return { [ key ]: value }
@@ -37,10 +46,12 @@ const createServer = async ({
   })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
+  const responderAuthCheck = wrapResponderAuthTimedLookup((store) => responderEndWithStatusCode(store, { statusCode: 200 }))
 
   const routerMap = createRouteMap([
-    [ '/status-visualize', 'GET', createResponderStatusVisualize('/status-state') ],
+    [ '/status-visualize', 'GET', createResponderStatusVisualize('/status-state', '/auth') ],
     [ '/status-state', 'GET', wrapResponderAuthTimedLookup(createResponderStatusState(factDB.getState)) ],
+    [ '/auth', 'GET', responderAuthCheck ],
     getRouteGetRouteList(() => routerMap),
     routeGetFavicon
   ])

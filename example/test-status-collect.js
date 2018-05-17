@@ -9,9 +9,9 @@ const main = async () => {
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuthConfig: `${__dirname}/.timed-lookup-gitignore.key`,
 
-    url: `http://localhost:8001/status-report`,
-    pathFactDirectory: `${__dirname}/fact-${SERVER_TAG}-gitignore`,
-    // delay: 2 * 1000,
+    statusCollectPath: `${__dirname}/fact-${SERVER_TAG}-gitignore`,
+    statusCollectUrl: `http://localhost:8001/status-report`,
+    // statusCollectInterval: 2 * 1000,
 
     protocol: 'http:',
     hostname: 'localhost',

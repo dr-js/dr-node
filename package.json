@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "dr-server",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "dr-js",
   "license": "MIT",
   "description": "A collection of strange functions, for server",
@@ -26,7 +26,6 @@
     "build-library": "babel ./source --out-dir ./output-gitignore/library --copy-files",
     "build-module": "cross-env BABEL_ENV=module babel ./source --out-dir ./output-gitignore/module",
     "// =============================": "",
-    "analyze-stat": "webpack-bundle-analyzer ./profile-stat-gitignore.json",
     "prepack": "echo \"Error: pack with script-*\" && exit 1"
   },
   "engines": {
@@ -34,12 +33,11 @@
     "npm": ">=5"
   },
   "peerDependencies": {
-    "dr-js": "0.15.0-dev.5"
+    "dr-js": "0.15.1-dev.1"
   },
   "devDependencies": {
-    "dr-js": "0.15.0-dev.5",
+    "dr-js": "0.15.1-dev.1",
     "dev-dep-tool": "0.2.2-dev.5",
-    "dev-dep-babel": "0.2.2-dev.5",
-    "webpack-bundle-analyzer": "^2.11.1"
+    "dev-dep-babel": "0.2.2-dev.5"
   }
 }

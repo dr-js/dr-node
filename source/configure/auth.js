@@ -2,6 +2,7 @@ import { catchSync } from 'dr-js/module/common/error'
 import { generateCheckCode, verifyCheckCode } from 'dr-js/module/common/module/TimedLookup'
 import { generateLookupData, loadLookupFile, saveLookupFile } from 'dr-js/module/node/module/TimedLookup'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
+import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
 const configureAuthTimedLookup = async ({
   fileAuthConfig,
@@ -37,14 +38,16 @@ const configureAuthTimedLookup = async ({
   return {
     verifyAuthHeader,
     assignAuthHeader,
-    wrapResponderAuthTimedLookup: (responder) => (store) => {
-      __DEV__ && console.log('AuthTimedLookup: check', store.request.headers[ 'auth-check-code' ], generateCheckCode(timedLookupData))
-      const { error } = catchSync(verifyAuthHeader, store.request.headers)
-      __DEV__ && console.log('AuthTimedLookup: pass?', !error)
-      return error
-        ? responderEndWithStatusCode(store, { statusCode: 403 })
-        : responder(store)
-    },
+    wrapResponderAuthTimedLookup: (responder) => createResponderCheckRateLimit({
+      checkFunc: (store) => {
+        __DEV__ && console.log('AuthTimedLookup: check', store.request.headers[ 'auth-check-code' ], generateCheckCode(timedLookupData))
+        const { error } = catchSync(verifyAuthHeader, store.request.headers)
+        __DEV__ && console.log('AuthTimedLookup: pass?', !error)
+        return !error
+      },
+      responderNext: responder,
+      responderCheckFail: (store) => responderEndWithStatusCode(store, { statusCode: 403 })
+    }),
     wrapResponderAssignTimedLookup: (responder) => (store) => {
       store.response.setHeader(...assignAuthHeader())
       return responder(store)
