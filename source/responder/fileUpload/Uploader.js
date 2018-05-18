@@ -59,12 +59,18 @@ const createResponderFileChunkUpload = async (
 
   return async (store) => {
     const [ headerString, payloadBuffer ] = parseBufferPacket(await receiveBufferAsync(store.request))
-    const { filePath: filePathRaw, chunkHashString, chunkIndex, chunkTotal } = JSON.parse(headerString)
+    const { filePath: filePathRaw, chunkByteLength, chunkHashBufferString, chunkIndex, chunkTotal } = JSON.parse(headerString)
 
-    const chunkHashBuffer = Buffer.from(parseBufferString(chunkHashString))
-    const verifyChunkHashBuffer = createHash('sha256').update(payloadBuffer).digest()
-    if (Buffer.compare(chunkHashBuffer, verifyChunkHashBuffer) !== 0) {
-      throw new Error(`hash mismatch, get: ${verifyChunkHashBuffer.toString('base64')}, expect ${chunkHashBuffer.toString('base64')}`)
+    if (chunkByteLength !== payloadBuffer.length) {
+      throw new Error(`chunk length mismatch, get: ${payloadBuffer.length}, expect ${chunkByteLength}`)
+    }
+
+    if (chunkHashBufferString) { // TODO: wait for stable browser crypto
+      const chunkHashBuffer = Buffer.from(parseBufferString(chunkHashBufferString))
+      const verifyChunkHashBuffer = createHash('sha256').update(payloadBuffer).digest()
+      if ((Buffer.compare(chunkHashBuffer, verifyChunkHashBuffer) !== 0)) {
+        throw new Error(`chunk hash mismatch, get: ${verifyChunkHashBuffer.toString('base64')}, expect ${chunkHashBuffer.toString('base64')}`)
+      }
     }
 
     const filePath = getPath(filePathRaw)
