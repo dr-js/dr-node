@@ -16,19 +16,21 @@ import { createResponderStatusReport } from 'source/responder/status/Report'
 import { getRouteGetRouteList } from 'source/responder/routeList'
 
 const createServer = async ({
-  pathLogDirectory, prefixLogFile,
+  // common
   filePid,
-  fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
+  pathLogDirectory, prefixLogFile,
+  // auth
+  fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
+  // status report
   statusReportProcessTag
 }) => {
-  const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
-
   await configureFilePid({ filePid })
-
-  const { wrapResponderAuthTimedLookup } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
-
   const { server, start, stop, option } = await configureServerBase({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
+  const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
+  const {
+    wrapResponderAuthTimedLookup
+  } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
 

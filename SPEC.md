@@ -6,7 +6,7 @@
 + 📄 [source/function.js](source/function.js)
   - `autoTestServerPort`, `getServerInfo`
 + 📄 [source/option.js](source/option.js)
-  - `AUTH_FORMAT_CONFIG`, `FILE_UPLOAD_FORMAT_CONFIG`, `SERVER_FORMAT_CONFIG`, `STATUS_COLLECT_FORMAT_CONFIG`, `STATUS_REPORT_FORMAT_CONFIG`
+  - `AuthFormatConfig`, `FileUploadFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `getServerFormatConfig`
 + 📄 [source/configure/auth.js](source/configure/auth.js)
   - `configureAuthTimedLookup`
 + 📄 [source/configure/filePid.js](source/configure/filePid.js)

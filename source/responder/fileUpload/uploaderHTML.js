@@ -30,8 +30,7 @@ const mainScript = `<script>window.onload = () => {
     }
   } = window
 
-  // TODO: non-https site can not access window.crypto.subtle
-  const tryCalcBlobHashBufferString = async (blob) => packBufferString(await window.crypto.subtle.digest('SHA-256', await parseBlobAsArrayBuffer(blob)))
+  const calcBlobHashBufferString = async (blob) => packBufferString(await window.crypto.subtle.digest('SHA-256', await parseBlobAsArrayBuffer(blob)))
 
   const CHUNK_SIZE_MAX = 1 * 1024 * 1024 // 1MB max
   const uploadFileByChunk = async (fileBlob, pathPrefix, onProgress, getAuthCheckCode) => {
@@ -47,7 +46,8 @@ const mainScript = `<script>window.onload = () => {
         : fileBlobSize % CHUNK_SIZE_MAX
       const chunkBlob = fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize)
       const chunkByteLength = chunkBlob.size 
-      const chunkHashBufferString = (await catchAsync(tryCalcBlobHashBufferString, chunkBlob)).result || ''
+      // TODO: non-https site can not access window.crypto.subtle
+      const chunkHashBufferString = window.isSecureContext ? await calcBlobHashBufferString(chunkBlob) : ''
       const blobPacket = packBlobPacket(JSON.stringify({ filePath, chunkByteLength, chunkHashBufferString, chunkIndex, chunkTotal }), chunkBlob)
       onProgress(chunkIndex * CHUNK_SIZE_MAX, fileBlobSize)
       await withRetryAsync(async () => { 

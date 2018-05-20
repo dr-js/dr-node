@@ -17,19 +17,21 @@ import { getRouteGetRouteList } from 'source/responder/routeList'
 import { createResponderUploader, createResponderFileChunkUpload } from 'source/responder/fileUpload/Uploader'
 
 const createServer = async ({
-  pathLogDirectory, prefixLogFile,
+  // common
   filePid,
-  fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
+  pathLogDirectory, prefixLogFile,
+  // auth
+  fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
+  // file upload
   uploadRootPath, uploadMergePath
 }) => {
-  const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
-
   await configureFilePid({ filePid })
-
-  const { wrapResponderAuthTimedLookup } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
-
   const { server, start, stop, option } = await configureServerBase({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
+  const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
+  const {
+    wrapResponderAuthTimedLookup
+  } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
   const responderAuthCheck = wrapResponderAuthTimedLookup((store) => responderEndWithStatusCode(store, { statusCode: 200 }))

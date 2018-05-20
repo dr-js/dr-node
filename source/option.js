@@ -5,7 +5,7 @@ const { SingleString, SingleInteger, BooleanFlag } = ConfigPreset
 // protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
 // pathLogDirectory, prefixLogFile
 // filePid
-const SERVER_FORMAT_CONFIG = {
+const getServerFormatConfig = (extendFormatList = []) => ({
   ...SingleString,
   optional: true,
   name: 'hostname',
@@ -24,12 +24,13 @@ const SERVER_FORMAT_CONFIG = {
       ]
     },
     { ...SingleString, isPath: true, optional: true, name: 'path-log', extendFormatList: [ { ...SingleString, optional: true, name: 'prefix-log-file' } ] },
-    { ...SingleString, isPath: true, optional: true, name: 'file-pid' }
+    { ...SingleString, isPath: true, optional: true, name: 'file-pid' },
+    ...extendFormatList
   ]
-}
+})
 
 // fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap
-const AUTH_FORMAT_CONFIG = {
+const AuthFormatConfig = {
   ...SingleString,
   optional: true,
   isPath: true,
@@ -47,7 +48,7 @@ const AUTH_FORMAT_CONFIG = {
 }
 
 // uploadRootPath, uploadMergePath
-const FILE_UPLOAD_FORMAT_CONFIG = {
+const FileUploadFormatConfig = {
   ...SingleString,
   optional: true,
   isPath: true,
@@ -56,7 +57,7 @@ const FILE_UPLOAD_FORMAT_CONFIG = {
 }
 
 // statusCollectPath, statusCollectUrl, statusCollectInterval
-const STATUS_COLLECT_FORMAT_CONFIG = {
+const StatusCollectFormatConfig = {
   ...SingleString,
   optional: true,
   isPath: true,
@@ -68,12 +69,12 @@ const STATUS_COLLECT_FORMAT_CONFIG = {
 }
 
 // statusReportProcessTag
-const STATUS_REPORT_FORMAT_CONFIG = { ...SingleString, optional: true, name: 'status-report-process-tag' }
+const StatusReportFormatConfig = { ...SingleString, optional: true, name: 'status-report-process-tag' }
 
 export {
-  SERVER_FORMAT_CONFIG,
-  AUTH_FORMAT_CONFIG,
-  FILE_UPLOAD_FORMAT_CONFIG,
-  STATUS_COLLECT_FORMAT_CONFIG,
-  STATUS_REPORT_FORMAT_CONFIG
+  getServerFormatConfig,
+  AuthFormatConfig,
+  FileUploadFormatConfig,
+  StatusCollectFormatConfig,
+  StatusReportFormatConfig
 }
