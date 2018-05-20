@@ -46,7 +46,7 @@ const configureStatusCollector = async ({
 
   const timer = createTimer({ func: collectStatus, delay: collectInterval })
 
-  return { factDB, timer }
+  return { factDB, timer, collectStatus }
 }
 
 export { configureStatusCollector }

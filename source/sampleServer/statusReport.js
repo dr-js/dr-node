@@ -11,9 +11,9 @@ import { configureLogger } from 'source/configure/logger'
 import { configureFilePid } from 'source/configure/filePid'
 import { configureAuthTimedLookup } from 'source/configure/auth'
 import { configureServerBase } from 'source/configure/serverBase'
-import { routeGetFavicon } from 'source/responder/favicon'
+import { createRouteGetFavicon } from 'source/responder/favicon'
 import { createResponderStatusReport } from 'source/responder/status/Report'
-import { getRouteGetRouteList } from 'source/responder/routeList'
+import { createResponderRouteList } from 'source/responder/routeList'
 
 const createServer = async ({
   // common
@@ -36,8 +36,8 @@ const createServer = async ({
 
   const routerMap = createRouteMap([
     [ '/status-report', 'GET', wrapResponderAuthTimedLookup(createResponderStatusReport(statusReportProcessTag)) ],
-    getRouteGetRouteList(() => routerMap),
-    routeGetFavicon
+    [ '/', 'GET', createResponderRouteList(() => routerMap) ],
+    await createRouteGetFavicon()
   ])
 
   server.on('request', createRequestListener({

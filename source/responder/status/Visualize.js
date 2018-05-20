@@ -1,27 +1,37 @@
-import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
+import { transformCache } from 'dr-js/module/common/immutable/function'
 import { responderSendBufferCompress } from 'dr-js/module/node/server/Responder/Send'
 
+import { prepareBufferDataHTML, prepareBufferDataJSON } from 'source/responder/function'
 import { getHTML } from './visualizeHTML'
 
-const createResponderStatusVisualize = (
+const createResponderStatusVisualize = async (
   statusFetchUrl = '/status-state',
   authCheckUrl = '/auth'
 ) => {
-  const HTML_TEMPLATE_WITH_SCRIPT = getHTML({
+  const bufferData = await prepareBufferDataHTML(Buffer.from(getHTML({
     STATUS_FETCH_URL: statusFetchUrl,
-    AUTH_CHECK_URL: authCheckUrl
-  })
-
-  return (store) => responderSendBufferCompress(store, {
-    buffer: Buffer.from(HTML_TEMPLATE_WITH_SCRIPT),
-    type: BASIC_EXTENSION_MAP.html
-  })
+    AUTH_CHECK_URL: authCheckUrl,
+    RENDER_PRESET_CONFIG: __DEV__
+      ? {
+        StatusRaw: { positionScale: 8, horizontalDelta: 20, mergeGapMax: 0 },
+        Merge0: { positionScale: 4, horizontalDelta: 60, mergeGapMax: 0 },
+        Merge1: { positionScale: 2, horizontalDelta: 120, mergeGapMax: 0 },
+        Merge2: { positionScale: 1, horizontalDelta: 360, mergeGapMax: 0 }
+      }
+      : {
+        StatusRaw: { positionScale: 0.05, horizontalDelta: 60 * 60, mergeGapMax: (5 + 1) * 60 },
+        Merge0: { positionScale: 0.01, horizontalDelta: 6 * 60 * 60, mergeGapMax: (20 + 1) * 60 },
+        Merge1: { positionScale: 0.001, horizontalDelta: 24 * 60 * 60, mergeGapMax: (60 + 1) * 60 },
+        Merge2: { positionScale: 0.0005, horizontalDelta: 14 * 24 * 60 * 60, mergeGapMax: (24 + 1) * 60 * 60 }
+      }
+  })))
+  return (store) => responderSendBufferCompress(store, bufferData)
 }
 
-const createResponderStatusState = (getStatusState) => (store) => responderSendBufferCompress(store, {
-  buffer: Buffer.from(JSON.stringify(getStatusState())),
-  type: BASIC_EXTENSION_MAP.json
-})
+const createResponderStatusState = (getStatusState) => {
+  const getBufferDataAsync = transformCache((statusState) => prepareBufferDataJSON(Buffer.from(JSON.stringify(statusState))))
+  return async (store) => responderSendBufferCompress(store, await getBufferDataAsync(getStatusState()))
+}
 
 export {
   createResponderStatusVisualize,

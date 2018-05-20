@@ -19,8 +19,8 @@ const COMMON_STYLE = () => `<style>
   ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.3); }
   button { text-decoration: none; margin: 2px 4px; padding: 2px 4px; border: 0; background: #ddd; }
   button:hover { background: #eee; box-shadow: inset 0 0 0 1px #aaa; }
-  @media (pointer: coarse) { button { min-height: 32px; line-height: 32px; font-size: 18px; } }
-  @media (pointer: fine) { button { min-height: 20px; line-height: 20px; font-size: 14px; } }
+  @media (pointer: coarse) { button { min-height: 32px; font-size: 18px; } }
+  @media (pointer: fine) { button { min-height: 20px; font-size: 14px; } }
 </style>`
 
 const COMMON_SCRIPT = () => `<script>Object.assign(window, {

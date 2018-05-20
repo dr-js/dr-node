@@ -25,14 +25,16 @@ const mainScript = `<script>window.onload = () => {
     cT,
     initAuthMask,
     Dr: {
-      Common: { Time: { clock }, Error: { catchAsync }, Function: { withRetryAsync }, Data: { ArrayBuffer: { packBufferString } }, Module: { TimedLookup: { generateCheckCode } }, Format },
+      Common: { Time: { clock }, Function: { withRetryAsync }, Data: { ArrayBuffer: { packBufferString } }, Module: { TimedLookup: { generateCheckCode } }, Format },
       Browser: { DOM: { applyDragFileListListener }, Data: { Blob: { parseBlobAsArrayBuffer }, BlobPacket: { packBlobPacket } } }
-    }
+    },
+    FILE_UPLOAD_URL,
+    AUTH_CHECK_URL
   } = window
 
   const calcBlobHashBufferString = async (blob) => packBufferString(await window.crypto.subtle.digest('SHA-256', await parseBlobAsArrayBuffer(blob)))
 
-  const CHUNK_SIZE_MAX = 1 * 1024 * 1024 // 1MB max
+  const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
   const uploadFileByChunk = async (fileBlob, pathPrefix, onProgress, getAuthCheckCode) => {
     const filePath = String(pathPrefix) + fileBlob.name
     const fileBlobSize = fileBlob.size

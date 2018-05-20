@@ -1,16 +1,14 @@
-import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
-import { responderSendBuffer } from 'dr-js/module/node/server/Responder/Send'
+import { responderSendBufferCompress } from 'dr-js/module/node/server/Responder/Send'
+import { prepareBufferDataPNG } from './function'
 
-const BUFFER_DATA_FAVICON_PNG = {
-  buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEVjrv/wbTZJAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64'),
-  type: BASIC_EXTENSION_MAP.png
+const createResponderFavicon = async () => {
+  const bufferData = await prepareBufferDataPNG(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEVjrv/wbTZJAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64'))
+  return (store) => responderSendBufferCompress(store, bufferData)
 }
 
-const responderFavicon = (store) => responderSendBuffer(store, BUFFER_DATA_FAVICON_PNG)
-
-const routeGetFavicon = [ [ '/favicon.ico', '/favicon' ], 'GET', responderFavicon ]
+const createRouteGetFavicon = async () => [ [ '/favicon.ico', '/favicon' ], 'GET', await createResponderFavicon() ]
 
 export {
-  responderFavicon,
-  routeGetFavicon
+  createResponderFavicon,
+  createRouteGetFavicon
 }

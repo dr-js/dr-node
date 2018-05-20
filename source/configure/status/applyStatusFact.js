@@ -18,7 +18,7 @@ const floorTimestampByDay = (timestamp) => Math.floor(timestamp / DAY_IN_SECOND)
 
 const getStartState = (timestamp) => ({
   id: 1,
-  timestamp: 1,
+  timestamp,
   sumKeyList: [],
   rangeKeyList: [],
   statusRawList: [], // per 5min status for 1 day // estimate length = 24 * 60 / 5 = 288
@@ -33,7 +33,7 @@ const getStartState = (timestamp) => ({
 const parseStatus = ({ timestamp, error, retryCount, status, timeOk, timeEnd }, sumKeyList, rangeKeyList) => {
   const sumRawList = []
   const rangeRawList = []
-  rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timestamp', timestamp)
+  rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timestamp', timestamp) // TODO: may be not good for timestamp to have valueSize = 1
   if (error) {
     sumKeyList = setSumRaw(sumKeyList, sumRawList, 'error', 1)
   } else {

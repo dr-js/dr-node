@@ -13,8 +13,8 @@ import { configureFilePid } from 'source/configure/filePid'
 import { configureAuthTimedLookup } from 'source/configure/auth'
 import { configureServerBase } from 'source/configure/serverBase'
 import { configureStatusCollector } from 'source/configure/status/Collector'
-import { routeGetFavicon } from 'source/responder/favicon'
-import { getRouteGetRouteList } from 'source/responder/routeList'
+import { createRouteGetFavicon } from 'source/responder/favicon'
+import { createResponderRouteList } from 'source/responder/routeList'
 import { createResponderStatusVisualize, createResponderStatusState } from 'source/responder/status/Visualize'
 
 const createServer = async ({
@@ -48,11 +48,11 @@ const createServer = async ({
   const responderAuthCheck = wrapResponderAuthTimedLookup((store) => responderEndWithStatusCode(store, { statusCode: 200 }))
 
   const routerMap = createRouteMap([
-    [ '/status-visualize', 'GET', createResponderStatusVisualize('/status-state', '/auth') ],
+    [ '/status-visualize', 'GET', await createResponderStatusVisualize('/status-state', '/auth') ],
     [ '/status-state', 'GET', wrapResponderAuthTimedLookup(createResponderStatusState(factDB.getState)) ],
     [ '/auth', 'GET', responderAuthCheck ],
-    getRouteGetRouteList(() => routerMap),
-    routeGetFavicon
+    [ '/', 'GET', createResponderRouteList(() => routerMap) ],
+    await createRouteGetFavicon()
   ])
 
   server.on('request', createRequestListener({

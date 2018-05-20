@@ -46,7 +46,10 @@ const mainScript = `<script>window.onload = () => {
     qSS,
     cT,
     initAuthMask,
-    Dr: { Common: { Math: { roundFloat }, Function: { lossyAsync }, Module: { TimedLookup: { generateCheckCode } }, Format } }
+    Dr: { Common: { Math: { roundFloat, clamp }, Function: { lossyAsync }, Module: { TimedLookup: { generateCheckCode } }, Format } },
+    STATUS_FETCH_URL,
+    AUTH_CHECK_URL,
+    RENDER_PRESET_CONFIG
   } = window
 
   const renderChartMain = ({
@@ -61,7 +64,7 @@ const mainScript = `<script>window.onload = () => {
         prevHorizontalPosition = from
       }
       o.push(
-        '<div class="chart-bar" style="flex-basis: ' + Math.abs((from - to) * positionScale) + 'px;' + (value === undefined ? ' pointer-events: none;' : '') + '">',
+        '<div class="chart-bar" style="flex-basis: ' + clamp(Math.abs((from - to) * positionScale), 4, 256) + 'px;' + (value === undefined ? ' pointer-events: none;' : '') + '">',
         tag && '<div class="chart-bar-tag">' + tag + '</div>',
         ...(value === undefined ? [] : min !== max ? [
           '<div class="chart-bar-value" style="height: ' + value + '%;"></div>',
@@ -98,8 +101,8 @@ const mainScript = `<script>window.onload = () => {
     getValueData, parseValue,
     preset = {}
   ) => {
-    const resultTrackList = [] // [ from , to, value, min, max ]
-    let { valueMin = Infinity, valueMax = -Infinity } = preset
+    let resultTrackList = [] // [ from , to, value, min, max ]
+    let { valueMin = Infinity, valueMax = -Infinity, mergeGapMax = 0 } = preset
     let prevPositionTo
 
     dataList.forEach((data) => {
@@ -114,6 +117,22 @@ const mainScript = `<script>window.onload = () => {
       resultTrackList.push([ from, to, value, min, max ])
       prevPositionTo = to
     })
+
+    if (mergeGapMax) { // reduce interval gaps
+      let prevTrack
+      resultTrackList = resultTrackList.reduce((o, track) => {
+        const [ from, to, value ]= track
+        if (value) {
+          o.push(track)
+          prevTrack = track
+        } else {
+          if (prevTrack && Math.abs(from - to) <= mergeGapMax) prevTrack[ 1 ] = to
+          else o.push(track)
+          prevTrack = undefined
+        }
+        return o
+      }, [])
+    }
 
     return {
       ...preset,
@@ -251,10 +270,10 @@ const mainScript = `<script>window.onload = () => {
     }
 
     qSS('#chart-panel', '')
-    createRenderStatusButton('render-status-raw', 'RenderStatusRaw', renderStatusRawList, () => GET_STATE().statusRawList, { formatPosition: formatTimestamp, positionScale: 8, horizontalDelta: 20 })
-    createRenderStatusButton('render-merge-0', 'RenderMerge0', renderMergeList, () => GET_STATE().merge0List, { formatPosition: formatTimestamp, positionScale: 4, horizontalDelta: 60 })
-    createRenderStatusButton('render-merge-1', 'RenderMerge1', renderMergeList, () => GET_STATE().merge1List, { formatPosition: formatTimestamp, positionScale: 2, horizontalDelta: 120 })
-    createRenderStatusButton('render-merge-2', 'RenderMerge2', renderMergeList, () => GET_STATE().merge2List, { formatPosition: formatTimestamp, positionScale: 1, horizontalDelta: 360 })
+    createRenderStatusButton('render-status-raw', 'RenderStatusRaw', renderStatusRawList, () => GET_STATE().statusRawList, { ...RENDER_PRESET_CONFIG.StatusRaw, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-merge-0', 'RenderMerge0', renderMergeList, () => GET_STATE().merge0List, { ...RENDER_PRESET_CONFIG.Merge0, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-merge-1', 'RenderMerge1', renderMergeList, () => GET_STATE().merge1List, { ...RENDER_PRESET_CONFIG.Merge1, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-merge-2', 'RenderMerge2', renderMergeList, () => GET_STATE().merge2List, { ...RENDER_PRESET_CONFIG.Merge2, formatPosition: formatTimestamp })
   }).trigger
 
   let STATE
