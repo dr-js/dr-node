@@ -4,6 +4,10 @@ import { generateLookupData, loadLookupFile, saveLookupFile } from 'dr-js/module
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
+const DEFAULT_RESPONDER_CHECK_FAIL = (store) => responderEndWithStatusCode(store, { statusCode: 403 })
+
+// TODO: allow check multiple auth file
+
 const configureAuthTimedLookup = async ({
   fileAuthConfig,
   shouldAuthGen = false,
@@ -13,43 +17,45 @@ const configureAuthTimedLookup = async ({
   authGenTimeGap,
   logger
 }) => {
-  let timedLookupData
-  try {
-    timedLookupData = await loadLookupFile(fileAuthConfig)
-    logger.add('loaded auth lookup file')
-  } catch (error) {
+  const timedLookupData = await loadLookupFile(fileAuthConfig).catch(async (error) => {
     if (!shouldAuthGen) {
       console.error('missing auth lookup file', error)
       throw error
     }
     logger.add('generate new auth lookup file')
-    timedLookupData = await generateLookupData({
+    const timedLookupData = await generateLookupData({
       tag: authGenTag,
       size: authGenSize,
       tokenSize: authGenTokenSize,
       timeGap: authGenTimeGap
     })
     await saveLookupFile(fileAuthConfig, timedLookupData)
-  }
+    return timedLookupData
+  })
+  logger.add('loaded auth lookup file')
 
-  const verifyAuthHeader = (headers) => verifyCheckCode(timedLookupData, headers[ 'auth-check-code' ])
-  const assignAuthHeader = () => [ 'auth-check-code', generateCheckCode(timedLookupData) ]
+  const tryGetAuthCheckCode = (authCheckCode) => { // will throw error
+    __DEV__ && console.log('verifyAuthCheckCode: check', authCheckCode)
+    const isCheckPass = !catchSync(verifyCheckCode, timedLookupData, authCheckCode).error
+    __DEV__ && console.log('verifyAuthCheckCode: pass', isCheckPass)
+    return isCheckPass && timedLookupData
+  }
+  const generateAuthCheckCode = () => generateCheckCode(timedLookupData)
 
   return {
-    verifyAuthHeader,
-    assignAuthHeader,
-    wrapResponderAuthTimedLookup: (responder) => createResponderCheckRateLimit({
+    tryGetAuthCheckCode,
+    generateAuthCheckCode,
+    wrapResponderCheckAuthCheckCode: (responderNext, responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL, headerKey = 'auth-check-code') => createResponderCheckRateLimit({
       checkFunc: (store) => {
-        __DEV__ && console.log('AuthTimedLookup: check', store.request.headers[ 'auth-check-code' ], generateCheckCode(timedLookupData))
-        const { error } = catchSync(verifyAuthHeader, store.request.headers)
-        __DEV__ && console.log('AuthTimedLookup: pass?', !error)
-        return !error
+        const timedLookupData = tryGetAuthCheckCode(store.request.headers[ headerKey ])
+        timedLookupData && store.setState({ timedLookupData })
+        return Boolean(timedLookupData)
       },
-      responderNext: responder,
-      responderCheckFail: (store) => responderEndWithStatusCode(store, { statusCode: 403 })
+      responderNext,
+      responderCheckFail
     }),
-    wrapResponderAssignTimedLookup: (responder) => (store) => {
-      store.response.setHeader(...assignAuthHeader())
+    wrapResponderAssignAuthCheckCode: (responder, headerKey = 'auth-check-code') => (store) => {
+      store.response.setHeader(headerKey, generateAuthCheckCode())
       return responder(store)
     }
   }

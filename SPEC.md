@@ -6,7 +6,7 @@
 + 📄 [source/function.js](source/function.js)
   - `autoTestServerPort`, `getServerInfo`
 + 📄 [source/option.js](source/option.js)
-  - `AuthFormatConfig`, `FileUploadFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `getServerFormatConfig`
+  - `AuthFormatConfig`, `FileUploadFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `getServerFormatConfig`, `tokenCacheFormatConfig`
 + 📄 [source/configure/auth.js](source/configure/auth.js)
   - `configureAuthTimedLookup`
 + 📄 [source/configure/filePid.js](source/configure/filePid.js)
@@ -15,6 +15,8 @@
   - `configureLogger`
 + 📄 [source/configure/serverBase.js](source/configure/serverBase.js)
   - `configureServerBase`
++ 📄 [source/configure/tokenCache.js](source/configure/tokenCache.js)
+  - `configureTokenCache`
 + 📄 [source/configure/status/Collector.js](source/configure/status/Collector.js)
   - `configureStatusCollector`
 + 📄 [source/configure/status/applyStatusFact.js](source/configure/status/applyStatusFact.js)
@@ -34,7 +36,7 @@
 + 📄 [source/responder/fileUpload/uploaderHTML.js](source/responder/fileUpload/uploaderHTML.js)
   - `getHTML`
 + 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)
-  - `createResponderExplorer`, `createResponderPathContent`, `createResponderPathModify`, `createResponderSendFile`
+  - `createResponderExplorer`, `createResponderPathContent`, `createResponderPathModify`, `createResponderServeFile`
 + 📄 [source/responder/pathContent/explorerHTML.js](source/responder/pathContent/explorerHTML.js)
   - `getHTML`
 + 📄 [source/responder/status/Report.js](source/responder/status/Report.js)
@@ -43,12 +45,6 @@
   - `createResponderStatusState`, `createResponderStatusVisualize`
 + 📄 [source/responder/status/visualizeHTML.js](source/responder/status/visualizeHTML.js)
   - `getHTML`
-+ 📄 [source/sampleServer/fileUpload.js](source/sampleServer/fileUpload.js)
-  - `createServer`
-+ 📄 [source/sampleServer/statusCollect.js](source/sampleServer/statusCollect.js)
-  - `createServer`
-+ 📄 [source/sampleServer/statusReport.js](source/sampleServer/statusReport.js)
-  - `createServer`
 + 📄 [source/task/getFileChunkUpload.js](source/task/getFileChunkUpload.js)
   - `createFileChunkUpload`
 + 📄 [source/task/getPathContent.js](source/task/getPathContent.js)

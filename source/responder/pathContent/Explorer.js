@@ -14,13 +14,13 @@ import { getHTML } from './explorerHTML'
 const createResponderExplorer = async (
   pathContentUrl = '/path-content',
   pathModifyUrl = '/path-modify',
-  sendFileUrl = '/send-file',
+  serveFileUrl = '/serve-file',
   authCheckUrl = '/auth'
 ) => {
   const bufferData = await prepareBufferDataHTML(Buffer.from(getHTML({
     PATH_CONTENT_URL: pathContentUrl,
     PATH_MODIFY_URL: pathModifyUrl,
-    SEND_FILE_URL: sendFileUrl,
+    SERVE_FILE_URL: serveFileUrl,
     AUTH_CHECK_URL: authCheckUrl
   })))
   return (store) => responderSendBufferCompress(store, bufferData)
@@ -36,7 +36,7 @@ const createResponderPathModify = (rootPath, extraData) => {
   return async (store, modifyType, relativePathFrom, relativePathTo) => responderSendJSON(store, { object: await getPathModify(modifyType, relativePathFrom, relativePathTo) })
 }
 
-const createResponderSendFile = (rootPath) => {
+const createResponderServeFile = (rootPath) => {
   const getPath = createPathPrefixLock(rootPath)
   const responderServeStatic = createResponderServeStatic({ expireTime: 1000 }) // 1000 ms expire
   return (store, relativePath) => responderServeStatic(store, getPath(relativePath))
@@ -46,5 +46,5 @@ export {
   createResponderExplorer,
   createResponderPathContent,
   createResponderPathModify,
-  createResponderSendFile
+  createResponderServeFile
 }

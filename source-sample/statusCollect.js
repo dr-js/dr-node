@@ -28,28 +28,26 @@ const createServer = async ({
   statusCollectPath, statusCollectUrl, statusCollectInterval
 }) => {
   await configureFilePid({ filePid })
-  const { server, start, stop, option } = await configureServerBase({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
+  const { server, start, stop, option } = await configureServerBase({
+    protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
+  })
   const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
-  const {
-    assignAuthHeader,
-    wrapResponderAuthTimedLookup
-  } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
+  const { generateAuthCheckCode, wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
+    fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
+  })
   const { factDB, timer } = await configureStatusCollector({
     collectPath: statusCollectPath,
     collectUrl: statusCollectUrl,
     collectInterval: statusCollectInterval,
-    getExtraHeaders: () => {
-      const [ key, value ] = assignAuthHeader()
-      return { [ key ]: value }
-    }
+    getExtraHeaders: () => ({ [ 'auth-check-code' ]: generateAuthCheckCode() })
   })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
-  const responderAuthCheck = wrapResponderAuthTimedLookup((store) => responderEndWithStatusCode(store, { statusCode: 200 }))
+  const responderAuthCheck = wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 }))
 
   const routerMap = createRouteMap([
     [ '/status-visualize', 'GET', await createResponderStatusVisualize('/status-state', '/auth') ],
-    [ '/status-state', 'GET', wrapResponderAuthTimedLookup(createResponderStatusState(factDB.getState)) ],
+    [ '/status-state', 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusState(factDB.getState)) ],
     [ '/auth', 'GET', responderAuthCheck ],
     [ '/', 'GET', createResponderRouteList(() => routerMap) ],
     await createRouteGetFavicon()

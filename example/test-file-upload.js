@@ -1,4 +1,4 @@
-const { createServer } = require('../output-gitignore/library/sampleServer/fileUpload')
+const { createServer } = require('../output-gitignore/sample/fileUpload')
 
 const SERVER_TAG = 'file-upload'
 
@@ -8,6 +8,7 @@ const main = async () => {
     // prefixLogFile: SERVER_TAG,
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuthConfig: `${__dirname}/.timed-lookup-gitignore.key`,
+    // fileTokenCache: `${__dirname}/.token-cache-gitignore.json`,
 
     // url: `http://localhost:8001/status-report`,
     // pathFactDirectory: `${__dirname}/fact-${SERVER_TAG}-gitignore`,

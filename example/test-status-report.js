@@ -1,4 +1,4 @@
-const { createServer } = require('../output-gitignore/library/sampleServer/statusReport')
+const { createServer } = require('../output-gitignore/sample/statusReport')
 
 const SERVER_TAG = 'status-report'
 

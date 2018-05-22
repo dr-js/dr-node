@@ -13,10 +13,11 @@ import { configureLogger } from 'source/configure/logger'
 import { configureFilePid } from 'source/configure/filePid'
 import { configureAuthTimedLookup } from 'source/configure/auth'
 import { configureServerBase } from 'source/configure/serverBase'
+
 import { createRouteGetFavicon } from 'source/responder/favicon'
 import { createResponderRouteList } from 'source/responder/routeList'
 import { createResponderUploader, createResponderFileChunkUpload } from 'source/responder/fileUpload/Uploader'
-import { createResponderExplorer, createResponderPathContent, createResponderPathModify, createResponderSendFile } from 'source/responder/pathContent/Explorer'
+import { createResponderExplorer, createResponderPathContent, createResponderPathModify, createResponderServeFile } from 'source/responder/pathContent/Explorer'
 
 const createServer = async ({
   // common
@@ -29,11 +30,13 @@ const createServer = async ({
   uploadRootPath, uploadMergePath
 }) => {
   await configureFilePid({ filePid })
-  const { server, start, stop, option } = await configureServerBase({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
+  const { server, start, stop, option } = await configureServerBase({
+    protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
+  })
   const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
-  const {
-    wrapResponderAuthTimedLookup
-  } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
+  const { wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
+    fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
+  })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
   const responderFileChunkUpload = await createResponderFileChunkUpload({
@@ -46,19 +49,19 @@ const createServer = async ({
   })
   const responderPathContent = createResponderPathContent(uploadRootPath)
   const responderPathModify = createResponderPathModify(uploadRootPath)
-  const responderSendFile = createResponderSendFile(uploadRootPath)
+  const responderServeFile = createResponderServeFile(uploadRootPath)
 
   const routerMap = createRouteMap([
-    [ '/auth', 'GET', wrapResponderAuthTimedLookup((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
     [ '/uploader', 'GET', await createResponderUploader('/file-chunk-upload', '/auth') ],
-    [ '/file-chunk-upload', 'POST', wrapResponderAuthTimedLookup(responderFileChunkUpload) ],
-    [ '/explorer', 'GET', await createResponderExplorer('/path-content', '/path-modify', '/send-file', '/auth') ],
-    [ '/path-content/*', 'GET', wrapResponderAuthTimedLookup((store) => responderPathContent(store, decodeURI(getRouteParamAny(store)))) ],
-    [ '/path-modify', 'POST', wrapResponderAuthTimedLookup(async (store) => {
+    [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
+    [ '/explorer', 'GET', await createResponderExplorer('/path-content', '/path-modify', '/serve-file', '/auth') ],
+    [ '/path-content/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderPathContent(store, decodeURI(getRouteParamAny(store)))) ],
+    [ '/path-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
       const { modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
       return responderPathModify(store, modifyType, relativePathFrom, relativePathTo)
     }) ],
-    [ '/send-file/*', 'GET', wrapResponderAuthTimedLookup((store) => responderSendFile(store, decodeURI(getRouteParamAny(store)))) ],
+    [ '/serve-file/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderServeFile(store, decodeURI(getRouteParamAny(store)))) ],
+    [ '/auth', 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
     [ '/', 'GET', createResponderRouteList(() => routerMap) ],
     await createRouteGetFavicon()
   ].filter(Boolean))

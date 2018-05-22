@@ -17,10 +17,11 @@ const COMMON_STYLE = () => `<style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.3); }
-  button { text-decoration: none; margin: 2px 4px; padding: 2px 4px; border: 0; background: #ddd; }
-  button:hover { background: #eee; box-shadow: inset 0 0 0 1px #aaa; }
-  @media (pointer: coarse) { button { min-height: 32px; font-size: 18px; } }
-  @media (pointer: fine) { button { min-height: 20px; font-size: 14px; } }
+  .button { cursor: pointer; }
+  button, .button { text-decoration: none; margin: 2px 4px; padding: 2px 4px; border: 0; background: #ddd; }
+  button:hover, .button:hover { background: #eee; box-shadow: inset 0 0 0 1px #aaa; }
+  @media (pointer: coarse) { button, .button { min-height: 32px; font-size: 18px; } }
+  @media (pointer: fine) { button, .button { min-height: 20px; font-size: 14px; } }
 </style>`
 
 const COMMON_SCRIPT = () => `<script>Object.assign(window, {
@@ -73,12 +74,16 @@ const AUTH_MASK_SCRIPT = () => `<script>window.initAuthMask = (authCheckUrl, onA
   const authMaskDiv = cT('div', { 
     style: 'position: fixed; display: flex; align-items: center; justify-content: center; top: 0px; left: 0px; width: 100vw; height: 100vh; z-index: 256;'
   }, authMainDiv)
-  applyDragFileListListener(authMaskDiv, (fileList) => { authKeyInput.files = fileList })
-  authKeyInput.addEventListener('change', () => {
+  const tryAuthCheck = () => {
     const fileBlob = authKeyInput.files[ 0 ]
     authInfoPre.innerText = fileBlob ? fileBlob.name : 'select auth file'
     fileBlob && authCheckFileBlob(fileBlob)
+  }
+  applyDragFileListListener(authMaskDiv, (fileList) => { 
+    authKeyInput.files = fileList
+    tryAuthCheck()
   })
+  authKeyInput.addEventListener('change', tryAuthCheck)
   return catchAsync(authCheck, catchSync(loadTimedLookupData).result).then(({ result: timedLookupData, error }) => {
     if (!error) return onAuthPass(timedLookupData)
     document.body.appendChild(authMaskDiv)

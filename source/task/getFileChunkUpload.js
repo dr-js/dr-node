@@ -58,10 +58,10 @@ const createFileChunkUpload = async ({
       chunkCacheMap.delete(cacheKey)
       __DEV__ && console.log(`##[done]`, chunkCacheMap.size, cacheKey)
     } else if (chunkCacheCount > 1) {
-      chunkCacheMap.touch(cacheKey, clock() + expireTime)
+      chunkCacheMap.touch(cacheKey, Date.now() + expireTime)
       __DEV__ && console.log(`##[touch]`, chunkCacheMap.size, cacheKey)
     } else {
-      chunkCacheMap.set(cacheKey, chunkData, 1, clock() + expireTime)
+      chunkCacheMap.set(cacheKey, chunkData, 1, Date.now() + expireTime)
       __DEV__ && console.log(`##[cache]`, chunkCacheMap.size, cacheKey)
     }
   }

@@ -22,9 +22,9 @@ const getHTML = (envObject) => COMMON_LAYOUT([
 
 const mainStyle = `<style>
   .explorer-path { margin: 12px 2px; }
-  .explorer-directory, .explorer-file { display: flex; flex-flow: row nowrap; align-items: stretch; margin: 0; text-align: left; background: transparent; border-top: 1px solid #ddd; font-family: monospace; }
+  .explorer-directory, .explorer-file { display: flex; flex-flow: row nowrap; align-items: stretch; border-top: 1px solid #ddd; }
   .explorer-file { pointer-events: none; color: #666; }
-  .explorer-name { overflow:hidden; flex: 1; align-self: center; white-space:nowrap; text-overflow: ellipsis; }
+  .explorer-name { overflow:hidden; flex: 1; align-self: center; margin: 0; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
   .explorer-edit { pointer-events: auto; color: #aaa; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 
@@ -35,7 +35,7 @@ const mainScript = `<script>window.onload = () => {
     initAuthMask,
     PATH_CONTENT_URL,
     PATH_MODIFY_URL,
-    SEND_FILE_URL,
+    SERVE_FILE_URL,
     AUTH_CHECK_URL,
     Dr: { 
       Common: { Function: { lossyAsync }, Module: { TimedLookup: { generateCheckCode } } },
@@ -54,13 +54,13 @@ const mainScript = `<script>window.onload = () => {
     
     const fetchPathModify = async (modifyType, relativePathFrom, relativePathTo) => {
       const response = await fetch(PATH_MODIFY_URL, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: JSON.stringify({ modifyType, relativePathFrom, relativePathTo }) })
-      if (!response.ok) throw new Error('[fetchPathContent] error status: ' + response.status)
+      if (!response.ok) throw new Error('[fetchPathModify] error status: ' + response.status)
       return response.json()
     }
     
-    const fetchSendFile = async (relativePath, fileName) => {
-      const response = await fetch(SEND_FILE_URL + '/' + encodeURI(relativePath), { method: 'GET', headers: { 'auth-check-code': getAuthCheckCode() } })
-      if (!response.ok) throw new Error('[fetchPathContent] error status: ' + response.status)
+    const fetchServeFile = async (relativePath, fileName) => {
+      const response = await fetch(SERVE_FILE_URL + '/' + encodeURI(relativePath), { method: 'GET', headers: { 'auth-check-code': getAuthCheckCode() } })
+      if (!response.ok) throw new Error('[fetchServeFile] error status: ' + response.status)
       createDownloadBlob(fileName, [ await response.blob() ])
     }
     
@@ -69,7 +69,7 @@ const mainScript = `<script>window.onload = () => {
       updatePath(pathList)
     }).trigger
     
-    const sendFile = lossyAsync((pathList, name) => fetchSendFile([ ...pathList, name ].join('/'), name)).trigger
+    const serveFile = lossyAsync((pathList, name) => fetchServeFile([ ...pathList, name ].join('/'), name)).trigger
     
     const updatePath = lossyAsync(async (pathList = []) => {
       const explorerPanel = qS('#explorer-panel')
@@ -84,18 +84,22 @@ const mainScript = `<script>window.onload = () => {
       loadingMask.remove()
       explorerPanel.innerHTML = ''
       explorerPanel.appendChild(cT('h2', { className: 'explorer-path', innerText: relativePath ? ('/' + relativePath + '/') : '[ROOT]' }))
-      relativePath && explorerPanel.appendChild(cT('button', { className: 'explorer-directory', innerText: '🔙|..', onclick: () => updatePath(pathList.slice(0, -1)) }))
+      relativePath && explorerPanel.appendChild(cT(
+        'div', 
+        { className: 'explorer-directory' },
+        cT('span', { className: 'explorer-name button', innerText: '🔙|..', onclick: () => updatePath(pathList.slice(0, -1)) }),
+      ))
       directoryList.map((name) => explorerPanel.appendChild(cT(
-        'button', 
-        { className: 'explorer-directory', onclick: () => updatePath([ ...pathList, name ]) },
-        cT('span', { className: 'explorer-name', innerText: '📁|' + name + '/' }),
+        'div', 
+        { className: 'explorer-directory' },
+        cT('span', { className: 'explorer-name button', innerText: '📁|' + name + '/', onclick: () => updatePath([ ...pathList, name ]) }),
         cT('button', { className: 'explorer-edit', innerText: '☓', onclick: () => modifyDelete(pathList, name) })
       )))
       fileList.map((name) => explorerPanel.appendChild(cT(
-        'button', 
+        'div', 
         { className: 'explorer-file' },
-        cT('span', { className: 'explorer-name', innerText: '📄|' + name }),
-        cT('button', { className: 'explorer-edit', innerText: '⇩', onclick: () => sendFile(pathList, name) }),
+        cT('span', { className: 'explorer-name button', innerText: '📄|' + name }),
+        cT('button', { className: 'explorer-edit', innerText: '⇩', onclick: () => serveFile(pathList, name) }),
         cT('button', { className: 'explorer-edit', innerText: '☓', onclick: () => modifyDelete(pathList, name) })
         )))
     }).trigger

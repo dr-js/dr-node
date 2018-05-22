@@ -29,6 +29,18 @@ const getServerFormatConfig = (extendFormatList = []) => ({
   ]
 })
 
+// fileTokenCache, tokenSize, tokenExpireTime
+const tokenCacheFormatConfig = {
+  ...SingleString,
+  isPath: true,
+  optional: true,
+  name: 'file-token-cache',
+  extendFormatList: [
+    { ...SingleInteger, optional: true, name: 'token-size' },
+    { ...SingleInteger, optional: true, name: 'token-expire-time' }
+  ]
+}
+
 // fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap
 const AuthFormatConfig = {
   ...SingleString,
@@ -73,6 +85,7 @@ const StatusReportFormatConfig = { ...SingleString, optional: true, name: 'statu
 
 export {
   getServerFormatConfig,
+  tokenCacheFormatConfig,
   AuthFormatConfig,
   FileUploadFormatConfig,
   StatusCollectFormatConfig,

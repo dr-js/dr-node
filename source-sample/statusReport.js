@@ -26,16 +26,18 @@ const createServer = async ({
   statusReportProcessTag
 }) => {
   await configureFilePid({ filePid })
-  const { server, start, stop, option } = await configureServerBase({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
+  const { server, start, stop, option } = await configureServerBase({
+    protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
+  })
   const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
-  const {
-    wrapResponderAuthTimedLookup
-  } = await configureAuthTimedLookup({ fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
+  const { wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
+    fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
+  })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
 
   const routerMap = createRouteMap([
-    [ '/status-report', 'GET', wrapResponderAuthTimedLookup(createResponderStatusReport(statusReportProcessTag)) ],
+    [ '/status-report', 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusReport(statusReportProcessTag)) ],
     [ '/', 'GET', createResponderRouteList(() => routerMap) ],
     await createRouteGetFavicon()
   ])

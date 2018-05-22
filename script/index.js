@@ -16,21 +16,33 @@ const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
 const fromOutput = (...args) => resolve(PATH_OUTPUT, ...args)
 const execOptionRoot = { cwd: fromRoot(), stdio: argvFlag('quiet') ? [ 'ignore', 'ignore' ] : 'inherit', shell: true }
 
+const filterScriptFile = (path) => path.endsWith('.js') && !path.endsWith('.test.js')
+
 const processOutput = async ({ packageJSON, logger }) => {
   const { padLog, stepLog } = logger
 
-  padLog(`minify module`)
+  padLog(`minify output`)
+
+  stepLog(`minify library`)
   await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('module'))).filter((path) => path.endsWith('.js') && !path.endsWith('.test.js')),
+    fileList: (await getFileList(fromOutput('library'))).filter(filterScriptFile),
+    option: getUglifyESOption({ isDevelopment: false, isModule: false }),
+    rootPath: PATH_OUTPUT,
+    logger
+  })
+
+  stepLog(`minify module`)
+  await minifyFileListWithUglifyEs({
+    fileList: (await getFileList(fromOutput('module'))).filter(filterScriptFile),
     option: getUglifyESOption({ isDevelopment: false, isModule: true }),
     rootPath: PATH_OUTPUT,
     logger
   })
 
-  padLog(`minify library`)
+  stepLog(`minify sample`)
   await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('library'))).filter((path) => path.endsWith('.js') && !path.endsWith('.test.js')),
-    option: getUglifyESOption({ isDevelopment: false, isModule: false }),
+    fileList: (await getFileList(fromOutput('sample'))).filter(filterScriptFile),
+    option: getUglifyESOption({ isDevelopment: false, isModule: true }),
     rootPath: PATH_OUTPUT,
     logger
   })
@@ -38,10 +50,8 @@ const processOutput = async ({ packageJSON, logger }) => {
   padLog(`process output`)
   const processBabel = wrapFileProcessor({ processor: fileProcessorBabel, logger })
   let sizeCodeReduce = 0
-  for (const filePath of [
-    ...await getFileList(fromOutput('library')),
-    ...await getFileList(fromOutput('module'))
-  ]) sizeCodeReduce += await processBabel(filePath)
+  const outputFilePathList = (await getFileList(fromOutput())).filter(filterScriptFile)
+  for (const filePath of outputFilePathList) sizeCodeReduce += await processBabel(filePath)
   stepLog(`output size reduce: ${formatBinary(sizeCodeReduce)}B`)
 }
 
@@ -60,6 +70,8 @@ runMain(async (logger) => {
   execSync('npm run build-library', execOptionRoot)
   stepLog(`build module`)
   execSync('npm run build-module', execOptionRoot)
+  stepLog(`build sample`)
+  execSync('npm run build-sample', execOptionRoot)
 
   await processOutput({ packageJSON, logger })
 
