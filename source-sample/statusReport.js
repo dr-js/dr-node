@@ -7,13 +7,13 @@ import {
 } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
 
-import { configureLogger } from 'source/configure/logger'
-import { configureFilePid } from 'source/configure/filePid'
-import { configureAuthTimedLookup } from 'source/configure/auth'
-import { configureServerBase } from 'source/configure/serverBase'
-import { createRouteGetFavicon } from 'source/responder/favicon'
-import { createResponderStatusReport } from 'source/responder/status/Report'
-import { createResponderRouteList } from 'source/responder/routeList'
+import { configureLogger } from 'dr-server/module/configure/logger'
+import { configureFilePid } from 'dr-server/module/configure/filePid'
+import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
+import { configureServerBase } from 'dr-server/module/configure/serverBase'
+import { createRouteGetFavicon } from 'dr-server/module/responder/favicon'
+import { createResponderStatusReport } from 'dr-server/module/responder/status/Report'
+import { createResponderRouteList } from 'dr-server/module/responder/routeList'
 
 const createServer = async ({
   // common

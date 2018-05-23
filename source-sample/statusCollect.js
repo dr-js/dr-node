@@ -8,14 +8,14 @@ import {
 } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
 
-import { configureLogger } from 'source/configure/logger'
-import { configureFilePid } from 'source/configure/filePid'
-import { configureAuthTimedLookup } from 'source/configure/auth'
-import { configureServerBase } from 'source/configure/serverBase'
-import { configureStatusCollector } from 'source/configure/status/Collector'
-import { createRouteGetFavicon } from 'source/responder/favicon'
-import { createResponderRouteList } from 'source/responder/routeList'
-import { createResponderStatusVisualize, createResponderStatusState } from 'source/responder/status/Visualize'
+import { configureLogger } from 'dr-server/module/configure/logger'
+import { configureFilePid } from 'dr-server/module/configure/filePid'
+import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
+import { configureServerBase } from 'dr-server/module/configure/serverBase'
+import { configureStatusCollector } from 'dr-server/module/configure/status/Collector'
+import { createRouteGetFavicon } from 'dr-server/module/responder/favicon'
+import { createResponderRouteList } from 'dr-server/module/responder/routeList'
+import { createResponderStatusVisualize, createResponderStatusState } from 'dr-server/module/responder/status/Visualize'
 
 const createServer = async ({
   // common
@@ -39,7 +39,7 @@ const createServer = async ({
     collectPath: statusCollectPath,
     collectUrl: statusCollectUrl,
     collectInterval: statusCollectInterval,
-    getExtraHeaders: () => ({ [ 'auth-check-code' ]: generateAuthCheckCode() })
+    getExtraHeaders: () => ({ 'auth-check-code': generateAuthCheckCode() })
   })
 
   const responderLogEnd = createResponderLogEnd(logger.add)

@@ -8,7 +8,7 @@ module.exports = {
   ],
   plugins: [
     [ '@babel/proposal-class-properties' ],
-    [ 'module-resolver', { root: [ './' ], alias: isRawModule ? undefined : { 'dr-js/module/(.+)': 'dr-js/library/', 'dr-server/source/(.+)': './library/' } } ],
+    [ 'module-resolver', { root: [ './' ], alias: isRawModule ? undefined : { 'dr-js/module/(.+)': 'dr-js/library/', 'dr-server/module/(.+)': './library/' } } ],
     [ 'minify-replace', { replacements: [ { identifierName: '__DEV__', replacement: { type: 'booleanLiteral', value: isDev } } ] } ]
   ],
   comments: false

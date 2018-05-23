@@ -9,15 +9,15 @@ import {
 } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderRouter, createRouteMap, getRouteParamAny } from 'dr-js/module/node/server/Responder/Router'
 
-import { configureLogger } from 'source/configure/logger'
-import { configureFilePid } from 'source/configure/filePid'
-import { configureAuthTimedLookup } from 'source/configure/auth'
-import { configureServerBase } from 'source/configure/serverBase'
+import { configureLogger } from 'dr-server/module/configure/logger'
+import { configureFilePid } from 'dr-server/module/configure/filePid'
+import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
+import { configureServerBase } from 'dr-server/module/configure/serverBase'
 
-import { createRouteGetFavicon } from 'source/responder/favicon'
-import { createResponderRouteList } from 'source/responder/routeList'
-import { createResponderUploader, createResponderFileChunkUpload } from 'source/responder/fileUpload/Uploader'
-import { createResponderExplorer, createResponderPathContent, createResponderPathModify, createResponderServeFile } from 'source/responder/pathContent/Explorer'
+import { createRouteGetFavicon } from 'dr-server/module/responder/favicon'
+import { createResponderRouteList } from 'dr-server/module/responder/routeList'
+import { createResponderUploader, createResponderFileChunkUpload } from 'dr-server/module/responder/fileUpload/Uploader'
+import { createResponderExplorer, createResponderPathContent, createResponderPathModify, createResponderServeFile } from 'dr-server/module/responder/pathContent/Explorer'
 
 const createServer = async ({
   // common

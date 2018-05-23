@@ -1,7 +1,6 @@
 import { resolve, dirname } from 'path'
 import { createReadStream, createWriteStream } from 'fs'
 
-import { clock } from 'dr-js/module/common/time'
 import { getRandomId } from 'dr-js/module/common/math/random'
 import { createCacheMap } from 'dr-js/module/common/data/CacheMap'
 import { createAsyncTaskQueue } from 'dr-js/module/common/module/AsyncTaskQueue'
