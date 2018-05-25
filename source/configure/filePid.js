@@ -5,11 +5,14 @@ import { writeFileAsync } from 'dr-js/module/node/file/function'
 import { createDirectory } from 'dr-js/module/node/file/File'
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
 
-const configureFilePid = async ({ filePid }) => {
+const configureFilePid = async ({
+  filePid,
+  shouldIgnoreExistPid = false
+}) => {
   if (!filePid) return
 
-  __DEV__ && console.log('check existing pid file', filePid)
-  catchSync(() => {
+  __DEV__ && !shouldIgnoreExistPid && console.log('check existing pid file', filePid)
+  !shouldIgnoreExistPid && catchSync(() => {
     const existingPid = readFileSync(filePid, { encoding: 'utf8' })
     if (!existingPid) return
     console.warn(`[FilePid] get existing pid: ${existingPid}, exit process...`)

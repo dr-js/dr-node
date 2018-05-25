@@ -24,7 +24,7 @@ const getServerFormatConfig = (extendFormatList = []) => ({
       ]
     },
     { ...SingleString, isPath: true, optional: true, name: 'path-log', extendFormatList: [ { ...SingleString, optional: true, name: 'prefix-log-file' } ] },
-    { ...SingleString, isPath: true, optional: true, name: 'file-pid' },
+    { ...SingleString, isPath: true, optional: true, name: 'file-pid', extendFormatList: [ { ...BooleanFlag, name: 'pid-ignore-exist' } ] },
     ...extendFormatList
   ]
 })

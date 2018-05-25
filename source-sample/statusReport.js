@@ -17,7 +17,7 @@ import { createResponderRouteList } from 'dr-server/module/responder/routeList'
 
 const createServer = async ({
   // common
-  filePid,
+  filePid, shouldIgnoreExistPid,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
   pathLogDirectory, prefixLogFile,
   // auth
@@ -25,7 +25,7 @@ const createServer = async ({
   // status report
   statusReportProcessTag
 }) => {
-  await configureFilePid({ filePid })
+  await configureFilePid({ filePid, shouldIgnoreExistPid })
   const { server, start, stop, option } = await configureServerBase({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })

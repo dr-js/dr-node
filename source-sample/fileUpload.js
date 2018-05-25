@@ -21,7 +21,7 @@ import { createResponderExplorer, createResponderPathContent, createResponderPat
 
 const createServer = async ({
   // common
-  filePid,
+  filePid, shouldIgnoreExistPid,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
   pathLogDirectory, prefixLogFile,
   // auth
@@ -29,7 +29,7 @@ const createServer = async ({
   // file upload
   uploadRootPath, uploadMergePath
 }) => {
-  await configureFilePid({ filePid })
+  await configureFilePid({ filePid, shouldIgnoreExistPid })
   const { server, start, stop, option } = await configureServerBase({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })

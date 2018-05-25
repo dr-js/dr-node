@@ -19,7 +19,7 @@ import { createResponderStatusVisualize, createResponderStatusState } from 'dr-s
 
 const createServer = async ({
   // common
-  filePid,
+  filePid, shouldIgnoreExistPid,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
   pathLogDirectory, prefixLogFile,
   // auth
@@ -27,7 +27,7 @@ const createServer = async ({
   // status collect
   statusCollectPath, statusCollectUrl, statusCollectInterval
 }) => {
-  await configureFilePid({ filePid })
+  await configureFilePid({ filePid, shouldIgnoreExistPid })
   const { server, start, stop, option } = await configureServerBase({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })
