@@ -1,4 +1,5 @@
 import { roundFloat } from 'dr-js/module/common/math/base'
+import { isNumber, isBasicArray } from 'dr-js/module/common/check'
 
 // combinable sum range data
 
@@ -29,11 +30,11 @@ const combineStatusRaw = (statusRawList) => {
   const rangeList = []
   statusRawList.forEach(({ sumRawList, rangeRawList }) => {
     sumRawList.forEach((sumRaw, index) => {
-      if (sumRaw === undefined) return
+      if (!isNumber(sumRaw)) return
       sumList[ index ] = (sumList[ index ] || 0) + sumRaw
     })
     rangeRawList.forEach((rangeRaw, index) => {
-      if (rangeRaw === undefined) return
+      if (!isBasicArray(rangeRaw)) return
       const [ value, valueSize ] = rangeRaw
       const [ min, max, sum, size ] = rangeList[ index ] || INITIAL_MERGE_VALUE
       rangeList[ index ] = [
@@ -54,11 +55,11 @@ const combineStatus = (mergeStatusList) => {
   mergeStatusList.forEach((mergeStatus) => {
     size += mergeStatus.size
     mergeStatus.sumList.forEach((value, index) => {
-      if (value === undefined) return
+      if (!isNumber(value)) return
       sumList[ index ] = (sumList[ index ] || 0) + value
     })
     mergeStatus.rangeList.forEach((mergeValue, index) => {
-      if (mergeValue === undefined) return
+      if (!isBasicArray(mergeValue)) return
       const [ min, max, sum, size ] = rangeList[ index ] || INITIAL_MERGE_VALUE
       rangeList[ index ] = [
         Math.min(min, mergeValue[ 0 ]), // min

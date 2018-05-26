@@ -1,3 +1,6 @@
+import { clock, getTimestamp } from 'dr-js/module/common/time'
+import { roundFloat } from 'dr-js/module/common/math/base'
+import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createRequestListener } from 'dr-js/module/node/server/Server'
 import {
   responderEnd,
@@ -6,6 +9,7 @@ import {
   createResponderLog,
   createResponderLogEnd
 } from 'dr-js/module/node/server/Responder/Common'
+import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
 
 import { configureLogger } from 'dr-server/module/configure/logger'
@@ -13,7 +17,6 @@ import { configureFilePid } from 'dr-server/module/configure/filePid'
 import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
 import { configureServerBase } from 'dr-server/module/configure/serverBase'
 import { configureStatusCollector } from 'dr-server/module/configure/status/Collector'
-import { createRouteGetFavicon } from 'dr-server/module/responder/favicon'
 import { createResponderRouteList } from 'dr-server/module/responder/routeList'
 import { createResponderStatusVisualize, createResponderStatusState } from 'dr-server/module/responder/status/Visualize'
 
@@ -44,13 +47,20 @@ const createServer = async ({
 
   const responderLogEnd = createResponderLogEnd(logger.add)
   const responderAuthCheck = wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 }))
+  const responderStatusCollect = async (store) => {
+    const statusBuffer = await receiveBufferAsync(store.request)
+    __DEV__ && console.log(`statusBuffer`, statusBuffer.toString())
+    factDB.add({ timestamp: getTimestamp(), retryCount: 0, status: JSON.parse(statusBuffer), timeOk: 0, timeDownload: roundFloat(clock() - store.getState().time) })
+    responderEndWithStatusCode(store, { statusCode: 200 })
+  }
 
   const routerMap = createRouteMap([
     [ '/status-visualize', 'GET', await createResponderStatusVisualize('/status-state', '/auth') ],
     [ '/status-state', 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusState(factDB.getState)) ],
+    [ '/status-collect', 'POST', wrapResponderCheckAuthCheckCode(responderStatusCollect) ],
     [ '/auth', 'GET', responderAuthCheck ],
     [ '/', 'GET', createResponderRouteList(() => routerMap) ],
-    await createRouteGetFavicon()
+    [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ])
 
   server.on('request', createRequestListener({
@@ -65,7 +75,7 @@ const createServer = async ({
     }
   }))
 
-  return { server, start, stop, option, factDB, timer }
+  return { server, start, stop, option, timer }
 }
 
 export { createServer }

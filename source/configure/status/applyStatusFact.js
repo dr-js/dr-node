@@ -30,7 +30,7 @@ const getStartState = (timestamp) => ({
   merge2List: [] // per day status // length = Infinite
 })
 
-const parseStatus = ({ timestamp, error, retryCount, status, timeOk, timeEnd }, sumKeyList, rangeKeyList) => {
+const parseStatus = ({ timestamp, error, retryCount, status, timeOk, timeDownload }, sumKeyList, rangeKeyList) => {
   const sumRawList = []
   const rangeRawList = []
   rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timestamp', timestamp) // TODO: may be not good for timestamp to have valueSize = 1
@@ -40,7 +40,7 @@ const parseStatus = ({ timestamp, error, retryCount, status, timeOk, timeEnd }, 
     const { timestamp: timestampStatus, systemStatus, processStatus, delta } = status
     sumKeyList = setSumRaw(sumKeyList, sumRawList, 'retryCount', retryCount)
     rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timeOk', timeOk)
-    rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timeEnd', timeEnd)
+    rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timeDownload', timeDownload)
     rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'timestampStatus', timestampStatus)
     rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'systemMemoryUsed', calcSystemMemoryUsed(systemStatus.memory))
     rangeKeyList = setRangeRaw(rangeKeyList, rangeRawList, 'processMemoryRSS', processStatus.memoryUsage.rss)

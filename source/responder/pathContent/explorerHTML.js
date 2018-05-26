@@ -2,7 +2,6 @@ import {
   COMMON_LAYOUT,
   COMMON_STYLE,
   COMMON_SCRIPT,
-  INJECT_GLOBAL_ENV_SCRIPT,
   DR_BROWSER_SCRIPT,
   AUTH_MASK_SCRIPT
 } from 'source/resource/commonHTML'
@@ -12,107 +11,268 @@ const getHTML = (envObject) => COMMON_LAYOUT([
   mainStyle
 ], [
   `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
-  `<div id="explorer-panel" style="overflow: auto; display: flex; flex-flow: column nowrap; flex: 1; min-height: 0;"></div>`,
-  COMMON_SCRIPT(),
-  mainScript,
-  INJECT_GLOBAL_ENV_SCRIPT(envObject),
+  `<div id="main-panel" style="position: relative; overflow: auto; display: flex; flex-flow: column nowrap; flex: 1; min-height: 0;"></div>`,
+  COMMON_SCRIPT(envObject),
+  `<script>window.onload = ${onLoadFunc.toString()}</script>`,
   AUTH_MASK_SCRIPT(),
   DR_BROWSER_SCRIPT()
 ])
 
 const mainStyle = `<style>
-  .explorer-path { margin: 12px 2px; }
-  .explorer-directory, .explorer-file { display: flex; flex-flow: row nowrap; align-items: stretch; border-top: 1px solid #ddd; }
-  .explorer-file { pointer-events: none; color: #666; }
-  .explorer-name { overflow:hidden; flex: 1; align-self: center; margin: 0; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
-  .explorer-edit { pointer-events: auto; color: #aaa; min-width: 1.5em; min-height: auto; line-height: normal; }
+  .loading { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: 256; transition: opacity 1s ease; }
+  .path { margin: 12px 2px; }
+  .directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; border-top: 1px solid #ddd; }
+  .file { pointer-events: none; color: #666; }
+  .name { overflow:hidden; flex: 1; align-self: center; margin: 0; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
+  .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 
-const mainScript = `<script>window.onload = () => {
+const onLoadFunc = () => {
   const {
+    fetch,
+    crypto,
+    isSecureContext,
     qS,
     cT,
     initAuthMask,
     PATH_CONTENT_URL,
     PATH_MODIFY_URL,
+    FILE_UPLOAD_URL,
     SERVE_FILE_URL,
     AUTH_CHECK_URL,
-    Dr: { 
-      Common: { Function: { lossyAsync }, Module: { TimedLookup: { generateCheckCode } } },
-      Browser: { Resource: { createDownloadBlob } }
+    Dr: {
+      Common: {
+        Time: { clock },
+        Error: { catchAsync },
+        Function: { withRetryAsync, lossyAsync },
+        Data: { ArrayBuffer: { packBufferString } },
+        Immutable: { Object: { objectSet, objectDelete, objectMerge }, StateStore: { createStateStore } },
+        Module: { TimedLookup: { generateCheckCode } },
+        Format
+      },
+      Browser: {
+        Resource: { createDownloadWithBlob },
+        DOM: { applyDragFileListListener },
+        Data: { Blob: { parseBlobAsArrayBuffer }, BlobPacket: { packBlobPacket } }
+      }
     }
   } = window
 
+  const calcBlobHashBufferString = async (blob) => packBufferString(await crypto.subtle.digest('SHA-256', await parseBlobAsArrayBuffer(blob)))
+
+  const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
+  const uploadFileByChunk = async (fileBlob, filePath, onProgress, getAuthCheckCode) => {
+    const fileBlobSize = fileBlob.size
+    let chunkIndex = 0
+    const chunkTotal = Math.ceil(fileBlobSize / CHUNK_SIZE_MAX) || 1
+    onProgress(0, fileBlobSize)
+
+    while (chunkIndex < chunkTotal) {
+      const chunkSize = (chunkIndex < chunkTotal - 1)
+        ? CHUNK_SIZE_MAX
+        : fileBlobSize % CHUNK_SIZE_MAX
+      const chunkBlob = fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize)
+      const chunkByteLength = chunkBlob.size
+      // TODO: non-https site can not access window.crypto.subtle
+      const chunkHashBufferString = isSecureContext ? await calcBlobHashBufferString(chunkBlob) : ''
+      const blobPacket = packBlobPacket(JSON.stringify({ filePath, chunkByteLength, chunkHashBufferString, chunkIndex, chunkTotal }), chunkBlob)
+      onProgress(chunkIndex * CHUNK_SIZE_MAX, fileBlobSize)
+      await withRetryAsync(async () => {
+        const { ok } = await fetch(FILE_UPLOAD_URL, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: blobPacket })
+        if (!ok) throw new Error(`[uploadFileByChunk] error uploading chunk ${chunkIndex} of ${filePath}`)
+      }, 3, 50)
+      chunkIndex += 1
+    }
+    onProgress(fileBlobSize, fileBlobSize)
+  }
+
   const initExplorer = (timedLookupData) => {
     const getAuthCheckCode = () => generateCheckCode(timedLookupData)
-    
-    const fetchPathContent = async (relativePath) => {
-      const response = await fetch(PATH_CONTENT_URL + '/' + encodeURI(relativePath), { method: 'GET', headers: { 'auth-check-code': getAuthCheckCode() } })
-      if (!response.ok) throw new Error('[fetchPathContent] error status: ' + response.status)
-      return response.json()
+
+    const INITIAL_STATE = {
+      isLoading: false,
+      pathState: {
+        pathFragList: [ /* pathFrag */ ],
+        pathContent: { relativePath: '', directoryList: [ /* name */ ], fileList: [ /* name */ ] }
+      },
+      uploadState: {
+        isActive: false,
+        uploadFileList: [ /* { filePath, fileBlob } */ ],
+        uploadProgress: { /* [filePath]: progress[0,1] */ },
+        uploadStatus: ''
+      }
     }
-    
-    const fetchPathModify = async (modifyType, relativePathFrom, relativePathTo) => {
-      const response = await fetch(PATH_MODIFY_URL, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: JSON.stringify({ modifyType, relativePathFrom, relativePathTo }) })
-      if (!response.ok) throw new Error('[fetchPathModify] error status: ' + response.status)
-      return response.json()
-    }
-    
-    const fetchServeFile = async (relativePath, fileName) => {
-      const response = await fetch(SERVE_FILE_URL + '/' + encodeURI(relativePath), { method: 'GET', headers: { 'auth-check-code': getAuthCheckCode() } })
-      if (!response.ok) throw new Error('[fetchServeFile] error status: ' + response.status)
-      createDownloadBlob(fileName, [ await response.blob() ])
-    }
-    
-    const modifyDelete = lossyAsync(async (pathList, name) => {
-      await fetchPathModify('delete', [ ...pathList, name ].join('/'))
-      updatePath(pathList)
+
+    const STATE_STORE = createStateStore(INITIAL_STATE)
+
+    const wrapLossyLoading = (func) => lossyAsync(async (...args) => {
+      if (STATE_STORE.getState().isLoading) return
+      STATE_STORE.setState({ isLoading: true })
+      await catchAsync(func, ...args)
+      STATE_STORE.setState({ isLoading: false })
     }).trigger
-    
-    const serveFile = lossyAsync((pathList, name) => fetchServeFile([ ...pathList, name ].join('/'), name)).trigger
-    
-    const updatePath = lossyAsync(async (pathList = []) => {
-      const explorerPanel = qS('#explorer-panel')
-      const loadingMask = document.body.appendChild(cT('div', { style: 'position: absolute; top: 0px; left: 0px; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: 256; transition: opacity 1s ease;' }))
-      setTimeout(() => { loadingMask.style.opacity = '0.5' }, 200)
-      
-      const { relativePath, directoryList, fileList } = await fetchPathContent(pathList.join('/'))
-      currentPathList = pathList
 
-      // await window.Dr.Common.Time.setTimeoutAsync(500)
-      
-      loadingMask.remove()
-      explorerPanel.innerHTML = ''
-      explorerPanel.appendChild(cT('h2', { className: 'explorer-path', innerText: relativePath ? ('/' + relativePath + '/') : '[ROOT]' }))
-      relativePath && explorerPanel.appendChild(cT(
-        'div', 
-        { className: 'explorer-directory' },
-        cT('span', { className: 'explorer-name button', innerText: '🔙|..', onclick: () => updatePath(pathList.slice(0, -1)) }),
-      ))
-      directoryList.map((name) => explorerPanel.appendChild(cT(
-        'div', 
-        { className: 'explorer-directory' },
-        cT('span', { className: 'explorer-name button', innerText: '📁|' + name + '/', onclick: () => updatePath([ ...pathList, name ]) }),
-        cT('button', { className: 'explorer-edit', innerText: '☓', onclick: () => modifyDelete(pathList, name) })
-      )))
-      fileList.map((name) => explorerPanel.appendChild(cT(
-        'div', 
-        { className: 'explorer-file' },
-        cT('span', { className: 'explorer-name button', innerText: '📄|' + name }),
-        cT('button', { className: 'explorer-edit', innerText: '⇩', onclick: () => serveFile(pathList, name) }),
-        cT('button', { className: 'explorer-edit', innerText: '☓', onclick: () => modifyDelete(pathList, name) })
-        )))
-    }).trigger
-    
-    qS('#control-panel').appendChild(cT('button', { innerText: 'Refresh', onclick: () => updatePath(currentPathList) }))
-    qS('#control-panel').appendChild(cT('button', { innerText: 'To Root', onclick: () => updatePath([]) }))
+    const updatePathState = (pathState) => STATE_STORE.setState({ pathState: objectMerge(STATE_STORE.getState().pathState, pathState) })
+    const updateUploadState = (uploadState) => STATE_STORE.setState({ uploadState: objectMerge(STATE_STORE.getState().uploadState, uploadState) })
 
-    let currentPathList = []
+    const loadPathAsync = async (pathFragList = STATE_STORE.getState().pathState.pathFragList) => {
+      const response = await fetch(`${PATH_CONTENT_URL}/${encodeURI(pathFragList.join('/'))}`, {
+        method: 'GET',
+        headers: { 'auth-check-code': getAuthCheckCode() }
+      })
+      if (!response.ok) throw new Error(`[loadPathAsync] error status: ${response.status}`)
+      const { relativePath, directoryList, fileList } = await response.json()
+      updatePathState({ pathFragList, pathContent: { relativePath, directoryList, fileList } })
+    }
+    const modifyPathAsync = async (modifyType, relativePathFrom, relativePathTo) => {
+      const response = await fetch(PATH_MODIFY_URL, {
+        method: 'POST',
+        headers: { 'auth-check-code': getAuthCheckCode() },
+        body: JSON.stringify({ modifyType, relativePathFrom, relativePathTo })
+      })
+      if (!response.ok) throw new Error(`[modifyPathAsync] error status: ${response.status}`)
+      await response.json()
+      await loadPathAsync()
+    }
+    const fetchFileAsync = async (pathList, fileName) => {
+      const response = await fetch(`${SERVE_FILE_URL}/${encodeURI([ ...pathList, fileName ].join('/'))}`, {
+        method: 'GET',
+        headers: { 'auth-check-code': getAuthCheckCode() }
+      })
+      if (!response.ok) throw new Error(`[fetchFileAsync] error status: ${response.status}`)
+      createDownloadWithBlob(fileName, await response.blob())
+    }
+    const uploadFileAsync = async () => {
+      const { uploadFileList } = STATE_STORE.getState().uploadState
+      updateUploadState({ uploadStatus: 'uploading' })
+      const timeStart = clock()
+      const uploadStatusList = []
+      for (const { filePath, fileBlob } of uploadFileList) {
+        const onProgress = (current, total) => updateUploadState({
+          uploadProgress: objectSet(
+            STATE_STORE.getState().uploadState.uploadProgress,
+            filePath,
+            total ? (current / total) : 1
+          )
+        })
+        const { error } = await catchAsync(uploadFileByChunk, fileBlob, filePath, onProgress, getAuthCheckCode)
+        error && uploadStatusList.push(`Error upload '${filePath}': ${error.stack || (error.target && error.target.error) || error}`)
+      }
+      uploadStatusList.push(`Done in ${Format.time(clock() - timeStart)} for ${uploadFileList.length} file`)
+      updateUploadState({ uploadStatus: uploadStatusList.join('\n') })
+      await loadPathAsync()
+    }
+    const updateUploadFileList = (fileList = []) => {
+      const { isLoading, pathState: { pathFragList } } = STATE_STORE.getState()
+      if (isLoading) return
+      const uploadFileList = fileList.map((fileBlob) => ({ filePath: [ ...pathFragList, fileBlob.name ].join('/'), fileBlob }))
+      const uploadProgress = uploadFileList.reduce(
+        (uploadProgress, { filePath }) => objectDelete(uploadProgress, filePath),
+        STATE_STORE.getState().uploadState.uploadProgress
+      )
+      updateUploadState({ isActive: true, uploadFileList, uploadProgress, uploadStatus: '' })
+    }
 
-    updatePath(currentPathList)
+    const loadPath = wrapLossyLoading(loadPathAsync)
+    const modifyPath = wrapLossyLoading(modifyPathAsync)
+    const fetchFile = wrapLossyLoading(fetchFileAsync)
+    const uploadFile = wrapLossyLoading(uploadFileAsync)
+
+    STATE_STORE.subscribe((state, prevState) => {
+      const shouldUpdateLoading = state.isLoading !== prevState.isLoading
+      const shouldUpdatePath = state.pathState !== prevState.pathState
+      const shouldUpdateUpload = shouldUpdatePath || state.uploadState !== prevState.uploadState
+
+      shouldUpdateLoading && renderLoading(state)
+      shouldUpdatePath && renderPathContent(state)
+      shouldUpdateUpload && renderUpload(state)
+    })
+
+    const renderLoading = ({ isLoading }) => {
+      if (!isLoading) return qS('#loading') && qS('#loading').remove()
+      !qS('#loading') && document.body.appendChild(cT('div', { id: 'loading', className: 'loading' }))
+      setTimeout(() => { if (qS('#loading')) qS('#loading').style.opacity = '0.5' }, 200)
+    }
+
+    const renderPathContent = ({ pathState: { pathFragList, pathContent: { relativePath, directoryList, fileList } } }) => {
+      const contentList = [
+        cT('h2', { className: 'path', innerText: relativePath ? (`/${relativePath}/`) : '[ROOT]' }),
+        relativePath && cT(
+          'div',
+          { className: 'directory' },
+          cT('span', { className: 'name button', innerText: '🔙|..', onclick: () => loadPath(pathFragList.slice(0, -1)) })
+        ),
+        ...directoryList.map((name) => cT(
+          'div',
+          { className: 'directory' },
+          cT('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
+          cT('button', { className: 'edit', innerText: '☓', onclick: () => modifyPath('delete', [ ...pathFragList, name ].join('/')) })
+        )),
+        ...fileList.map((name) => cT(
+          'div',
+          { className: 'file' },
+          cT('span', { className: 'name button', innerText: `📄|${name}` }),
+          cT('button', { className: 'edit', innerText: '⇩', onclick: () => fetchFile(pathFragList, name) }),
+          cT('button', { className: 'edit', innerText: '☓', onclick: () => modifyPath('delete', [ ...pathFragList, name ].join('/')) })
+        ))
+      ].filter(Boolean)
+      const mainPanel = qS('#main-panel', '')
+      contentList.forEach((element) => mainPanel.appendChild(element))
+    }
+
+    const renderUpload = ({ uploadState: { isActive, uploadFileList, uploadProgress, uploadStatus } }) => {
+      if (!isActive) {
+        const uploadBlockDiv = document.body.querySelector('#upload-panel')
+        uploadBlockDiv && uploadBlockDiv.remove()
+        return
+      }
+      const uploadBlockDiv = getUploadBlockDiv()
+      uploadBlockDiv.querySelector('pre').innerText = [
+        ...uploadFileList.map(({ filePath, fileBlob: { size } }) =>
+          `[${Format.percent(uploadProgress[ filePath ] || 0).padStart(7, ' ')}] - ${filePath} (${Format.binary(size)}B)`
+        ),
+        uploadStatus
+      ].filter(Boolean).join('\n') || 'or drop file here'
+    }
+
+    const getUploadBlockDiv = () => {
+      const uploadBlockDiv = document.body.querySelector('#upload-panel') || document.body.appendChild(cT('div', {
+        id: 'upload-panel',
+        style: 'overflow: hidden; position: absolute; bottom: 0; right: 0; margin: 8px; background: #fff; box-shadow: 0 0 2px 0 #666;',
+        innerHTML: [
+          '<div style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;">',
+          ...[
+            '<button class="edit">Upload</button>',
+            '<button class="edit">Clear</button>',
+            '<div style="flex: 1;"></div>',
+            '<button class="edit" style="align-self: flex-end;">☓</button>'
+          ],
+          '</div>',
+          '<label>Select file: <input type="file" multiple/></label>',
+          '<pre style="overflow: auto; padding: 8px 4px; max-width: 80vw; max-height: 60vh; min-height: 64px; color: #666;"></pre>'
+        ].join('<br />')
+      }))
+      const [ uploadButton, clearButton, removeBlockButton ] = uploadBlockDiv.querySelectorAll('button')
+      const uploadFileListInput = uploadBlockDiv.querySelector('input[type="file"]')
+
+      uploadButton.addEventListener('click', uploadFile)
+      clearButton.addEventListener('click', () => updateUploadState({ ...INITIAL_STATE.uploadState, isActive: true }))
+      removeBlockButton.addEventListener('click', () => updateUploadState({ isActive: false }))
+      uploadFileListInput.addEventListener('change', () => updateUploadFileList([ ...uploadFileListInput.files ]))
+
+      return uploadBlockDiv
+    }
+
+    qS('#control-panel').appendChild(cT('button', { innerText: 'Refresh', onclick: () => loadPath() }))
+    qS('#control-panel').appendChild(cT('button', { innerText: 'To Root', onclick: () => loadPath([]) }))
+    qS('#control-panel').appendChild(cT('button', { innerText: 'Toggle Upload', onclick: () => updateUploadState({ isActive: !STATE_STORE.getState().uploadState.isActive }) }))
+
+    applyDragFileListListener(document.body, (fileList) => updateUploadFileList([ ...fileList ]))
+
+    loadPath([])
   }
 
   initAuthMask(AUTH_CHECK_URL, initExplorer)
-}</script>`
+}
 
 export { getHTML }

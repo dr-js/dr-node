@@ -35,9 +35,9 @@ const configureStatusCollector = async ({
       if (!ok) throw new Error('fetch no ok')
       const timeOk = roundFloat(clock() - timeFetchStart)
       const status = await json()
-      const timeEnd = roundFloat(clock() - timeFetchStart)
+      const timeDownload = roundFloat(clock() - timeFetchStart - timeOk)
       __DEV__ && console.log('[fetch] pass, get status', status.timestamp, getTimestamp())
-      factDB.add({ timestamp: getTimestamp(), retryCount, status, timeOk, timeEnd })
+      factDB.add({ timestamp: getTimestamp(), retryCount, status, timeOk, timeDownload })
     }, FETCH_RETRY_COUNT, __DEV__ ? 50 : 500)
   }, (error) => {
     console.error('[fetch] failed', collectUrl, error)

@@ -24,19 +24,13 @@
 + 📄 [source/configure/status/combine.js](source/configure/status/combine.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
 + 📄 [source/resource/commonHTML.js](source/resource/commonHTML.js)
-  - `AUTH_MASK_SCRIPT`, `COMMON_LAYOUT`, `COMMON_SCRIPT`, `COMMON_STYLE`, `DR_BROWSER_SCRIPT`, `INJECT_GLOBAL_ENV_SCRIPT`
-+ 📄 [source/responder/favicon.js](source/responder/favicon.js)
-  - `createResponderFavicon`, `createRouteGetFavicon`
+  - `AUTH_MASK_SCRIPT`, `COMMON_LAYOUT`, `COMMON_SCRIPT`, `COMMON_STYLE`, `DR_BROWSER_SCRIPT`
 + 📄 [source/responder/function.js](source/responder/function.js)
   - `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
 + 📄 [source/responder/routeList.js](source/responder/routeList.js)
   - `createResponderRouteList`
-+ 📄 [source/responder/fileUpload/Uploader.js](source/responder/fileUpload/Uploader.js)
-  - `createResponderFileChunkUpload`, `createResponderUploader`
-+ 📄 [source/responder/fileUpload/uploaderHTML.js](source/responder/fileUpload/uploaderHTML.js)
-  - `getHTML`
 + 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)
-  - `createResponderExplorer`, `createResponderPathContent`, `createResponderPathModify`, `createResponderServeFile`
+  - `createResponderExplorer`, `createResponderFileChunkUpload`, `createResponderPathContent`, `createResponderPathModify`, `createResponderServeFile`
 + 📄 [source/responder/pathContent/explorerHTML.js](source/responder/pathContent/explorerHTML.js)
   - `getHTML`
 + 📄 [source/responder/status/Report.js](source/responder/status/Report.js)

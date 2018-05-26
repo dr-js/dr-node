@@ -7,6 +7,7 @@ import {
   createResponderLog,
   createResponderLogEnd
 } from 'dr-js/module/node/server/Responder/Common'
+import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap, getRouteParamAny } from 'dr-js/module/node/server/Responder/Router'
 
 import { configureLogger } from 'dr-server/module/configure/logger'
@@ -14,10 +15,14 @@ import { configureFilePid } from 'dr-server/module/configure/filePid'
 import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
 import { configureServerBase } from 'dr-server/module/configure/serverBase'
 
-import { createRouteGetFavicon } from 'dr-server/module/responder/favicon'
 import { createResponderRouteList } from 'dr-server/module/responder/routeList'
-import { createResponderUploader, createResponderFileChunkUpload } from 'dr-server/module/responder/fileUpload/Uploader'
-import { createResponderExplorer, createResponderPathContent, createResponderPathModify, createResponderServeFile } from 'dr-server/module/responder/pathContent/Explorer'
+import {
+  createResponderExplorer,
+  createResponderPathContent,
+  createResponderPathModify,
+  createResponderServeFile,
+  createResponderFileChunkUpload
+} from 'dr-server/module/responder/pathContent/Explorer'
 
 const createServer = async ({
   // common
@@ -52,9 +57,8 @@ const createServer = async ({
   const responderServeFile = createResponderServeFile(uploadRootPath)
 
   const routerMap = createRouteMap([
-    [ '/uploader', 'GET', await createResponderUploader('/file-chunk-upload', '/auth') ],
-    [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
     [ '/explorer', 'GET', await createResponderExplorer('/path-content', '/path-modify', '/serve-file', '/auth') ],
+    [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
     [ '/path-content/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderPathContent(store, decodeURI(getRouteParamAny(store)))) ],
     [ '/path-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
       const { modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
@@ -63,7 +67,7 @@ const createServer = async ({
     [ '/serve-file/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderServeFile(store, decodeURI(getRouteParamAny(store)))) ],
     [ '/auth', 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
     [ '/', 'GET', createResponderRouteList(() => routerMap) ],
-    await createRouteGetFavicon()
+    [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ].filter(Boolean))
 
   server.on('request', createRequestListener({
