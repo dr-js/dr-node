@@ -29,6 +29,7 @@ const mainStyle = `<style>
 
 const onLoadFunc = () => {
   const {
+    prompt,
     fetch,
     crypto,
     isSecureContext,
@@ -125,6 +126,7 @@ const onLoadFunc = () => {
       updatePathState({ pathFragList, pathContent: { relativePath, directoryList, fileList } })
     }
     const modifyPathAsync = async (modifyType, relativePathFrom, relativePathTo) => {
+      if ((modifyType === 'move' || modifyType === 'copy') && (!relativePathTo || relativePathTo === relativePathFrom)) return
       const response = await fetch(PATH_MODIFY_URL, {
         method: 'POST',
         headers: { 'auth-check-code': getAuthCheckCode() },
@@ -162,13 +164,17 @@ const onLoadFunc = () => {
       updateUploadState({ uploadStatus: uploadStatusList.join('\n') })
       await loadPathAsync()
     }
-    const updateUploadFileList = (fileList = []) => {
-      const { isLoading, pathState: { pathFragList } } = STATE_STORE.getState()
+    const appendUploadFileList = (fileList = []) => {
+      const { isLoading, pathState: { pathFragList }, uploadState } = STATE_STORE.getState()
       if (isLoading) return
-      const uploadFileList = fileList.map((fileBlob) => ({ filePath: [ ...pathFragList, fileBlob.name ].join('/'), fileBlob }))
+      const dedupSet = new Set()
+      const uploadFileList = [
+        ...fileList.map((fileBlob) => ({ filePath: [ ...pathFragList, fileBlob.name ].join('/'), fileBlob })),
+        ...uploadState.uploadFileList
+      ].filter(({ filePath }) => dedupSet.has(filePath) ? false : dedupSet.add(filePath))
       const uploadProgress = uploadFileList.reduce(
         (uploadProgress, { filePath }) => objectDelete(uploadProgress, filePath),
-        STATE_STORE.getState().uploadState.uploadProgress
+        uploadState.uploadProgress
       )
       updateUploadState({ isActive: true, uploadFileList, uploadProgress, uploadStatus: '' })
     }
@@ -195,6 +201,12 @@ const onLoadFunc = () => {
     }
 
     const renderPathContent = ({ pathState: { pathFragList, pathContent: { relativePath, directoryList, fileList } } }) => {
+      const commonEdit = (relativePath) => [
+        cT('button', { className: 'edit', innerText: '✂', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
+        cT('button', { className: 'edit', innerText: '⎘', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
+        cT('button', { className: 'edit', innerText: '☢', onclick: () => modifyPath('delete', relativePath) })
+      ]
+
       const contentList = [
         cT('h2', { className: 'path', innerText: relativePath ? (`/${relativePath}/`) : '[ROOT]' }),
         relativePath && cT(
@@ -206,14 +218,14 @@ const onLoadFunc = () => {
           'div',
           { className: 'directory' },
           cT('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
-          cT('button', { className: 'edit', innerText: '☓', onclick: () => modifyPath('delete', [ ...pathFragList, name ].join('/')) })
+          ...commonEdit([ ...pathFragList, name ].join('/'))
         )),
         ...fileList.map((name) => cT(
           'div',
           { className: 'file' },
           cT('span', { className: 'name button', innerText: `📄|${name}` }),
-          cT('button', { className: 'edit', innerText: '⇩', onclick: () => fetchFile(pathFragList, name) }),
-          cT('button', { className: 'edit', innerText: '☓', onclick: () => modifyPath('delete', [ ...pathFragList, name ].join('/')) })
+          cT('button', { className: 'edit', innerText: '⭳', onclick: () => fetchFile(pathFragList, name) }),
+          ...commonEdit([ ...pathFragList, name ].join('/'))
         ))
       ].filter(Boolean)
       const mainPanel = qS('#main-panel', '')
@@ -258,16 +270,17 @@ const onLoadFunc = () => {
       uploadButton.addEventListener('click', uploadFile)
       clearButton.addEventListener('click', () => updateUploadState({ ...INITIAL_STATE.uploadState, isActive: true }))
       removeBlockButton.addEventListener('click', () => updateUploadState({ isActive: false }))
-      uploadFileListInput.addEventListener('change', () => updateUploadFileList([ ...uploadFileListInput.files ]))
+      uploadFileListInput.addEventListener('change', () => appendUploadFileList([ ...uploadFileListInput.files ]))
 
       return uploadBlockDiv
     }
 
     qS('#control-panel').appendChild(cT('button', { innerText: 'Refresh', onclick: () => loadPath() }))
     qS('#control-panel').appendChild(cT('button', { innerText: 'To Root', onclick: () => loadPath([]) }))
+    qS('#control-panel').appendChild(cT('button', { innerText: 'New Directory', onclick: () => modifyPath('create-directory', [ ...STATE_STORE.getState().pathState.pathFragList, prompt('Directory Name', `new-directory-${Date.now().toString(36)}`) ].join('/')) }))
     qS('#control-panel').appendChild(cT('button', { innerText: 'Toggle Upload', onclick: () => updateUploadState({ isActive: !STATE_STORE.getState().uploadState.isActive }) }))
 
-    applyDragFileListListener(document.body, (fileList) => updateUploadFileList([ ...fileList ]))
+    applyDragFileListListener(document.body, (fileList) => appendUploadFileList([ ...fileList ]))
 
     loadPath([])
   }
