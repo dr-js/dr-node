@@ -1,10 +1,5 @@
-import {
-  COMMON_LAYOUT,
-  COMMON_STYLE,
-  COMMON_SCRIPT,
-  DR_BROWSER_SCRIPT,
-  AUTH_MASK_SCRIPT
-} from 'source/resource/commonHTML'
+import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT, DR_BROWSER_SCRIPT } from 'dr-js/module/node/server/commonHTML'
+import { initAuthMask } from 'source/responder/function'
 
 const getHTML = (envObject) => COMMON_LAYOUT([
   COMMON_STYLE(),
@@ -12,30 +7,28 @@ const getHTML = (envObject) => COMMON_LAYOUT([
 ], [
   `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="chart-panel" style="overflow: auto; flex: 1; min-height: 0;"></div>`,
-  COMMON_SCRIPT(envObject),
-  `<script>window.onload = ${onLoadFunc.toString()}</script>`,
-  AUTH_MASK_SCRIPT(),
+  COMMON_SCRIPT({ ...envObject, initAuthMask, onload: onLoadFunc }),
   DR_BROWSER_SCRIPT()
 ])
 
 const mainStyle = `<style>
-  h2, h4 { padding: 4px 2px 2px; }
+h2, h4 { padding: 4px 2px 2px; }
 
-  .chart { user-select: none; position: relative; overflow: visible; margin: 10px; outline: none; }
-  .chart-panel-vertical { pointer-events: none; position: absolute; left: 0; top: 0; overflow: visible; }
-  .chart-label-vertical { position: absolute; left: 0; transform: translateY(50%); color: #666; z-index: 1; }
-  .chart-main { display: flex; flex-flow: row nowrap; position: relative; overflow-x: auto; box-shadow: 0 0 2px 0 #6666; }
-  .chart-label-horizontal { pointer-events: none; position: relative; overflow: visible; width: 0; box-shadow: 0 0 0 1px #8886; z-index: 1; }
-  .chart-label-horizontal-tag { position: absolute; top: 0; color: #6666; }
-  .chart-bar { position: relative; overflow: visible; flex: 0 0; height: 100%; }
-  .chart-bar-value { position: absolute; left: 0; bottom: 0; width: 100%; background: #faa; }
-  .chart-bar-value-range { position: absolute; left: 0; width: 100%; box-shadow: inset 0 0 2px 0 #666b; }
-  .chart-bar-tag { display: none; pointer-events: none; position: absolute; left: 100%; top: 0; background: #ddd6; white-space: pre; z-index: 2; }
-  .chart-bar:hover { box-shadow: 0 0 12px 0 #666; z-index: 2; }
-  .chart-bar:hover .chart-bar-tag { display: initial; }
+.chart { user-select: none; position: relative; overflow: visible; margin: 10px; outline: none; }
+.chart-panel-vertical { pointer-events: none; position: absolute; left: 0; top: 0; overflow: visible; }
+.chart-label-vertical { position: absolute; left: 0; transform: translateY(50%); color: #666; z-index: 1; }
+.chart-main { display: flex; flex-flow: row nowrap; position: relative; overflow-x: auto; box-shadow: 0 0 2px 0 #6666; }
+.chart-label-horizontal { pointer-events: none; position: relative; overflow: visible; width: 0; box-shadow: 0 0 0 1px #8886; z-index: 1; }
+.chart-label-horizontal-tag { position: absolute; top: 0; color: #6666; }
+.chart-bar { position: relative; overflow: visible; flex: 0 0; height: 100%; }
+.chart-bar-value { position: absolute; left: 0; bottom: 0; width: 100%; background: #faa; }
+.chart-bar-value-range { position: absolute; left: 0; width: 100%; box-shadow: inset 0 0 2px 0 #666b; }
+.chart-bar-tag { display: none; pointer-events: none; position: absolute; left: 100%; top: 0; background: #ddd6; white-space: pre; z-index: 2; }
+.chart-bar:hover { box-shadow: 0 0 12px 0 #666; z-index: 2; }
+.chart-bar:hover .chart-bar-tag { display: initial; }
 
-  .chart-panel-vertical, .chart-main { height: 100px; }
-  .chart:focus .chart-panel-vertical, .chart:focus .chart-main { height: 300px; }
+.chart-panel-vertical, .chart-main { height: 100px; }
+.chart:focus .chart-panel-vertical, .chart:focus .chart-main { height: 300px; }
 </style>`
 
 const onLoadFunc = () => {
@@ -43,11 +36,11 @@ const onLoadFunc = () => {
     alert,
     fetch,
     qS,
-    cT,
-    initAuthMask,
+    cE,
     STATUS_FETCH_URL,
     AUTH_CHECK_URL,
     RENDER_PRESET_CONFIG,
+    initAuthMask,
     Dr: {
       Common: {
         Math: { roundFloat, clamp },
@@ -239,7 +232,7 @@ const onLoadFunc = () => {
         .sort((a, b) => a.order - b.order || compareString(a.title, b.title))
         .map((valueTrack) => renderValueTrackList(valueTrack).join('\n'))
     ].join('<br />'))
-    qS('#control-panel').appendChild(cT('button', { id, innerText: title, onclick: renderChart }))
+    qS('#control-panel').appendChild(cE('button', { id, innerText: title, onclick: renderChart }))
   }
 
   const formatTimestamp = (value) => {
@@ -301,9 +294,12 @@ const onLoadFunc = () => {
     throw new Error('data not ready!')
   }
 
-  initAuthMask(AUTH_CHECK_URL, (timedLookupData) => {
-    qS('#control-panel').appendChild(cT('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(timedLookupData) }))
-    fetchStatusState(timedLookupData)
+  initAuthMask({
+    authCheckUrl: AUTH_CHECK_URL,
+    onAuthPass: (timedLookupData) => {
+      qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(timedLookupData) }))
+      fetchStatusState(timedLookupData)
+    }
   })
 }
 

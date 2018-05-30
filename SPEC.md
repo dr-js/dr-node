@@ -23,10 +23,8 @@
   - `applyFact`
 + 📄 [source/configure/status/combine.js](source/configure/status/combine.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
-+ 📄 [source/resource/commonHTML.js](source/resource/commonHTML.js)
-  - `AUTH_MASK_SCRIPT`, `COMMON_LAYOUT`, `COMMON_SCRIPT`, `COMMON_STYLE`, `DR_BROWSER_SCRIPT`
 + 📄 [source/responder/function.js](source/responder/function.js)
-  - `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
+  - `initAuthMask`, `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
 + 📄 [source/responder/routeList.js](source/responder/routeList.js)
   - `createResponderRouteList`
 + 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)

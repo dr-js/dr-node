@@ -1,10 +1,5 @@
-import {
-  COMMON_LAYOUT,
-  COMMON_STYLE,
-  COMMON_SCRIPT,
-  DR_BROWSER_SCRIPT,
-  AUTH_MASK_SCRIPT
-} from 'source/resource/commonHTML'
+import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT, DR_BROWSER_SCRIPT } from 'dr-js/module/node/server/commonHTML'
+import { initAuthMask } from 'source/responder/function'
 
 const getHTML = (envObject) => COMMON_LAYOUT([
   COMMON_STYLE(),
@@ -12,19 +7,17 @@ const getHTML = (envObject) => COMMON_LAYOUT([
 ], [
   `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; display: flex; flex-flow: column nowrap; flex: 1; min-height: 0;"></div>`,
-  COMMON_SCRIPT(envObject),
-  `<script>window.onload = ${onLoadFunc.toString()}</script>`,
-  AUTH_MASK_SCRIPT(),
+  COMMON_SCRIPT({ ...envObject, initAuthMask, onload: onLoadFunc }),
   DR_BROWSER_SCRIPT()
 ])
 
 const mainStyle = `<style>
-  .loading { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: 256; transition: opacity 1s ease; }
-  .path { margin: 12px 2px; }
-  .directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; border-top: 1px solid #ddd; }
-  .file { pointer-events: none; color: #666; }
-  .name { overflow:hidden; flex: 1; align-self: center; margin: 0; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
-  .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
+.loading { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: 256; transition: opacity 1s ease; }
+.path { margin: 12px 2px; }
+.directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; border-top: 1px solid #ddd; }
+.file { pointer-events: none; color: #666; }
+.name { overflow:hidden; flex: 1; align-self: center; margin: 0; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
+.edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 
 const onLoadFunc = () => {
@@ -34,13 +27,14 @@ const onLoadFunc = () => {
     crypto,
     isSecureContext,
     qS,
-    cT,
-    initAuthMask,
+    cE,
+    aCL,
     PATH_CONTENT_URL,
     PATH_MODIFY_URL,
     FILE_UPLOAD_URL,
     SERVE_FILE_URL,
     AUTH_CHECK_URL,
+    initAuthMask,
     Dr: {
       Common: {
         Time: { clock },
@@ -196,37 +190,31 @@ const onLoadFunc = () => {
 
     const renderLoading = ({ isLoading }) => {
       if (!isLoading) return qS('#loading') && qS('#loading').remove()
-      !qS('#loading') && document.body.appendChild(cT('div', { id: 'loading', className: 'loading' }))
+      !qS('#loading') && document.body.appendChild(cE('div', { id: 'loading', className: 'loading' }))
       setTimeout(() => { if (qS('#loading')) qS('#loading').style.opacity = '0.5' }, 200)
     }
 
     const renderPathContent = ({ pathState: { pathFragList, pathContent: { relativePath, directoryList, fileList } } }) => {
       const commonEdit = (relativePath) => [
-        cT('button', { className: 'edit', innerText: '✂', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
-        cT('button', { className: 'edit', innerText: '⎘', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
-        cT('button', { className: 'edit', innerText: '☢', onclick: () => modifyPath('delete', relativePath) })
+        cE('button', { className: 'edit', innerText: '✂', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
+        cE('button', { className: 'edit', innerText: '⎘', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
+        cE('button', { className: 'edit', innerText: '☢', onclick: () => modifyPath('delete', relativePath) })
       ]
 
       const contentList = [
-        cT('h2', { className: 'path', innerText: relativePath ? (`/${relativePath}/`) : '[ROOT]' }),
-        relativePath && cT(
-          'div',
-          { className: 'directory' },
-          cT('span', { className: 'name button', innerText: '🔙|..', onclick: () => loadPath(pathFragList.slice(0, -1)) })
-        ),
-        ...directoryList.map((name) => cT(
-          'div',
-          { className: 'directory' },
-          cT('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
+        cE('h2', { className: 'path', innerText: relativePath ? (`/${relativePath}/`) : '[ROOT]' }),
+        relativePath && cE('div', { className: 'directory' }, [
+          cE('span', { className: 'name button', innerText: '🔙|..', onclick: () => loadPath(pathFragList.slice(0, -1)) })
+        ]),
+        ...directoryList.map((name) => cE('div', { className: 'directory' }, [
+          cE('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
           ...commonEdit([ ...pathFragList, name ].join('/'))
-        )),
-        ...fileList.map((name) => cT(
-          'div',
-          { className: 'file' },
-          cT('span', { className: 'name button', innerText: `📄|${name}` }),
-          cT('button', { className: 'edit', innerText: '⭳', onclick: () => fetchFile(pathFragList, name) }),
+        ])),
+        ...fileList.map((name) => cE('div', { className: 'file' }, [
+          cE('span', { className: 'name button', innerText: `📄|${name}` }),
+          cE('button', { className: 'edit', innerText: '⭳', onclick: () => fetchFile(pathFragList, name) }),
           ...commonEdit([ ...pathFragList, name ].join('/'))
-        ))
+        ]))
       ].filter(Boolean)
       const mainPanel = qS('#main-panel', '')
       contentList.forEach((element) => mainPanel.appendChild(element))
@@ -234,7 +222,7 @@ const onLoadFunc = () => {
 
     const renderUpload = ({ uploadState: { isActive, uploadFileList, uploadProgress, uploadStatus } }) => {
       if (!isActive) {
-        const uploadBlockDiv = document.body.querySelector('#upload-panel')
+        const uploadBlockDiv = qS('#upload-panel')
         uploadBlockDiv && uploadBlockDiv.remove()
         return
       }
@@ -248,7 +236,7 @@ const onLoadFunc = () => {
     }
 
     const getUploadBlockDiv = () => {
-      const uploadBlockDiv = document.body.querySelector('#upload-panel') || document.body.appendChild(cT('div', {
+      const uploadBlockDiv = qS('#upload-panel') || document.body.appendChild(cE('div', {
         id: 'upload-panel',
         style: 'overflow: hidden; position: absolute; bottom: 0; right: 0; margin: 8px; background: #fff; box-shadow: 0 0 2px 0 #666;',
         innerHTML: [
@@ -275,17 +263,19 @@ const onLoadFunc = () => {
       return uploadBlockDiv
     }
 
-    qS('#control-panel').appendChild(cT('button', { innerText: 'Refresh', onclick: () => loadPath() }))
-    qS('#control-panel').appendChild(cT('button', { innerText: 'To Root', onclick: () => loadPath([]) }))
-    qS('#control-panel').appendChild(cT('button', { innerText: 'New Directory', onclick: () => modifyPath('create-directory', [ ...STATE_STORE.getState().pathState.pathFragList, prompt('Directory Name', `new-directory-${Date.now().toString(36)}`) ].join('/')) }))
-    qS('#control-panel').appendChild(cT('button', { innerText: 'Toggle Upload', onclick: () => updateUploadState({ isActive: !STATE_STORE.getState().uploadState.isActive }) }))
+    aCL(qS('#control-panel'), [
+      cE('button', { innerText: 'Refresh', onclick: () => loadPath() }),
+      cE('button', { innerText: 'To Root', onclick: () => loadPath([]) }),
+      cE('button', { innerText: 'New Directory', onclick: () => modifyPath('create-directory', [ ...STATE_STORE.getState().pathState.pathFragList, prompt('Directory Name', `new-directory-${Date.now().toString(36)}`) ].join('/')) }),
+      cE('button', { innerText: 'Toggle Upload', onclick: () => updateUploadState({ isActive: !STATE_STORE.getState().uploadState.isActive }) })
+    ])
 
     applyDragFileListListener(document.body, (fileList) => appendUploadFileList([ ...fileList ]))
 
     loadPath([])
   }
 
-  initAuthMask(AUTH_CHECK_URL, initExplorer)
+  initAuthMask({ authCheckUrl: AUTH_CHECK_URL, onAuthPass: initExplorer })
 }
 
 export { getHTML }

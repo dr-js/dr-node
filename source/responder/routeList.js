@@ -1,7 +1,6 @@
 import { responderSendBufferCompress } from 'dr-js/module/node/server/Responder/Send'
 import { describeRouteMap } from 'dr-js/module/node/server/Responder/Router'
-
-import { COMMON_LAYOUT, COMMON_STYLE } from 'source/resource/commonHTML'
+import { COMMON_LAYOUT, COMMON_STYLE } from 'dr-js/module/node/server/commonHTML'
 import { prepareBufferDataHTML } from './function'
 
 const getHTML = (routeMap) => COMMON_LAYOUT([
