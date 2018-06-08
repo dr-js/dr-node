@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "dr-server",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "author": "dr-js",
   "license": "MIT",
   "description": "A collection of strange functions, for server",
@@ -34,11 +34,11 @@
     "npm": ">=5"
   },
   "peerDependencies": {
-    "dr-js": "^0.15.2-dev.1 || ^0.15.2"
+    "dr-js": "^0.15.2-dev.2 || ^0.15.2"
   },
   "devDependencies": {
-    "dr-js": "0.15.2-dev.1",
-    "dr-server": "^0.0.11",
+    "dr-js": "0.15.2-dev.2",
+    "dr-server": "^0.0.12",
     "dev-dep-tool": "0.3.1-dev.0",
     "dev-dep-babel": "^0.3.0"
   }

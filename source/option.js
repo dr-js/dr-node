@@ -28,7 +28,7 @@ const getServerFormatConfig = (extendFormatList = []) => ({
       optional: true,
       name: 'path-log',
       extendFormatList: [
-        { ...SinglePath, name: 'prefix-log-file' } // TODO: change to `log-file-prefix`
+        { ...SingleString, optional: true, name: 'prefix-log-file' } // TODO: change to `log-file-prefix`
       ]
     },
     {

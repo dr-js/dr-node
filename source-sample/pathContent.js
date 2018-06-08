@@ -57,7 +57,7 @@ const createServer = async ({
   const responderServeFile = createResponderServeFile(uploadRootPath)
 
   const routerMap = createRouteMap([
-    [ '/explorer', 'GET', await createResponderExplorer('/path-content', '/path-modify', '/serve-file', '/auth') ],
+    [ '/explorer', 'GET', await createResponderExplorer({ fileUploadUrl: '/file-chunk-upload', pathStatusUrl: '/path-status', pathContentUrl: '/path-content', pathModifyUrl: '/path-modify', serveFileUrl: '/serve-file', authCheckUrl: '/auth' }) ],
     [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
     [ '/path-content/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderPathContent(store, decodeURI(getRouteParamAny(store)))) ],
     [ '/path-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {

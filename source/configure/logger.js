@@ -12,11 +12,7 @@ const configureLogger = async ({ pathLogDirectory, prefixLogFile }) => {
   __DEV__ && !pathLogDirectory && console.log('[Logger] output with console.log()')
 
   const logger = prefixLoggerTime(pathLogDirectory
-    ? await createLogger({
-      pathLogDirectory,
-      getLogFileName: () => `${prefixLogFile}${(new Date().toISOString()).replace(/\W/g, '-')}.log`,
-      flags: 'a' // append not clear file if name clash
-    })
+    ? await createLogger({ pathLogDirectory, prefixLogFile, flags: 'a' }) // append not clear file if name clash
     : { add: console.log, save: EMPTY_FUNC, split: EMPTY_FUNC, end: EMPTY_FUNC }
   )
 
