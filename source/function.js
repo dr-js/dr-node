@@ -1,5 +1,5 @@
 import { catchAsync } from 'dr-js/module/common/error'
-import { getUnusedPort } from 'dr-js/module/node/server/Server'
+import { getUnusedPort } from 'dr-js/module/node/server/function'
 import { getNetworkIPv4AddressList } from 'dr-js/module/node/system/NetworkAddress'
 
 const autoTestServerPort = async (expectPortList, host) => {
