@@ -18,12 +18,13 @@ const configureLogger = async ({ pathLogDirectory, prefixLogFile }) => {
 
   addExitListenerAsync((exitState) => {
     __DEV__ && console.log('>> listenerAsync')
-    logger.add(`[SERVER DOWN] ${JSON.stringify(exitState)}`)
+    logger.add(`[EXITING] ${JSON.stringify(exitState)}`)
   })
 
   addExitListenerSync((exitState) => {
     __DEV__ && console.log('>> listenerSync')
-    logger.add(`[SERVER EXIT] ${JSON.stringify(exitState)}`)
+    logger.add(`[EXIT] ${JSON.stringify(exitState)}`)
+    exitState.error && logger.add(`[EXIT][ERROR] ${exitState.error.stack || exitState.error}`)
     logger.end()
   })
 
