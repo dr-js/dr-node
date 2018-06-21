@@ -1,8 +1,8 @@
 import { createHash } from 'crypto'
 
-import { parseBufferString } from 'dr-js/module/common/data/ArrayBuffer'
-import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
-import { parseBufferPacket } from 'dr-js/module/node/data/BufferPacket'
+import { toString as arrayBufferToString } from 'dr-js/module/common/data/ArrayBuffer'
+import { parseChainArrayBufferPacket } from 'dr-js/module/common/data/ArrayBufferPacket'
+import { receiveBufferAsync, toArrayBuffer } from 'dr-js/module/node/data/Buffer'
 import { createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { responderSendBufferCompress, responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
@@ -56,20 +56,21 @@ const createResponderServeFile = (rootPath) => {
 const createResponderFileChunkUpload = async (option) => {
   const fileChunkUpload = await createFileChunkUpload(option)
   return async (store) => {
-    const [ headerString, payloadBuffer ] = parseBufferPacket(await receiveBufferAsync(store.request))
-    const { filePath: filePathRaw, chunkByteLength, chunkHashBufferString, chunkIndex, chunkTotal } = JSON.parse(headerString)
+    const [ headerArrayBuffer, chunkHashArrayBuffer, chunkArrayBuffer ] = parseChainArrayBufferPacket(toArrayBuffer(await receiveBufferAsync(store.request)))
+    const { filePath: filePathRaw, chunkByteLength, chunkIndex, chunkTotal } = JSON.parse(arrayBufferToString(headerArrayBuffer))
+    const chunkBuffer = Buffer.from(chunkArrayBuffer)
 
-    if (chunkByteLength !== payloadBuffer.length) throw new Error(`chunk length mismatch, get: ${payloadBuffer.length}, expect ${chunkByteLength}`)
+    if (chunkByteLength !== chunkBuffer.length) throw new Error(`chunk length mismatch, get: ${chunkBuffer.length}, expect ${chunkByteLength}`)
 
-    if (chunkHashBufferString) { // TODO: wait for non-isSecureContext browser crypto
-      const chunkHashBuffer = Buffer.from(parseBufferString(chunkHashBufferString))
-      const verifyChunkHashBuffer = createHash('sha256').update(payloadBuffer).digest()
+    if (chunkHashArrayBuffer.byteLength) { // TODO: Currently optional, wait for non-isSecureContext browser crypto
+      const chunkHashBuffer = Buffer.from(chunkHashArrayBuffer)
+      const verifyChunkHashBuffer = createHash('sha256').update(chunkBuffer).digest()
       if ((Buffer.compare(chunkHashBuffer, verifyChunkHashBuffer) !== 0)) {
         throw new Error(`chunk hash mismatch, get: ${verifyChunkHashBuffer.toString('base64')}, expect ${chunkHashBuffer.toString('base64')}`)
       }
     }
 
-    await fileChunkUpload(payloadBuffer, chunkIndex, chunkTotal, filePathRaw, store.request.socket.remoteAddress)
+    await fileChunkUpload(chunkBuffer, chunkIndex, chunkTotal, filePathRaw, store.request.socket.remoteAddress)
 
     responderEndWithStatusCode(store, { statusCode: 200 })
   }

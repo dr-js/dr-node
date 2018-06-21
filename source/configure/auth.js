@@ -1,10 +1,14 @@
 import { catchSync } from 'dr-js/module/common/error'
-import { generateCheckCode, verifyCheckCode } from 'dr-js/module/common/module/TimedLookup'
-import { generateLookupData, loadLookupFile, saveLookupFile } from 'dr-js/module/node/module/TimedLookup'
+import { generateCheckCode, verifyCheckCode, generateLookupData, packDataArrayBuffer, parseDataArrayBuffer } from 'dr-js/module/common/module/TimedLookup'
+import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
+import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
 const DEFAULT_RESPONDER_CHECK_FAIL = (store) => responderEndWithStatusCode(store, { statusCode: 403 })
+
+const saveLookupFile = (pathFile, LookupData) => writeFileAsync(pathFile, Buffer.from(packDataArrayBuffer(LookupData)))
+const loadLookupFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await readFileAsync(pathFile)))
 
 // TODO: allow check multiple auth file
 

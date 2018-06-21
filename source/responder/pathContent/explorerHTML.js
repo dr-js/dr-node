@@ -14,9 +14,9 @@ const getHTML = (envObject) => COMMON_LAYOUT([
 const mainStyle = `<style>
 .loading { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: 256; transition: opacity 1s ease; }
 .path { margin: 12px 2px; }
-.directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; border-top: 1px solid #ddd; }
+.directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; }
 .file { pointer-events: none; color: #666; }
-.name { overflow:hidden; flex: 1; align-self: center; margin: 0; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
+.name { overflow:hidden; flex: 1; align-self: center; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
 .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 
@@ -40,20 +40,24 @@ const onLoadFunc = () => {
         Time: { clock },
         Error: { catchAsync },
         Function: { withRetryAsync, lossyAsync },
-        Data: { ArrayBuffer: { packBufferString } },
-        Immutable: { Object: { objectSet, objectDelete, objectMerge }, StateStore: { createStateStore } },
+        Data: {
+          ArrayBuffer: { fromString },
+          ArrayBufferPacket: { packChainArrayBufferPacket }
+        },
+        Immutable: {
+          Object: { objectSet, objectDelete, objectMerge },
+          StateStore: { createStateStore }
+        },
         Module: { TimedLookup: { generateCheckCode } },
         Format
       },
       Browser: {
         Resource: { createDownloadWithBlob },
         DOM: { applyDragFileListListener },
-        Data: { Blob: { parseBlobAsArrayBuffer }, BlobPacket: { packBlobPacket } }
+        Data: { Blob: { parseBlobAsArrayBuffer } }
       }
     }
   } = window
-
-  const calcBlobHashBufferString = async (blob) => packBufferString(await crypto.subtle.digest('SHA-256', await parseBlobAsArrayBuffer(blob)))
 
   const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
   const uploadFileByChunk = async (fileBlob, filePath, onProgress, getAuthCheckCode) => {
@@ -66,14 +70,16 @@ const onLoadFunc = () => {
       const chunkSize = (chunkIndex < chunkTotal - 1)
         ? CHUNK_SIZE_MAX
         : fileBlobSize % CHUNK_SIZE_MAX
-      const chunkBlob = fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize)
-      const chunkByteLength = chunkBlob.size
-      // TODO: non-https site can not access window.crypto.subtle
-      const chunkHashBufferString = isSecureContext ? await calcBlobHashBufferString(chunkBlob) : ''
-      const blobPacket = packBlobPacket(JSON.stringify({ filePath, chunkByteLength, chunkHashBufferString, chunkIndex, chunkTotal }), chunkBlob)
+      const chunkArrayBuffer = await parseBlobAsArrayBuffer(fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize))
+      const chunkByteLength = chunkArrayBuffer.byteLength
+      const chainArrayBufferPacket = packChainArrayBufferPacket([
+        fromString(JSON.stringify({ filePath, chunkByteLength, chunkIndex, chunkTotal })),
+        isSecureContext ? await crypto.subtle.digest('SHA-256', chunkArrayBuffer) : new ArrayBuffer(0), // TODO: non-https site can not access window.crypto.subtle
+        chunkArrayBuffer
+      ])
       onProgress(chunkIndex * CHUNK_SIZE_MAX, fileBlobSize)
       await withRetryAsync(async () => {
-        const { ok } = await fetch(FILE_UPLOAD_URL, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: blobPacket })
+        const { ok } = await fetch(FILE_UPLOAD_URL, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: chainArrayBufferPacket })
         if (!ok) throw new Error(`[uploadFileByChunk] error uploading chunk ${chunkIndex} of ${filePath}`)
       }, 3, 50)
       chunkIndex += 1

@@ -9,6 +9,7 @@ const main = async () => {
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuthConfig: `${__dirname}/.timed-lookup-gitignore.key`,
     // fileTokenCache: `${__dirname}/.token-cache-gitignore.json`,
+    shouldAuthGen: true,
 
     uploadRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
     uploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`,

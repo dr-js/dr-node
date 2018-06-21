@@ -26,17 +26,18 @@ const initAuthMask = ({ authCheckUrl, onAuthPass }) => {
       Common: {
         Function: { lossyAsync },
         Error: { catchSync, catchAsync },
-        Module: { TimedLookup: { generateCheckCode, packDataString, parseDataString } }
+        Data: { ArrayBuffer: { fromString: arrayBufferFromString, toString: arrayBufferToString } },
+        Module: { TimedLookup: { generateCheckCode, packDataArrayBuffer, parseDataArrayBuffer } }
       },
       Browser: {
         DOM: { applyDragFileListListener },
-        Module: { TimedLookup: { parseLookupBlob } }
+        Data: { Blob: { parseBlobAsArrayBuffer } }
       }
     }
   } = window
   const SAVE_KEY = 'timedLookupData'
-  const saveTimedLookupData = (timedLookupData) => localStorage.setItem(SAVE_KEY, packDataString(timedLookupData))
-  const loadTimedLookupData = () => parseDataString(localStorage.getItem(SAVE_KEY))
+  const saveTimedLookupData = (timedLookupData) => localStorage.setItem(SAVE_KEY, arrayBufferToString(packDataArrayBuffer(timedLookupData)))
+  const loadTimedLookupData = () => parseDataArrayBuffer(arrayBufferFromString(localStorage.getItem(SAVE_KEY)))
   const clearTimedLookupData = () => localStorage.removeItem(SAVE_KEY)
   const authCheck = async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
@@ -45,7 +46,10 @@ const initAuthMask = ({ authCheckUrl, onAuthPass }) => {
     return timedLookupData
   }
   const authCheckFileBlob = lossyAsync(async (fileBlob) => {
-    const { result: timedLookupData, error } = await catchAsync(authCheck, await parseLookupBlob(fileBlob))
+    const { result: timedLookupData, error } = await catchAsync(async () => {
+      const lookupData = await parseDataArrayBuffer(await parseBlobAsArrayBuffer(fileBlob))
+      return authCheck(lookupData)
+    })
     if (error) {
       authInfoPre.innerText = `auth invalid for file: ${fileBlob.name}`
       return
