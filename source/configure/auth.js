@@ -65,4 +65,8 @@ const configureAuthTimedLookup = async ({
   }
 }
 
-export { configureAuthTimedLookup }
+export {
+  saveLookupFile,
+  loadLookupFile,
+  configureAuthTimedLookup
+}

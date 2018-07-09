@@ -37,9 +37,9 @@ const onLoadFunc = () => {
     fetch,
     qS,
     cE,
-    STATUS_FETCH_URL,
-    AUTH_CHECK_URL,
-    RENDER_PRESET_CONFIG,
+    URL_STATUS_FETCH,
+    URL_AUTH_CHECK,
+    CONFIG_RENDER_PRESET,
     initAuthMask,
     Dr: {
       Common: {
@@ -243,7 +243,7 @@ const onLoadFunc = () => {
 
   const fetchStatusState = lossyAsync(async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
-    const response = await fetch(STATUS_FETCH_URL, { headers: { 'auth-check-code': checkCode } })
+    const response = await fetch(URL_STATUS_FETCH, { headers: { 'auth-check-code': checkCode } })
     const { sumKeyList, rangeKeyList, statusRawList, merge0List, merge1List, merge2List } = await response.json()
 
     const sumPresetList = []
@@ -279,10 +279,10 @@ const onLoadFunc = () => {
     }
 
     qS('#chart-panel', '')
-    createRenderStatusButton('render-status-raw', 'RenderStatusRaw', renderStatusRawList, () => GET_STATE().statusRawList, { ...RENDER_PRESET_CONFIG.StatusRaw, formatPosition: formatTimestamp })
-    createRenderStatusButton('render-merge-0', 'RenderMerge0', renderMergeList, () => GET_STATE().merge0List, { ...RENDER_PRESET_CONFIG.Merge0, formatPosition: formatTimestamp })
-    createRenderStatusButton('render-merge-1', 'RenderMerge1', renderMergeList, () => GET_STATE().merge1List, { ...RENDER_PRESET_CONFIG.Merge1, formatPosition: formatTimestamp })
-    createRenderStatusButton('render-merge-2', 'RenderMerge2', renderMergeList, () => GET_STATE().merge2List, { ...RENDER_PRESET_CONFIG.Merge2, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-status-raw', 'RenderStatusRaw', renderStatusRawList, () => GET_STATE().statusRawList, { ...CONFIG_RENDER_PRESET.StatusRaw, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-merge-0', 'RenderMerge0', renderMergeList, () => GET_STATE().merge0List, { ...CONFIG_RENDER_PRESET.Merge0, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-merge-1', 'RenderMerge1', renderMergeList, () => GET_STATE().merge1List, { ...CONFIG_RENDER_PRESET.Merge1, formatPosition: formatTimestamp })
+    createRenderStatusButton('render-merge-2', 'RenderMerge2', renderMergeList, () => GET_STATE().merge2List, { ...CONFIG_RENDER_PRESET.Merge2, formatPosition: formatTimestamp })
 
     qS('#render-status-raw').click()
   }).trigger
@@ -295,7 +295,7 @@ const onLoadFunc = () => {
   }
 
   initAuthMask({
-    authCheckUrl: AUTH_CHECK_URL,
+    urlAuthCheck: URL_AUTH_CHECK,
     onAuthPass: (timedLookupData) => {
       qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(timedLookupData) }))
       fetchStatusState(timedLookupData)

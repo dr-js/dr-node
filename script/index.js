@@ -23,25 +23,23 @@ const processOutput = async ({ packageJSON, logger }) => {
 
   padLog(`minify output`)
 
-  stepLog(`minify library`)
+  stepLog(`minify bin & library`)
   await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('library'))).filter(filterScriptFile),
+    fileList: [
+      ...await getFileList(fromOutput('bin')),
+      ...await getFileList(fromOutput('library'))
+    ].filter(filterScriptFile),
     option: getUglifyESOption({ isDevelopment: false, isModule: false }),
     rootPath: PATH_OUTPUT,
     logger
   })
 
-  stepLog(`minify module`)
+  stepLog(`minify module & sample`)
   await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('module'))).filter(filterScriptFile),
-    option: getUglifyESOption({ isDevelopment: false, isModule: true }),
-    rootPath: PATH_OUTPUT,
-    logger
-  })
-
-  stepLog(`minify sample`)
-  await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('sample'))).filter(filterScriptFile),
+    fileList: [
+      ...await getFileList(fromOutput('module')),
+      ...await getFileList(fromOutput('sample'))
+    ].filter(filterScriptFile),
     option: getUglifyESOption({ isDevelopment: false, isModule: true }),
     rootPath: PATH_OUTPUT,
     logger
@@ -66,6 +64,8 @@ runMain(async (logger) => {
   if (!argvFlag('pack')) return
 
   padLog(`build`)
+  stepLog(`build bin`)
+  execSync('npm run build-bin', execOptionRoot)
   stepLog(`build library`)
   execSync('npm run build-library', execOptionRoot)
   stepLog(`build module`)

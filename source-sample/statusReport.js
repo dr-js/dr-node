@@ -66,7 +66,7 @@ const createServer = async ({
     __DEV__ && console.log('reported status:', status)
   }
 
-  return { server, start, stop, option, reportStatus }
+  return { server, start, stop, option, logger, reportStatus }
 }
 
 export { createServer }

@@ -17,7 +17,7 @@ const prepareBufferDataHTML = (buffer) => prepareBufferData(buffer, BASIC_EXTENS
 const prepareBufferDataJSON = (buffer) => prepareBufferData(buffer, BASIC_EXTENSION_MAP.json)
 const prepareBufferDataPNG = (buffer) => prepareBufferData(buffer, BASIC_EXTENSION_MAP.png)
 
-const initAuthMask = ({ authCheckUrl, onAuthPass }) => {
+const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
   const {
     fetch,
     localStorage,
@@ -41,7 +41,7 @@ const initAuthMask = ({ authCheckUrl, onAuthPass }) => {
   const clearTimedLookupData = () => localStorage.removeItem(SAVE_KEY)
   const authCheck = async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
-    const { ok } = await fetch(authCheckUrl, { headers: { 'auth-check-code': checkCode } })
+    const { ok } = await fetch(urlAuthCheck, { headers: { 'auth-check-code': checkCode } })
     if (!ok) throw new Error('[authCheck] failed for timedLookupData')
     return timedLookupData
   }

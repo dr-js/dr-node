@@ -6,54 +6,33 @@ const getHTML = (envObject) => COMMON_LAYOUT([
   mainStyle
 ], [
   `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
-  `<div id="main-panel" style="position: relative; overflow: auto; display: flex; flex-flow: column nowrap; flex: 1; min-height: 0;"></div>`,
-  COMMON_SCRIPT({ ...envObject, initAuthMask, onload: onLoadFunc }),
+  `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
+  COMMON_SCRIPT({ ...envObject, initAuthMask, initFileUpload, onload: onLoadFunc }),
   DR_BROWSER_SCRIPT()
 ])
 
 const mainStyle = `<style>
+* { font-family: monospace; }
 .loading { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: 256; transition: opacity 1s ease; }
 .path { margin: 12px 2px; }
 .directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; }
-.file { pointer-events: none; color: #666; }
+.directory:hover, .file:hover { background: #eee; }
 .name { overflow:hidden; flex: 1; align-self: center; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
+.file .name { pointer-events: none; color: #666; }
 .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 
-const onLoadFunc = () => {
+const initFileUpload = (urlFileUpload) => {
   const {
-    prompt,
     fetch,
     crypto,
     isSecureContext,
-    qS,
-    cE,
-    aCL,
-    PATH_CONTENT_URL,
-    PATH_MODIFY_URL,
-    FILE_UPLOAD_URL,
-    SERVE_FILE_URL,
-    AUTH_CHECK_URL,
-    initAuthMask,
     Dr: {
       Common: {
-        Time: { clock },
-        Error: { catchAsync },
-        Function: { withRetryAsync, lossyAsync },
-        Data: {
-          ArrayBuffer: { fromString },
-          ArrayBufferPacket: { packChainArrayBufferPacket }
-        },
-        Immutable: {
-          Object: { objectSet, objectDelete, objectMerge },
-          StateStore: { createStateStore }
-        },
-        Module: { TimedLookup: { generateCheckCode } },
-        Format
+        Function: { withRetryAsync },
+        Data: { ArrayBuffer: { fromString }, ArrayBufferPacket: { packChainArrayBufferPacket } }
       },
       Browser: {
-        Resource: { createDownloadWithBlob },
-        DOM: { applyDragFileListListener },
         Data: { Blob: { parseBlobAsArrayBuffer } }
       }
     }
@@ -61,15 +40,15 @@ const onLoadFunc = () => {
 
   const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
   const uploadFileByChunk = async (fileBlob, filePath, onProgress, getAuthCheckCode) => {
-    const fileBlobSize = fileBlob.size
+    const fileSize = fileBlob.size
     let chunkIndex = 0
-    const chunkTotal = Math.ceil(fileBlobSize / CHUNK_SIZE_MAX) || 1
-    onProgress(0, fileBlobSize)
+    const chunkTotal = Math.ceil(fileSize / CHUNK_SIZE_MAX) || 1
+    onProgress(0, fileSize)
 
     while (chunkIndex < chunkTotal) {
       const chunkSize = (chunkIndex < chunkTotal - 1)
         ? CHUNK_SIZE_MAX
-        : fileBlobSize % CHUNK_SIZE_MAX
+        : fileSize % CHUNK_SIZE_MAX
       const chunkArrayBuffer = await parseBlobAsArrayBuffer(fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize))
       const chunkByteLength = chunkArrayBuffer.byteLength
       const chainArrayBufferPacket = packChainArrayBufferPacket([
@@ -77,15 +56,49 @@ const onLoadFunc = () => {
         isSecureContext ? await crypto.subtle.digest('SHA-256', chunkArrayBuffer) : new ArrayBuffer(0), // TODO: non-https site can not access window.crypto.subtle
         chunkArrayBuffer
       ])
-      onProgress(chunkIndex * CHUNK_SIZE_MAX, fileBlobSize)
+      onProgress(chunkIndex * CHUNK_SIZE_MAX, fileSize)
       await withRetryAsync(async () => {
-        const { ok } = await fetch(FILE_UPLOAD_URL, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: chainArrayBufferPacket })
+        const { ok } = await fetch(urlFileUpload, { method: 'POST', headers: { 'auth-check-code': getAuthCheckCode() }, body: chainArrayBufferPacket })
         if (!ok) throw new Error(`[uploadFileByChunk] error uploading chunk ${chunkIndex} of ${filePath}`)
       }, 3, 50)
       chunkIndex += 1
     }
-    onProgress(fileBlobSize, fileBlobSize)
+    onProgress(fileSize, fileSize)
   }
+
+  return { uploadFileByChunk }
+}
+
+const onLoadFunc = () => {
+  const {
+    prompt,
+    fetch,
+    qS,
+    cE,
+    aCL,
+    URL_AUTH_CHECK,
+    URL_PATH_MODIFY,
+    URL_FILE_UPLOAD,
+    URL_FILE_SERVE,
+    initAuthMask,
+    initFileUpload,
+    Dr: {
+      Common: {
+        Time: { clock },
+        Error: { catchAsync },
+        Function: { lossyAsync },
+        Immutable: { Object: { objectSet, objectDelete, objectMerge }, StateStore: { createStateStore } },
+        Module: { TimedLookup: { generateCheckCode } },
+        Format
+      },
+      Browser: {
+        Resource: { createDownloadWithBlob },
+        DOM: { applyDragFileListListener }
+      }
+    }
+  } = window
+
+  const { uploadFileByChunk } = initFileUpload(URL_FILE_UPLOAD)
 
   const initExplorer = (timedLookupData) => {
     const getAuthCheckCode = () => generateCheckCode(timedLookupData)
@@ -117,17 +130,18 @@ const onLoadFunc = () => {
     const updateUploadState = (uploadState) => STATE_STORE.setState({ uploadState: objectMerge(STATE_STORE.getState().uploadState, uploadState) })
 
     const loadPathAsync = async (pathFragList = STATE_STORE.getState().pathState.pathFragList) => {
-      const response = await fetch(`${PATH_CONTENT_URL}/${encodeURI(pathFragList.join('/'))}`, {
-        method: 'GET',
-        headers: { 'auth-check-code': getAuthCheckCode() }
+      const response = await fetch(URL_PATH_MODIFY, {
+        method: 'POST',
+        headers: { 'auth-check-code': getAuthCheckCode() },
+        body: JSON.stringify({ modifyType: 'path-content', relativePathFrom: pathFragList.join('/') })
       })
       if (!response.ok) throw new Error(`[loadPathAsync] error status: ${response.status}`)
-      const { relativePath, directoryList, fileList } = await response.json()
+      const { relativePathFrom: relativePath, directoryList, fileList } = await response.json()
       updatePathState({ pathFragList, pathContent: { relativePath, directoryList, fileList } })
     }
     const modifyPathAsync = async (modifyType, relativePathFrom, relativePathTo) => {
       if ((modifyType === 'move' || modifyType === 'copy') && (!relativePathTo || relativePathTo === relativePathFrom)) return
-      const response = await fetch(PATH_MODIFY_URL, {
+      const response = await fetch(URL_PATH_MODIFY, {
         method: 'POST',
         headers: { 'auth-check-code': getAuthCheckCode() },
         body: JSON.stringify({ modifyType, relativePathFrom, relativePathTo })
@@ -137,7 +151,7 @@ const onLoadFunc = () => {
       await loadPathAsync()
     }
     const fetchFileAsync = async (pathList, fileName) => {
-      const response = await fetch(`${SERVE_FILE_URL}/${encodeURI([ ...pathList, fileName ].join('/'))}`, {
+      const response = await fetch(`${URL_FILE_SERVE}/${encodeURIComponent([ ...pathList, fileName ].join('/'))}`, {
         method: 'GET',
         headers: { 'auth-check-code': getAuthCheckCode() }
       })
@@ -216,9 +230,9 @@ const onLoadFunc = () => {
           cE('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
           ...commonEdit([ ...pathFragList, name ].join('/'))
         ])),
-        ...fileList.map((name) => cE('div', { className: 'file' }, [
-          cE('span', { className: 'name button', innerText: `📄|${name}` }),
-          cE('button', { className: 'edit', innerText: '⭳', onclick: () => fetchFile(pathFragList, name) }),
+        ...fileList.map(([ name, size, mtimeMs ]) => cE('div', { className: 'file' }, [
+          cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
+          cE('button', { className: 'edit', innerText: `⭳|${Format.binary(size)}B`, onclick: () => fetchFile(pathFragList, name) }),
           ...commonEdit([ ...pathFragList, name ].join('/'))
         ]))
       ].filter(Boolean)
@@ -281,7 +295,7 @@ const onLoadFunc = () => {
     loadPath([])
   }
 
-  initAuthMask({ authCheckUrl: AUTH_CHECK_URL, onAuthPass: initExplorer })
+  initAuthMask({ urlAuthCheck: URL_AUTH_CHECK, onAuthPass: initExplorer })
 }
 
 export { getHTML }

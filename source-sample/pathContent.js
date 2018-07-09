@@ -18,7 +18,6 @@ import { configureServerBase } from 'dr-server/module/configure/serverBase'
 import { createResponderRouteList } from 'dr-server/module/responder/routeList'
 import {
   createResponderExplorer,
-  createResponderPathContent,
   createResponderPathModify,
   createResponderServeFile,
   createResponderFileChunkUpload
@@ -52,19 +51,22 @@ const createServer = async ({
       console.error(error)
     }
   })
-  const responderPathContent = createResponderPathContent(uploadRootPath)
   const responderPathModify = createResponderPathModify(uploadRootPath)
   const responderServeFile = createResponderServeFile(uploadRootPath)
 
   const routerMap = createRouteMap([
-    [ '/explorer', 'GET', await createResponderExplorer({ fileUploadUrl: '/file-chunk-upload', pathStatusUrl: '/path-status', pathContentUrl: '/path-content', pathModifyUrl: '/path-modify', serveFileUrl: '/serve-file', authCheckUrl: '/auth' }) ],
-    [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
-    [ '/path-content/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderPathContent(store, decodeURI(getRouteParamAny(store)))) ],
+    [ '/explorer', 'GET', await createResponderExplorer({
+      urlAuthCheck: '/auth',
+      urlPathModify: '/path-modify',
+      urlFileUpload: '/file-chunk-upload',
+      urlFileServe: '/file-serve'
+    }) ],
     [ '/path-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
       const { modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
       return responderPathModify(store, modifyType, relativePathFrom, relativePathTo)
     }) ],
-    [ '/serve-file/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderServeFile(store, decodeURI(getRouteParamAny(store)))) ],
+    [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
+    [ '/file-serve/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderServeFile(store, decodeURIComponent(getRouteParamAny(store)))) ],
     [ '/auth', 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
     [ '/', 'GET', createResponderRouteList(() => routerMap) ],
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
@@ -82,7 +84,7 @@ const createServer = async ({
     }
   }))
 
-  return { server, start, stop, option }
+  return { server, start, stop, option, logger }
 }
 
 export { createServer }

@@ -44,7 +44,7 @@ const getServerFormatConfig = (extendFormatList = []) => ({
 })
 
 // fileTokenCache, tokenSize, tokenExpireTime
-const tokenCacheFormatConfig = {
+const TokenCacheFormatConfig = {
   ...SinglePath,
   optional: true,
   name: 'file-token-cache',
@@ -101,7 +101,7 @@ const StatusReportFormatConfig = {
 
 export {
   getServerFormatConfig,
-  tokenCacheFormatConfig,
+  TokenCacheFormatConfig,
   AuthFormatConfig,
   FileUploadFormatConfig,
   StatusCollectFormatConfig,

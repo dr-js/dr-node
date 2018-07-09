@@ -5,13 +5,13 @@ import { prepareBufferDataHTML, prepareBufferDataJSON } from 'source/responder/f
 import { getHTML } from './visualizeHTML'
 
 const createResponderStatusVisualize = async (
-  statusFetchUrl = '/status-state',
-  authCheckUrl = '/auth'
+  urlStatusFetch = '/status-state',
+  urlAuthCheck = '/auth'
 ) => {
   const bufferData = await prepareBufferDataHTML(Buffer.from(getHTML({
-    STATUS_FETCH_URL: statusFetchUrl,
-    AUTH_CHECK_URL: authCheckUrl,
-    RENDER_PRESET_CONFIG: __DEV__
+    URL_STATUS_FETCH: urlStatusFetch,
+    URL_AUTH_CHECK: urlAuthCheck,
+    CONFIG_RENDER_PRESET: __DEV__
       ? {
         StatusRaw: { positionScale: 8, horizontalDelta: 20, mergeGapMax: 0 },
         Merge0: { positionScale: 4, horizontalDelta: 60, mergeGapMax: 0 },

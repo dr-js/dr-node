@@ -75,7 +75,7 @@ const createServer = async ({
     }
   }))
 
-  return { server, start, stop, option, timer }
+  return { server, start, stop, option, logger, timer }
 }
 
 export { createServer }
