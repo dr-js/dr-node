@@ -9,7 +9,6 @@ import { createGetPathModify } from 'source/task/getPathModify'
 import { prepareBufferDataHTML } from 'source/responder/function'
 import { getHTML } from './explorerHTML'
 
-// TODO: list file basic stat info (size / time)
 // TODO: edit file
 // TODO: sorting
 

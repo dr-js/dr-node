@@ -17,7 +17,7 @@ const mainStyle = `<style>
 .path { margin: 12px 2px; }
 .directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; }
 .directory:hover, .file:hover { background: #eee; }
-.name { overflow:hidden; flex: 1; align-self: center; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
+.name { overflow:hidden; flex: 1; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
 .file .name { pointer-events: none; color: #666; }
 .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
@@ -87,7 +87,7 @@ const onLoadFunc = () => {
         Time: { clock },
         Error: { catchAsync },
         Function: { lossyAsync },
-        Immutable: { Object: { objectSet, objectDelete, objectMerge }, StateStore: { createStateStore } },
+        Immutable: { Object: { objectSet, objectDelete, objectMerge, objectPickKey }, StateStore: { createStateStore } },
         Module: { TimedLookup: { generateCheckCode } },
         Format
       },
@@ -159,11 +159,11 @@ const onLoadFunc = () => {
       createDownloadWithBlob(fileName, await response.blob())
     }
     const uploadFileAsync = async () => {
-      const { uploadFileList } = STATE_STORE.getState().uploadState
+      const { uploadFileList: fileList } = STATE_STORE.getState().uploadState
       updateUploadState({ uploadStatus: 'uploading' })
       const timeStart = clock()
       const uploadStatusList = []
-      for (const { filePath, fileBlob } of uploadFileList) {
+      for (const { filePath, fileBlob } of fileList) {
         const onProgress = (current, total) => updateUploadState({
           uploadProgress: objectSet(
             STATE_STORE.getState().uploadState.uploadProgress,
@@ -174,8 +174,15 @@ const onLoadFunc = () => {
         const { error } = await catchAsync(uploadFileByChunk, fileBlob, filePath, onProgress, getAuthCheckCode)
         error && uploadStatusList.push(`Error upload '${filePath}': ${error.stack || (error.target && error.target.error) || error}`)
       }
-      uploadStatusList.push(`Done in ${Format.time(clock() - timeStart)} for ${uploadFileList.length} file`)
-      updateUploadState({ uploadStatus: uploadStatusList.join('\n') })
+      uploadStatusList.push(`Done in ${Format.time(clock() - timeStart)} for ${fileList.length} file`)
+      {
+        const { uploadState: { uploadFileList, uploadProgress } } = STATE_STORE.getState()
+        updateUploadState({
+          uploadFileList: uploadFileList.filter((v) => !fileList.includes(v)),
+          uploadProgress: objectPickKey(uploadProgress, Object.keys(uploadProgress).filter((filePath) => !fileList.find((v) => v.filePath === filePath))),
+          uploadStatus: uploadStatusList.join('\n')
+        })
+      }
       await loadPathAsync()
     }
     const appendUploadFileList = (fileList = []) => {
@@ -216,9 +223,9 @@ const onLoadFunc = () => {
 
     const renderPathContent = ({ pathState: { pathFragList, pathContent: { relativePath, directoryList, fileList } } }) => {
       const commonEdit = (relativePath) => [
-        cE('button', { className: 'edit', innerText: '✂', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
-        cE('button', { className: 'edit', innerText: '⎘', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
-        cE('button', { className: 'edit', innerText: '☢', onclick: () => modifyPath('delete', relativePath) })
+        cE('button', { className: 'edit', innerText: '✂️', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
+        cE('button', { className: 'edit', innerText: '📋', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
+        cE('button', { className: 'edit', innerText: '🗑️', onclick: () => modifyPath('delete', relativePath) })
       ]
 
       const contentList = [
@@ -232,7 +239,7 @@ const onLoadFunc = () => {
         ])),
         ...fileList.map(([ name, size, mtimeMs ]) => cE('div', { className: 'file' }, [
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
-          cE('button', { className: 'edit', innerText: `⭳|${Format.binary(size)}B`, onclick: () => fetchFile(pathFragList, name) }),
+          cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => fetchFile(pathFragList, name) }),
           ...commonEdit([ ...pathFragList, name ].join('/'))
         ]))
       ].filter(Boolean)
@@ -265,7 +272,7 @@ const onLoadFunc = () => {
             '<button class="edit">Upload</button>',
             '<button class="edit">Clear</button>',
             '<div style="flex: 1;"></div>',
-            '<button class="edit" style="align-self: flex-end;">☓</button>'
+            '<button class="edit" style="align-self: flex-end;">❌</button>'
           ],
           '</div>',
           '<label>Select file: <input type="file" multiple/></label>',
