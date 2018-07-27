@@ -72,6 +72,7 @@ const initFileUpload = (urlFileUpload) => {
 const onLoadFunc = () => {
   const {
     prompt,
+    confirm,
     fetch,
     qS,
     cE,
@@ -225,7 +226,7 @@ const onLoadFunc = () => {
       const commonEdit = (relativePath) => [
         cE('button', { className: 'edit', innerText: '✂️', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
         cE('button', { className: 'edit', innerText: '📋', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
-        cE('button', { className: 'edit', innerText: '🗑️', onclick: () => modifyPath('delete', relativePath) })
+        cE('button', { className: 'edit', innerText: '🗑️', onclick: () => confirm(`Delete path: ${relativePath}?`) && modifyPath('delete', relativePath) })
       ]
 
       const contentList = [

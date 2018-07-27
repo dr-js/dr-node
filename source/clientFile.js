@@ -12,6 +12,8 @@ import { createDirectory } from 'dr-js/module/node/file/File'
 import { loadLookupFile } from 'source/configure/auth'
 import { uploadFileByChunk } from 'source/task/getFileChunkUpload'
 
+// TODO: handle logging properly
+
 const getAuthFetch = async (fileAuthConfig) => {
   const timedLookupData = await loadLookupFile(fileAuthConfig)
   return async (url, config) => {
@@ -26,49 +28,54 @@ const clientFileUpload = async ({
   fileBuffer = readFileSync(fileInputPath),
   filePath,
   urlFileUpload,
-  fileAuthConfig
+  fileAuthConfig,
+  maxRetry = 3,
+  wait = 1000,
+  log = console.log
 }) => {
   const startTime = clock()
   const authFetch = await getAuthFetch(fileAuthConfig)
 
-  console.log(`[clientFileUpload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
+  log && log(`[clientFileUpload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
 
   await uploadFileByChunk({
     fileBuffer,
     filePath,
-    onProgress: (uploadedSize, totalSize) => console.log(`[clientFileUpload] uploading ${percent(uploadedSize / totalSize)} (${time(clock() - startTime)})`),
+    onProgress: (uploadedSize, totalSize) => log && log(`[clientFileUpload] uploading ${percent(uploadedSize / totalSize)} (${time(clock() - startTime)})`),
     uploadFileChunkBuffer: async (chainBufferPacket, { chunkIndex }) => withRetryAsync(
       async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket }).catch((error) => {
-        console.warn(error)
-        throw new Error(`[clientFileUpload] error upload chunk ${chunkIndex} of ${filePath}`)
+        const message = `[ERROR][clientFileUpload] upload chunk ${chunkIndex} of ${filePath}`
+        log && log(message, error)
+        throw new Error(message)
       }),
-      3,
-      50
+      maxRetry,
+      wait
     )
   })
 
-  console.log(`[clientFileUpload] done: ${filePath} (${time(clock() - startTime)})`)
+  log && log(`[clientFileUpload] done: ${filePath} (${time(clock() - startTime)})`)
 }
 
 const clientFileDownload = async ({
   fileOutputPath,
   filePath,
   urlFileDownload,
-  fileAuthConfig
+  fileAuthConfig,
+  log = console.log
 }) => {
   const startTime = clock()
   const authFetch = await getAuthFetch(fileAuthConfig)
 
-  console.log(`[clientFileDownload] file: ${filePath}`)
+  log && log(`[clientFileDownload] file: ${filePath}`)
 
   const { buffer } = await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET' })
   const fileBuffer = await buffer()
-  console.log(`[clientFileDownload] get file: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
+  log && log(`[clientFileDownload] get file: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
 
   if (fileOutputPath) {
     await createDirectory(dirname(fileOutputPath))
     writeFileSync(fileOutputPath, fileBuffer)
-    console.log(`[clientFileDownload] done: ${fileOutputPath} (${time(clock() - startTime)})`)
+    log && log(`[clientFileDownload] done: ${fileOutputPath} (${time(clock() - startTime)})`)
   }
 
   return fileBuffer
@@ -79,16 +86,17 @@ const clientFileModify = async ({
   filePath: relativePathFrom = '',
   filePathTo: relativePathTo,
   urlFileModify,
-  fileAuthConfig
+  fileAuthConfig,
+  log = console.log
 }) => {
   const startTime = clock()
   const authFetch = await getAuthFetch(fileAuthConfig)
 
-  console.log(`[clientFileModify] modify: ${modifyType}, file: ${relativePathFrom}, fileTo: ${relativePathTo}`)
+  log && log(`[clientFileModify] modify: ${modifyType}, file: ${relativePathFrom}, fileTo: ${relativePathTo}`)
 
   const result = await (await authFetch(urlFileModify, { method: 'POST', body: JSON.stringify({ modifyType, relativePathFrom, relativePathTo }) })).json()
 
-  console.log(`[clientFileModify] modify: ${modifyType} (${time(clock() - startTime)})`)
+  log && log(`[clientFileModify] modify: ${modifyType} (${time(clock() - startTime)})`)
 
   return result
 }
