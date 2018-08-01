@@ -1,8 +1,10 @@
+import { binary } from 'dr-js/module/common/format'
 import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { responderSendBufferCompress, responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderServeStatic } from 'dr-js/module/node/server/Responder/ServeStatic'
+import { runQuiet } from 'dr-js/module/node/system/Run'
 
 import { createFileChunkUpload } from 'source/task/getFileChunkUpload'
 import { createGetPathModify } from 'source/task/getPathModify'
@@ -16,13 +18,15 @@ const createResponderExplorer = async ({
   urlAuthCheck = '/auth',
   urlPathModify = '/path-modify',
   urlFileUpload = '/file-chunk-upload',
-  urlFileServe = '/file-serve'
+  urlFileServe = '/file-serve',
+  urlStorageStatus = '/storage-status'
 }) => {
   const bufferData = await prepareBufferDataHTML(Buffer.from(getHTML({
     URL_AUTH_CHECK: urlAuthCheck,
     URL_PATH_MODIFY: urlPathModify,
     URL_FILE_UPLOAD: urlFileUpload,
-    URL_FILE_SERVE: urlFileServe
+    URL_FILE_SERVE: urlFileServe,
+    URL_STORAGE_STATUS: urlStorageStatus
   })))
   return (store) => responderSendBufferCompress(store, bufferData)
 }
@@ -48,9 +52,27 @@ const createResponderFileChunkUpload = async (option) => {
   }
 }
 
+const createResponderStorageStatus = (rootPath) => {
+  const runQuick = async (command, option) => {
+    const { promise, stdoutBufferPromise } = runQuiet({ command, option })
+    await promise
+    return (await stdoutBufferPromise).toString()
+  }
+
+  const getStatus = process.platform !== 'win32'
+    ? () => runQuick('df -h .', { cwd: rootPath })
+    : () => runQuick('df -h .', { cwd: rootPath }).catch(() => // win32 alternative
+      runQuick('dir | find "bytes free"', { cwd: rootPath }) // sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
+        .then((stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`)
+    )
+
+  return async (store) => responderSendJSON(store, { object: { storageStatusText: await getStatus() } })
+}
+
 export {
   createResponderExplorer,
   createResponderPathModify,
   createResponderServeFile,
-  createResponderFileChunkUpload
+  createResponderFileChunkUpload,
+  createResponderStorageStatus
 }

@@ -93,11 +93,7 @@ const StatusCollectFormatConfig = {
 }
 
 // statusReportProcessTag
-const StatusReportFormatConfig = {
-  ...SingleString,
-  optional: true,
-  name: 'status-report-process-tag'
-}
+const StatusReportFormatConfig = { ...SingleString, optional: true, name: 'status-report-process-tag' }
 
 export {
   getServerFormatConfig,

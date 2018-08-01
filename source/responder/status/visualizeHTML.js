@@ -1,5 +1,5 @@
 import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT, DR_BROWSER_SCRIPT } from 'dr-js/module/node/server/commonHTML'
-import { initAuthMask } from 'source/responder/function'
+import { initAuthMask } from 'source/responder/commonHTML'
 
 const getHTML = (envObject) => COMMON_LAYOUT([
   COMMON_STYLE(),
@@ -34,20 +34,15 @@ h2, h4 { padding: 4px 2px 2px; }
 const onLoadFunc = () => {
   const {
     alert,
-    fetch,
-    qS,
-    cE,
-    URL_STATUS_FETCH,
-    URL_AUTH_CHECK,
-    CONFIG_RENDER_PRESET,
+    qS, cE,
+    URL_STATUS_FETCH, URL_AUTH_CHECK, CONFIG_RENDER_PRESET,
     initAuthMask,
     Dr: {
       Common: {
+        Format,
         Math: { roundFloat, clamp },
         Compare: { compareString },
-        Function: { lossyAsync },
-        Module: { TimedLookup: { generateCheckCode } },
-        Format
+        Function: { lossyAsync }
       }
     }
   } = window
@@ -241,10 +236,15 @@ const onLoadFunc = () => {
   }
   const formatBinaryData = (value) => `${Format.binary(value)}B`
 
-  const fetchStatusState = lossyAsync(async (timedLookupData) => {
-    const checkCode = generateCheckCode(timedLookupData)
-    const response = await fetch(URL_STATUS_FETCH, { headers: { 'auth-check-code': checkCode } })
-    const { sumKeyList, rangeKeyList, statusRawList, merge0List, merge1List, merge2List } = await response.json()
+  const fetchStatusState = lossyAsync(async (authFetch) => {
+    const {
+      sumKeyList,
+      rangeKeyList,
+      statusRawList,
+      merge0List,
+      merge1List,
+      merge2List
+    } = await (await authFetch(URL_STATUS_FETCH)).json()
 
     const sumPresetList = []
     sumPresetList[ sumKeyList.indexOf('error') ] = { order: 0, title: 'error count', valueMin: 0 }
@@ -296,9 +296,9 @@ const onLoadFunc = () => {
 
   initAuthMask({
     urlAuthCheck: URL_AUTH_CHECK,
-    onAuthPass: (timedLookupData) => {
-      qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(timedLookupData) }))
-      fetchStatusState(timedLookupData)
+    onAuthPass: (authFetch) => {
+      qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(authFetch) }))
+      fetchStatusState(authFetch)
     }
   })
 }

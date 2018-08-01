@@ -3,6 +3,7 @@ import { createRequestListener } from 'dr-js/module/node/server/Server'
 import {
   responderEnd,
   responderEndWithStatusCode,
+  responderEndWithRedirect,
   createResponderParseURL,
   createResponderLog,
   createResponderLogEnd
@@ -20,7 +21,8 @@ import {
   createResponderExplorer,
   createResponderPathModify,
   createResponderServeFile,
-  createResponderFileChunkUpload
+  createResponderFileChunkUpload,
+  createResponderStorageStatus
 } from 'dr-server/module/responder/pathContent/Explorer'
 
 const createServer = async ({
@@ -53,22 +55,25 @@ const createServer = async ({
   })
   const responderPathModify = createResponderPathModify(uploadRootPath)
   const responderServeFile = createResponderServeFile(uploadRootPath)
+  const responderStorageStatus = createResponderStorageStatus(uploadRootPath)
 
   const routerMap = createRouteMap([
     [ '/explorer', 'GET', await createResponderExplorer({
       urlAuthCheck: '/auth',
       urlPathModify: '/path-modify',
       urlFileUpload: '/file-chunk-upload',
-      urlFileServe: '/file-serve'
+      urlFileServe: '/file-serve',
+      urlStorageStatus: '/storage-status'
     }) ],
     [ '/path-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
       const { modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
       return responderPathModify(store, modifyType, relativePathFrom, relativePathTo)
     }) ],
     [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
+    [ '/storage-status', 'GET', wrapResponderCheckAuthCheckCode(responderStorageStatus) ],
     [ '/file-serve/*', 'GET', wrapResponderCheckAuthCheckCode((store) => responderServeFile(store, decodeURIComponent(getRouteParamAny(store)))) ],
     [ '/auth', 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
-    [ '/', 'GET', createResponderRouteList(() => routerMap) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: '/explorer' }) ],
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ].filter(Boolean))
 

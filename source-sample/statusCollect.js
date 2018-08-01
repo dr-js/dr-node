@@ -5,6 +5,7 @@ import { createRequestListener } from 'dr-js/module/node/server/Server'
 import {
   responderEnd,
   responderEndWithStatusCode,
+  responderEndWithRedirect,
   createResponderParseURL,
   createResponderLog,
   createResponderLogEnd
@@ -59,7 +60,7 @@ const createServer = async ({
     [ '/status-state', 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusState(factDB.getState)) ],
     [ '/status-collect', 'POST', wrapResponderCheckAuthCheckCode(responderStatusCollect) ],
     [ '/auth', 'GET', responderAuthCheck ],
-    [ '/', 'GET', createResponderRouteList(() => routerMap) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: '/status-visualize' }) ],
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ])
 

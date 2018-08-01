@@ -2,6 +2,7 @@ import { fetch } from 'dr-js/module/node/net'
 import { createRequestListener } from 'dr-js/module/node/server/Server'
 import {
   responderEnd,
+  responderEndWithRedirect,
   createResponderParseURL,
   createResponderLog,
   createResponderLogEnd
@@ -40,7 +41,7 @@ const createServer = async ({
 
   const routerMap = createRouteMap([
     [ '/status-report', 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusReport(statusReportProcessTag)) ],
-    [ '/', 'GET', createResponderRouteList(() => routerMap) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: '/status-report' }) ],
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ])
 
