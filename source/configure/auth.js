@@ -38,22 +38,17 @@ const configureAuthTimedLookup = async ({
   })
   logger.add('loaded auth lookup file')
 
-  const tryGetAuthCheckCode = (authCheckCode) => { // will throw error
-    __DEV__ && console.log('verifyAuthCheckCode: check', authCheckCode)
-    const isCheckPass = !catchSync(verifyCheckCode, timedLookupData, authCheckCode).error
-    __DEV__ && console.log('verifyAuthCheckCode: pass', isCheckPass)
-    return isCheckPass && timedLookupData
-  }
   const generateAuthCheckCode = () => generateCheckCode(timedLookupData)
 
   return {
-    tryGetAuthCheckCode,
     generateAuthCheckCode,
     wrapResponderCheckAuthCheckCode: (responderNext, responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL, headerKey = 'auth-check-code') => createResponderCheckRateLimit({
       checkFunc: (store) => {
-        const timedLookupData = tryGetAuthCheckCode(store.request.headers[ headerKey ])
-        timedLookupData && store.setState({ timedLookupData })
-        return Boolean(timedLookupData)
+        const authCheckCode = store.request.headers[ headerKey ]
+        const { error } = catchSync(verifyCheckCode, timedLookupData, authCheckCode)
+        error && logger.add(`[ERROR] verifyCheckCode: ${error}`)
+        !error && store.setState({ timedLookupData })
+        return !error
       },
       responderNext,
       responderCheckFail

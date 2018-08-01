@@ -19,14 +19,15 @@ const prepareBufferDataPNG = (buffer) => prepareBufferData(buffer, BASIC_EXTENSI
 
 const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
   const {
+    Request,
+    Response,
     fetch,
-    localStorage,
+    caches,
     cE,
     Dr: {
       Common: {
         Function: { lossyAsync },
-        Error: { catchSync, catchAsync },
-        Data: { ArrayBuffer: { fromString: arrayBufferFromString, toString: arrayBufferToString } },
+        Error: { catchAsync },
         Module: { TimedLookup: { generateCheckCode, packDataArrayBuffer, parseDataArrayBuffer } }
       },
       Browser: {
@@ -35,10 +36,12 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
       }
     }
   } = window
+
   const SAVE_KEY = 'timedLookupData'
-  const saveTimedLookupData = (timedLookupData) => localStorage.setItem(SAVE_KEY, arrayBufferToString(packDataArrayBuffer(timedLookupData)))
-  const loadTimedLookupData = () => parseDataArrayBuffer(arrayBufferFromString(localStorage.getItem(SAVE_KEY)))
-  const clearTimedLookupData = () => localStorage.removeItem(SAVE_KEY)
+  const saveTimedLookupData = async (timedLookupData) => (await caches.open(SAVE_KEY)).put(new Request(SAVE_KEY), new Response(packDataArrayBuffer(timedLookupData)))
+  const loadTimedLookupData = async () => parseDataArrayBuffer(await (await caches.match(new Request(SAVE_KEY))).arrayBuffer())
+  const clearTimedLookupData = async () => caches.delete(SAVE_KEY)
+
   const authCheck = async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
     const { ok } = await fetch(urlAuthCheck, { headers: { 'auth-check-code': checkCode } })
@@ -56,7 +59,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
     }
     authMaskDiv.remove()
     onAuthPass(timedLookupData)
-    catchSync(saveTimedLookupData, timedLookupData)
+    await catchAsync(saveTimedLookupData, timedLookupData)
   }).trigger
   const authInfoPre = cE('pre', { innerText: 'select auth file', style: 'flex: 1;' })
   const authKeyInput = cE('input', { type: 'file' })
@@ -76,11 +79,13 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
     tryAuthCheck()
   })
   authKeyInput.addEventListener('change', tryAuthCheck)
-  return catchAsync(authCheck, catchSync(loadTimedLookupData).result).then(({ result: timedLookupData, error }) => {
-    if (!error) return onAuthPass(timedLookupData)
-    document.body.appendChild(authMaskDiv)
-    catchSync(clearTimedLookupData)
-  })
+  return catchAsync(loadTimedLookupData)
+    .then(({ result: timedLookupData }) => catchAsync(authCheck, timedLookupData))
+    .then(({ result: timedLookupData, error }) => {
+      if (!error) return onAuthPass(timedLookupData)
+      document.body.appendChild(authMaskDiv)
+      return catchAsync(clearTimedLookupData)
+    })
 }
 
 export {
