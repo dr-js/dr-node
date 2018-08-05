@@ -36,7 +36,7 @@ const initLoadingMask = () => {
 
 const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
   const {
-    Request, Response, fetch, caches,
+    fetch,
     cE,
     Dr: {
       Common: {
@@ -46,15 +46,17 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
       },
       Browser: {
         DOM: { applyDragFileListListener },
-        Data: { Blob: { parseBlobAsArrayBuffer } }
+        Data: { Blob: { parseBlobAsArrayBuffer } },
+        Resource: { saveArrayBufferCache, loadArrayBufferCache, deleteArrayBufferCache }
       }
     }
   } = window
 
-  const SAVE_KEY = 'timedLookupData'
-  const saveTimedLookupData = async (timedLookupData) => (await caches.open(SAVE_KEY)).put(new Request(SAVE_KEY), new Response(packDataArrayBuffer(timedLookupData)))
-  const loadTimedLookupData = async () => parseDataArrayBuffer(await (await caches.match(new Request(SAVE_KEY))).arrayBuffer())
-  const clearTimedLookupData = async () => caches.delete(SAVE_KEY)
+  const CACHE_BUCKET = '@@cache'
+  const CACHE_KEY = 'timedLookupData'
+  const saveTimedLookupData = async (timedLookupData) => saveArrayBufferCache(CACHE_BUCKET, CACHE_KEY, packDataArrayBuffer(timedLookupData))
+  const loadTimedLookupData = async () => parseDataArrayBuffer(await loadArrayBufferCache(CACHE_BUCKET, CACHE_KEY))
+  const clearTimedLookupData = async () => deleteArrayBufferCache(CACHE_BUCKET, CACHE_KEY)
 
   const getAuthFetch = (timedLookupData) => async (url, option = {}) => {
     const response = await fetch(url, { ...option, headers: { 'auth-check-code': generateCheckCode(timedLookupData), ...option.headers } })

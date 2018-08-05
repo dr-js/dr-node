@@ -1,4 +1,6 @@
+import { join } from 'path'
 import { binary } from 'dr-js/module/common/format'
+import { catchAsync } from 'dr-js/module/common/error'
 import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
@@ -17,6 +19,7 @@ import { getHTML } from './explorerHTML'
 const createResponderExplorer = async ({
   urlAuthCheck = '/auth',
   urlPathModify = '/path-modify',
+  urlPathBatchModify = '/path-batch-modify',
   urlFileUpload = '/file-chunk-upload',
   urlFileServe = '/file-serve',
   urlStorageStatus = '/storage-status'
@@ -24,6 +27,7 @@ const createResponderExplorer = async ({
   const bufferData = await prepareBufferDataHTML(Buffer.from(getHTML({
     URL_AUTH_CHECK: urlAuthCheck,
     URL_PATH_MODIFY: urlPathModify,
+    URL_PATH_BATCH_MODIFY: urlPathBatchModify,
     URL_FILE_UPLOAD: urlFileUpload,
     URL_FILE_SERVE: urlFileServe,
     URL_STORAGE_STATUS: urlStorageStatus
@@ -36,6 +40,20 @@ const createResponderPathModify = (rootPath) => {
   return async (store, modifyType, relativePathFrom, relativePathTo) => responderSendJSON(store, {
     object: await getPathModify(modifyType, relativePathFrom, relativePathTo)
   })
+}
+
+const createResponderPathBatchModify = (rootPath) => {
+  const getPathModify = createGetPathModify(rootPath)
+  return async (store, nameList, modifyType, relativePathFrom, relativePathTo) => {
+    const resultList = []
+    const errorList = []
+    for (const name of nameList) {
+      const { result, error } = await catchAsync(getPathModify, modifyType, join(relativePathFrom, name), relativePathTo && join(relativePathTo, name))
+      const response = { name, modifyType, relativePathFrom, relativePathTo, error, result }
+      error ? errorList.push(response) : resultList.push(response)
+    }
+    return responderSendJSON(store, { object: { resultList, errorList } })
+  }
 }
 
 const createResponderServeFile = (rootPath) => {
@@ -72,6 +90,7 @@ const createResponderStorageStatus = (rootPath) => {
 export {
   createResponderExplorer,
   createResponderPathModify,
+  createResponderPathBatchModify,
   createResponderServeFile,
   createResponderFileChunkUpload,
   createResponderStorageStatus

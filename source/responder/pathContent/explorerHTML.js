@@ -22,7 +22,7 @@ const onLoadFunc = () => {
   const {
     alert, prompt,
     qS, cE, aCL,
-    URL_AUTH_CHECK, URL_PATH_MODIFY, URL_FILE_UPLOAD, URL_FILE_SERVE, URL_STORAGE_STATUS,
+    URL_AUTH_CHECK, URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_UPLOAD, URL_FILE_SERVE, URL_STORAGE_STATUS,
     initAuthMask, initLoadingMask, initPathContent, initFileUpload, initUploader,
     Dr: {
       Common: { Immutable: { StateStore: { createStateStore } } },
@@ -33,7 +33,7 @@ const onLoadFunc = () => {
   const initExplorer = (authFetch) => {
     const { uploadFileByChunk } = initFileUpload(URL_FILE_UPLOAD)
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
-    const { initialPathContentState, getLoadPathAsync, getModifyPathAsync, getFetchFileAsync, renderPathContent } = initPathContent(URL_PATH_MODIFY, URL_FILE_SERVE)
+    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getModifyPathAsync, getModifyPathBatchAsync, getFetchFileAsync, renderPathContent } = initPathContent(URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
     const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = initUploader(uploadFileByChunk)
 
     const loadingMaskStore = createStateStore(initialLoadingMaskState)
@@ -44,6 +44,7 @@ const onLoadFunc = () => {
 
     const loadPath = wrapLossyLoading(loadingMaskStore, loadPathAsync)
     const modifyPath = wrapLossyLoading(loadingMaskStore, getModifyPathAsync(pathContentStore, authFetch))
+    const modifyPathBatch = wrapLossyLoading(loadingMaskStore, getModifyPathBatchAsync(pathContentStore, authFetch))
     const fetchFile = wrapLossyLoading(loadingMaskStore, getFetchFileAsync(pathContentStore, authFetch))
     const uploadFile = wrapLossyLoading(loadingMaskStore, getUploadFileAsync(uploaderStore, authFetch, loadPathAsync))
     const showStorageStatus = wrapLossyLoading(loadingMaskStore, async () => {
@@ -59,28 +60,39 @@ const onLoadFunc = () => {
       ...pathContentStore.getState().pathFragList,
       prompt('Directory Name', `new-directory-${Date.now().toString(36)}`)
     ].join('/'))
+    const updateSort = () => { qS('#button-sort').innerText = `Sort: ${pathContentStore.getState().pathSortType}` }
+    const cycleSort = () => {
+      cyclePathSortType(pathContentStore)
+      updateSort()
+    }
 
     loadingMaskStore.subscribe(() => renderLoadingMask(loadingMaskStore))
-    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPath, modifyPath, fetchFile))
+    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPath, modifyPath, modifyPathBatch, fetchFile))
     uploaderStore.subscribe(() => renderUploader(uploaderStore, uploadFile, appendUploadFileList))
 
     aCL(qS('#control-panel'), [
-      cE('button', { innerText: 'Refresh', onclick: () => loadPath() }),
       cE('button', { innerText: 'To Root', onclick: () => loadPath([]) }),
-      cE('button', { innerText: 'Storage Status', onclick: () => showStorageStatus() }),
+      cE('span', { innerText: '|' }),
+      cE('button', { innerText: 'Refresh', onclick: () => loadPath() }),
+      cE('button', { id: 'button-sort', onclick: cycleSort }),
       cE('button', { innerText: 'New Directory', onclick: createNewDirectory }),
-      cE('button', { innerText: 'Toggle Upload', onclick: () => uploaderStore.setState({ isActive: !uploaderStore.getState().isActive }) })
+      cE('span', { innerText: '|' }),
+      cE('button', { innerText: 'Toggle Upload', onclick: () => uploaderStore.setState({ isActive: !uploaderStore.getState().isActive }) }),
+      cE('button', { innerText: 'Storage Status', onclick: () => showStorageStatus() })
     ])
 
     applyDragFileListListener(document.body, (fileList) => appendUploadFileList(fileList))
-
     loadPath([])
+    updateSort()
+
+    if (__DEV__) window.DEBUG = { loadingMaskStore, pathContentStore, uploaderStore }
   }
 
   initAuthMask({
     urlAuthCheck: URL_AUTH_CHECK,
     onAuthPass: initExplorer
   })
+
 }
 
 export { getHTML }

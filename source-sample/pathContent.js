@@ -20,6 +20,7 @@ import { createResponderRouteList } from 'dr-server/module/responder/routeList'
 import {
   createResponderExplorer,
   createResponderPathModify,
+  createResponderPathBatchModify,
   createResponderServeFile,
   createResponderFileChunkUpload,
   createResponderStorageStatus
@@ -54,6 +55,7 @@ const createServer = async ({
     }
   })
   const responderPathModify = createResponderPathModify(uploadRootPath)
+  const responderPathBatchModify = createResponderPathBatchModify(uploadRootPath)
   const responderServeFile = createResponderServeFile(uploadRootPath)
   const responderStorageStatus = createResponderStorageStatus(uploadRootPath)
 
@@ -61,6 +63,7 @@ const createServer = async ({
     [ '/explorer', 'GET', await createResponderExplorer({
       urlAuthCheck: '/auth',
       urlPathModify: '/path-modify',
+      urlPathBatchModify: '/path-batch-modify',
       urlFileUpload: '/file-chunk-upload',
       urlFileServe: '/file-serve',
       urlStorageStatus: '/storage-status'
@@ -68,6 +71,10 @@ const createServer = async ({
     [ '/path-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
       const { modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
       return responderPathModify(store, modifyType, relativePathFrom, relativePathTo)
+    }) ],
+    [ '/path-batch-modify', 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
+      const { nameList, modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
+      return responderPathBatchModify(store, nameList, modifyType, relativePathFrom, relativePathTo)
     }) ],
     [ '/file-chunk-upload', 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
     [ '/storage-status', 'GET', wrapResponderCheckAuthCheckCode(responderStorageStatus) ],

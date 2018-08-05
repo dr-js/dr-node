@@ -31,7 +31,7 @@
 + 📄 [source/responder/routeList.js](source/responder/routeList.js)
   - `createResponderRouteList`
 + 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)
-  - `createResponderExplorer`, `createResponderFileChunkUpload`, `createResponderPathModify`, `createResponderServeFile`, `createResponderStorageStatus`
+  - `createResponderExplorer`, `createResponderFileChunkUpload`, `createResponderPathBatchModify`, `createResponderPathModify`, `createResponderServeFile`, `createResponderStorageStatus`
 + 📄 [source/responder/pathContent/explorerHTML.js](source/responder/pathContent/explorerHTML.js)
   - `getHTML`
 + 📄 [source/responder/pathContent/HTML/pathContent.js](source/responder/pathContent/HTML/pathContent.js)
