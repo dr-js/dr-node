@@ -13,11 +13,8 @@ h2, h6 { margin: 0.5em 4px; }
 const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE) => {
   const {
     prompt, confirm,
-    cE, aCL,
-    Dr: {
-      Common: { Format, Compare: { compareString } },
-      Browser: { Resource: { createDownloadWithBlob } }
-    }
+    qS, cE, aCL,
+    Dr: { Common: { Format, Compare: { compareString } } }
   } = window
 
   const SORT_FUNC = { // ([ nameA, sizeA, mtimeMsA ], [ nameB, sizeB, mtimeMsB ]) => 0,
@@ -30,7 +27,6 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
   const initialPathContentState = {
     pathFragList: [ /* pathFrag */ ],
     pathSortType: SORT_TYPE_LIST[ 0 ],
-    selectNameSet: new Set(),
     pathContent: {
       relativePath: '',
       directoryList: [ /* name */ ],
@@ -49,7 +45,7 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
       body: JSON.stringify({ modifyType: 'path-content', relativePathFrom: pathFragList.join('/') })
     })
     const { relativePathFrom: relativePath, directoryList, fileList } = await response.json()
-    pathContentStore.setState({ pathFragList, selectNameSet: new Set(), pathContent: { relativePath, directoryList, fileList } })
+    pathContentStore.setState({ pathFragList, pathContent: { relativePath, directoryList, fileList } })
   }
 
   const getLoadPathAsync = (pathContentStore, authFetch) => async (pathFragList) => doLoadPath(pathContentStore, pathFragList, authFetch)
@@ -71,30 +67,71 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
     await response.json()
     await doLoadPath(pathContentStore, undefined, authFetch)
   }
-  const getFetchFileAsync = (pathContentStore, authFetch) => async (pathList, fileName) => {
-    const response = await authFetch(`${URL_FILE_SERVE}/${encodeURIComponent([ ...pathList, fileName ].join('/'))}`)
-    createDownloadWithBlob(fileName, await response.blob())
-  }
+  const getDownloadFileAsync = (pathContentStore, authDownload) => async (pathList, fileName) => authDownload(
+    `${URL_FILE_SERVE}/${encodeURIComponent([ ...pathList, fileName ].join('/'))}`,
+    fileName
+  )
 
-  const renderPathContent = (pathContentStore, parentElement, loadPath, modifyPath, modifyPathBatch, fetchFile) => {
+  const renderPathContent = (pathContentStore, parentElement, loadPath, modifyPath, modifyPathBatch, downloadFile) => {
     const {
       pathFragList,
       pathSortType,
-      selectNameSet,
       pathContent: { relativePath, directoryList, fileList }
     } = pathContentStore.getState()
 
-    const selectButton = (name) => {
-      const isSelect = selectNameSet.has(name)
-      const onclick = () => {
-        const nextSelectNameSet = new Set(selectNameSet)
-        nextSelectNameSet[ isSelect ? 'delete' : 'add' ](name)
-        pathContentStore.setState({ selectNameSet: nextSelectNameSet })
+    const selectToggleMap = {}
+    const selectNameSet = new Set()
+
+    const selectEditSelectNone = cE('button', {
+      className: 'edit',
+      innerText: '🗃️☑',
+      onclick: () => {
+        selectNameSet.forEach((name) => selectToggleMap[ name ]())
+        updateSelectStatus()
       }
-      return cE('button', { className: isSelect ? 'edit select' : 'edit', innerText: isSelect ? '☑' : '☐', onclick })
+    })
+    const selectEditSelectAll = cE('button', {
+      className: 'edit',
+      innerText: '🗃️☐',
+      onclick: () => {
+        Object.entries(selectToggleMap).forEach(([ name, toggle ]) => !selectNameSet.has(name) && toggle())
+        updateSelectStatus()
+      }
+    })
+
+    const selectEditMove = cE('button', { className: 'edit', innerText: '🗃️✂️', onclick: () => modifyPathBatch([ ...selectNameSet ], 'move', relativePath, prompt(`Batch Move ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditCopy = cE('button', { className: 'edit', innerText: '🗃️📋', onclick: () => modifyPathBatch([ ...selectNameSet ], 'copy', relativePath, prompt(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditDelete = cE('button', { className: 'edit', innerText: '🗃️🗑️', onclick: () => confirm(`Batch Delete ${selectNameSet.size} Path In: ${relativePath}?`) && modifyPathBatch([ ...selectNameSet ], 'delete', relativePath) })
+
+    const updateSelectStatus = () => aCL(qS('.select', ''), [
+      selectNameSet.size ? selectEditSelectNone : selectEditSelectAll,
+      cE('span', { className: 'name button', innerText: `${selectNameSet.size} selected` }),
+      selectNameSet.size && selectEditMove,
+      selectNameSet.size && selectEditCopy,
+      selectNameSet.size && selectEditDelete
+    ])
+
+    const renderSelectButton = (name) => {
+      const toggle = () => {
+        const prevIsSelect = selectNameSet.has(name)
+        selectNameSet[ prevIsSelect ? 'delete' : 'add' ](name)
+        const isSelect = !prevIsSelect
+        element.className = isSelect ? 'edit select' : 'edit'
+        element.innerText = isSelect ? '☑' : '☐'
+      }
+      const element = cE('button', {
+        className: 'edit',
+        innerText: '☐',
+        onclick: () => {
+          toggle()
+          updateSelectStatus()
+        }
+      })
+      selectToggleMap[ name ] = toggle
+      return element
     }
 
-    const commonEdit = (relativePath) => [
+    const renderCommonEditList = (relativePath) => [
       cE('button', { className: 'edit', innerText: '✂️', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
       cE('button', { className: 'edit', innerText: '📋', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
       cE('button', { className: 'edit', innerText: '🗑️', onclick: () => confirm(`Delete path: ${relativePath}?`) && modifyPath('delete', relativePath) })
@@ -108,31 +145,25 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
       relativePath && cE('div', { className: 'directory' }, [
         cE('span', { className: 'name button', innerText: '🔙|..', onclick: () => loadPath(pathFragList.slice(0, -1)) })
       ]),
-      cE('div', { className: 'select' }, [
-        selectNameSet.size
-          ? cE('button', { className: 'edit', innerText: '🗃️☐', onclick: () => pathContentStore.setState({ selectNameSet: new Set() }) })
-          : cE('button', { className: 'edit', innerText: '🗃️☑', onclick: () => pathContentStore.setState({ selectNameSet: new Set([ ...directoryList, ...fileList.map(([ name ]) => name) ]) }) }),
-        cE('span', { className: 'name button', innerText: `${selectNameSet.size} selected` }),
-        selectNameSet.size && cE('button', { className: 'edit', innerText: '🗃️✂️', onclick: () => modifyPathBatch([ ...selectNameSet ], 'move', relativePath, prompt(`Batch Move ${selectNameSet.size} Path To`, relativePath)) }),
-        selectNameSet.size && cE('button', { className: 'edit', innerText: '🗃️📋', onclick: () => modifyPathBatch([ ...selectNameSet ], 'copy', relativePath, prompt(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) }),
-        selectNameSet.size && cE('button', { className: 'edit', innerText: '🗃️🗑️', onclick: () => confirm(`Batch Delete ${selectNameSet.size} Path In: ${relativePath}?`) && modifyPathBatch([ ...selectNameSet ], 'delete', relativePath) })
-      ]),
+      cE('div', { className: 'select' }),
       ...directoryList
         .sort((nameA, nameB) => SORT_FUNC[ pathSortType ]([ nameA ], [ nameB ]))
         .map((name) => cE('div', { className: 'directory' }, [
-          selectButton(name),
+          renderSelectButton(name),
           cE('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
-          ...commonEdit([ ...pathFragList, name ].join('/'))
+          ...renderCommonEditList([ ...pathFragList, name ].join('/'))
         ])),
       ...fileList
         .sort(SORT_FUNC[ pathSortType ])
         .map(([ name, size, mtimeMs ]) => cE('div', { className: 'file' }, [
-          selectButton(name),
+          renderSelectButton(name),
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
-          cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => fetchFile(pathFragList, name) }),
-          ...commonEdit([ ...pathFragList, name ].join('/'))
+          cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => downloadFile(pathFragList, name) }),
+          ...renderCommonEditList([ ...pathFragList, name ].join('/'))
         ]))
     ])
+
+    updateSelectStatus()
   }
 
   return {
@@ -141,7 +172,7 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
     getLoadPathAsync,
     getModifyPathAsync,
     getModifyPathBatchAsync,
-    getFetchFileAsync,
+    getDownloadFileAsync,
     renderPathContent
   }
 }

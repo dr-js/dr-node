@@ -30,10 +30,10 @@ const onLoadFunc = () => {
     }
   } = window
 
-  const initExplorer = (authFetch) => {
+  const initExplorer = ({ authFetch, authDownload }) => {
     const { uploadFileByChunk } = initFileUpload(URL_FILE_UPLOAD)
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
-    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getModifyPathAsync, getModifyPathBatchAsync, getFetchFileAsync, renderPathContent } = initPathContent(URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
+    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getModifyPathAsync, getModifyPathBatchAsync, getDownloadFileAsync, renderPathContent } = initPathContent(URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
     const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = initUploader(uploadFileByChunk)
 
     const loadingMaskStore = createStateStore(initialLoadingMaskState)
@@ -45,7 +45,7 @@ const onLoadFunc = () => {
     const loadPath = wrapLossyLoading(loadingMaskStore, loadPathAsync)
     const modifyPath = wrapLossyLoading(loadingMaskStore, getModifyPathAsync(pathContentStore, authFetch))
     const modifyPathBatch = wrapLossyLoading(loadingMaskStore, getModifyPathBatchAsync(pathContentStore, authFetch))
-    const fetchFile = wrapLossyLoading(loadingMaskStore, getFetchFileAsync(pathContentStore, authFetch))
+    const downloadFile = wrapLossyLoading(loadingMaskStore, getDownloadFileAsync(pathContentStore, authDownload))
     const uploadFile = wrapLossyLoading(loadingMaskStore, getUploadFileAsync(uploaderStore, authFetch, loadPathAsync))
     const showStorageStatus = wrapLossyLoading(loadingMaskStore, async () => {
       const response = await authFetch(URL_STORAGE_STATUS)
@@ -67,7 +67,7 @@ const onLoadFunc = () => {
     }
 
     loadingMaskStore.subscribe(() => renderLoadingMask(loadingMaskStore))
-    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPath, modifyPath, modifyPathBatch, fetchFile))
+    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPath, modifyPath, modifyPathBatch, downloadFile))
     uploaderStore.subscribe(() => renderUploader(uploaderStore, uploadFile, appendUploadFileList))
 
     aCL(qS('#control-panel'), [
@@ -92,7 +92,6 @@ const onLoadFunc = () => {
     urlAuthCheck: URL_AUTH_CHECK,
     onAuthPass: initExplorer
   })
-
 }
 
 export { getHTML }

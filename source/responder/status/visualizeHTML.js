@@ -296,7 +296,7 @@ const onLoadFunc = () => {
 
   initAuthMask({
     urlAuthCheck: URL_AUTH_CHECK,
-    onAuthPass: (authFetch) => {
+    onAuthPass: ({ authFetch }) => {
       qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(authFetch) }))
       fetchStatusState(authFetch)
     }

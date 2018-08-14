@@ -34,9 +34,9 @@ const initLoadingMask = () => {
   }
 }
 
-const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
+const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code' }) => {
   const {
-    fetch,
+    fetch, location, URL,
     cE,
     Dr: {
       Common: {
@@ -47,7 +47,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
       Browser: {
         DOM: { applyDragFileListListener },
         Data: { Blob: { parseBlobAsArrayBuffer } },
-        Resource: { saveArrayBufferCache, loadArrayBufferCache, deleteArrayBufferCache }
+        Resource: { saveArrayBufferCache, loadArrayBufferCache, deleteArrayBufferCache, createDownload }
       }
     }
   } = window
@@ -59,17 +59,27 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
   const clearTimedLookupData = async () => deleteArrayBufferCache(CACHE_BUCKET, CACHE_KEY)
 
   const getAuthFetch = (timedLookupData) => async (url, option = {}) => {
-    const response = await fetch(url, { ...option, headers: { 'auth-check-code': generateCheckCode(timedLookupData), ...option.headers } })
+    const response = await fetch(url, { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } })
     if (!response.ok) throw new Error(`[authFetch] error status: ${response.status}, url: ${url}`)
     return response
   }
 
+  const getAuthDownload = (timedLookupData) => (url, filename) => {
+    const urlObject = new URL(url, location.origin)
+    urlObject.searchParams.set(authKey, generateCheckCode(timedLookupData))
+    createDownload(filename, urlObject.toString())
+  }
+
   const authCheck = async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
-    const { ok } = await fetch(urlAuthCheck, { headers: { 'auth-check-code': checkCode } })
+    const { ok } = await fetch(urlAuthCheck, { headers: { [ authKey ]: checkCode } })
     if (!ok) throw new Error('[authCheck] failed for timedLookupData')
     return timedLookupData
   }
+  const authPass = (timedLookupData) => onAuthPass({
+    authFetch: getAuthFetch(timedLookupData),
+    authDownload: getAuthDownload(timedLookupData)
+  })
 
   const authInfoPre = cE('pre', { innerText: 'select auth file', style: 'flex: 1;' })
   const authKeyInput = cE('input', { type: 'file' })
@@ -92,7 +102,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
     if (error) authInfoPre.innerText = `auth invalid for file: ${fileBlob.name}`
     else {
       authMaskDiv.remove()
-      onAuthPass(timedLookupData)
+      await authPass(timedLookupData)
       await catchAsync(saveTimedLookupData, timedLookupData)
     }
   }).trigger
@@ -105,9 +115,11 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass }) => {
 
   return catchAsync(async () => {
     const { result: timedLookupData, error } = await catchAsync(async () => authCheck(await loadTimedLookupData()))
-    if (!error) return onAuthPass(getAuthFetch(timedLookupData))
-    document.body.appendChild(authMaskDiv)
-    return catchAsync(clearTimedLookupData)
+    if (error) {
+      document.body.appendChild(authMaskDiv)
+      return catchAsync(clearTimedLookupData)
+    }
+    return authPass(timedLookupData)
   })
 }
 

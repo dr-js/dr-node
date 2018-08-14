@@ -42,9 +42,11 @@ const configureAuthTimedLookup = async ({
 
   return {
     generateAuthCheckCode,
-    wrapResponderCheckAuthCheckCode: (responderNext, responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL, headerKey = 'auth-check-code') => createResponderCheckRateLimit({
+    wrapResponderCheckAuthCheckCode: (responderNext, responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL, authKey = 'auth-check-code') => createResponderCheckRateLimit({
       checkFunc: (store) => {
-        const authCheckCode = store.request.headers[ headerKey ]
+        const { url: { searchParams } } = store.getState()
+        const authCheckCode = searchParams.get(authKey) ||
+          store.request.headers[ authKey ]
         const { error } = catchSync(verifyCheckCode, timedLookupData, authCheckCode)
         error && logger.add(`[ERROR] verifyCheckCode: ${error}`)
         !error && store.setState({ timedLookupData })
