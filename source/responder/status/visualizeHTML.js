@@ -2,6 +2,7 @@ import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT, DR_BROWSER_SCRIPT } from 'd
 import { initAuthMask } from 'source/responder/commonHTML'
 
 const getHTML = (envObject) => COMMON_LAYOUT([
+  `<title>Status Visualize</title>`,
   COMMON_STYLE(),
   mainStyle
 ], [

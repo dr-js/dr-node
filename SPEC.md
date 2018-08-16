@@ -25,7 +25,7 @@
 + 📄 [source/configure/status/combine.js](source/configure/status/combine.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
 + 📄 [source/responder/commonHTML.js](source/responder/commonHTML.js)
-  - `initAuthMask`, `initLoadingMask`
+  - `initAuthMask`, `initLoadingMask`, `initModal`
 + 📄 [source/responder/function.js](source/responder/function.js)
   - `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
 + 📄 [source/responder/routeList.js](source/responder/routeList.js)

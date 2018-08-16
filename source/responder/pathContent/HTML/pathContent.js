@@ -2,7 +2,7 @@ const pathContentStyle = `<style>
 h2, h6 { margin: 0.5em 4px; }
 .select, .directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; }
 .directory:hover, .file:hover { background: #eee; }
-.name { overflow:hidden; flex: 1; white-space:nowrap; text-overflow: ellipsis; background: transparent; }
+.name { overflow:hidden; flex: 1; white-space:nowrap; text-align: left; text-overflow: ellipsis; background: transparent; }
 .select .name, .file .name { pointer-events: none; color: #666; }
 .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
@@ -10,9 +10,8 @@ h2, h6 { margin: 0.5em 4px; }
 // TODO: add batch modify, mostly batch delete
 // TODO: add drag selection
 
-const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE) => {
+const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE, withConfirmModal, withPromptModal) => {
   const {
-    prompt, confirm,
     qS, cE, aCL,
     Dr: { Common: { Format, Compare: { compareString } } }
   } = window
@@ -99,16 +98,16 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
       }
     })
 
-    const selectEditMove = cE('button', { className: 'edit', innerText: '🗃️✂️', onclick: () => modifyPathBatch([ ...selectNameSet ], 'move', relativePath, prompt(`Batch Move ${selectNameSet.size} Path To`, relativePath)) })
-    const selectEditCopy = cE('button', { className: 'edit', innerText: '🗃️📋', onclick: () => modifyPathBatch([ ...selectNameSet ], 'copy', relativePath, prompt(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
-    const selectEditDelete = cE('button', { className: 'edit', innerText: '🗃️🗑️', onclick: () => confirm(`Batch Delete ${selectNameSet.size} Path In: ${relativePath}?`) && modifyPathBatch([ ...selectNameSet ], 'delete', relativePath) })
+    const selectEditMove = cE('button', { className: 'edit', innerText: '🗃️✂️', onclick: async () => modifyPathBatch([ ...selectNameSet ], 'move', relativePath, await withPromptModal(`Batch Move ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditCopy = cE('button', { className: 'edit', innerText: '🗃️📋', onclick: async () => modifyPathBatch([ ...selectNameSet ], 'copy', relativePath, await withPromptModal(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditDelete = cE('button', { className: 'edit', innerText: '🗃️🗑️', onclick: async () => (await withConfirmModal(`Batch Delete ${selectNameSet.size} Path In: ${relativePath || 'ROOT'}?`)) && modifyPathBatch([ ...selectNameSet ], 'delete', relativePath) })
 
     const updateSelectStatus = () => aCL(qS('.select', ''), [
       selectNameSet.size ? selectEditSelectNone : selectEditSelectAll,
-      cE('span', { className: 'name button', innerText: `${selectNameSet.size} selected` }),
       selectNameSet.size && selectEditMove,
       selectNameSet.size && selectEditCopy,
-      selectNameSet.size && selectEditDelete
+      selectNameSet.size && selectEditDelete,
+      cE('span', { className: 'name button', innerText: `${selectNameSet.size} selected` })
     ])
 
     const renderSelectButton = (name) => {
@@ -132,9 +131,9 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
     }
 
     const renderCommonEditList = (relativePath) => [
-      cE('button', { className: 'edit', innerText: '✂️', onclick: () => modifyPath('move', relativePath, prompt('Move To', relativePath)) }),
-      cE('button', { className: 'edit', innerText: '📋', onclick: () => modifyPath('copy', relativePath, prompt('Copy To', relativePath)) }),
-      cE('button', { className: 'edit', innerText: '🗑️', onclick: () => confirm(`Delete path: ${relativePath}?`) && modifyPath('delete', relativePath) })
+      cE('button', { className: 'edit', innerText: '✂️', onclick: async () => modifyPath('move', relativePath, await withPromptModal('Move To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: '📋', onclick: async () => modifyPath('copy', relativePath, await withPromptModal('Copy To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: '🗑️', onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && modifyPath('delete', relativePath) })
     ]
 
     parentElement.innerHTML = ''
@@ -143,14 +142,14 @@ const initPathContent = (URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE)
       cE('h2', { innerText: relativePath ? (`/${relativePath}/`) : '[ROOT]' }),
       cE('h6', { innerText: `${directoryList.length} directory, ${fileList.length} file (${Format.binary(fileList.reduce((o, [ , size ]) => o + size, 0))}B)` }),
       relativePath && cE('div', { className: 'directory' }, [
-        cE('span', { className: 'name button', innerText: '🔙|..', onclick: () => loadPath(pathFragList.slice(0, -1)) })
+        cE('button', { className: 'name', innerText: '🔙|..', onclick: () => loadPath(pathFragList.slice(0, -1)) })
       ]),
       cE('div', { className: 'select' }),
       ...directoryList
         .sort((nameA, nameB) => SORT_FUNC[ pathSortType ]([ nameA ], [ nameB ]))
         .map((name) => cE('div', { className: 'directory' }, [
           renderSelectButton(name),
-          cE('span', { className: 'name button', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
+          cE('button', { className: 'name', innerText: `📁|${name}/`, onclick: () => loadPath([ ...pathFragList, name ]) }),
           ...renderCommonEditList([ ...pathFragList, name ].join('/'))
         ])),
       ...fileList
