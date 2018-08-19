@@ -49,7 +49,7 @@ const OPTION_CONFIG = {
   formatList: [
     Config,
     { ...BooleanFlag, name: 'version', shortName: 'v' },
-    { ...BooleanFlag, name: 'help', shortName: 'h', description: `show help` },
+    { ...BooleanFlag, name: 'help', shortName: 'h', description: `show full help` },
     ...MODE_FORMAT_LIST,
     getServerFormatConfig([ TokenCacheFormatConfig, AuthFormatConfig ])
   ]

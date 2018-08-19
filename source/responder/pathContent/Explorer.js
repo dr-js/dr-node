@@ -10,11 +10,8 @@ import { runQuiet } from 'dr-js/module/node/system/Run'
 
 import { createFileChunkUpload } from 'source/task/getFileChunkUpload'
 import { createGetPathModify } from 'source/task/getPathModify'
-import { prepareBufferDataHTML } from 'source/responder/function'
+import { prepareBufferDataHTML } from 'source/function'
 import { getHTML } from './explorerHTML'
-
-// TODO: edit file
-// TODO: sorting
 
 const createResponderExplorer = async ({
   urlAuthCheck = '/auth',
@@ -71,20 +68,28 @@ const createResponderFileChunkUpload = async (option) => {
 }
 
 const createResponderStorageStatus = (rootPath) => {
-  const runQuick = async (command, option) => {
-    const { promise, stdoutBufferPromise } = runQuiet({ command, option })
+  const runQuick = async (command) => {
+    const { promise, stdoutBufferPromise } = runQuiet({ command, option: { cwd: rootPath } })
     await promise
     return (await stdoutBufferPromise).toString()
   }
 
-  const getStatus = process.platform !== 'win32'
-    ? () => runQuick('df -h .', { cwd: rootPath })
-    : () => runQuick('df -h .', { cwd: rootPath }).catch(() => // win32 alternative
-      runQuick('dir | find "bytes free"', { cwd: rootPath }) // sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
-        .then((stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`)
-    )
+  const getPathStatus = () => runQuick('du -hd1').catch(() => '')// no good win32 alternative
 
-  return async (store) => responderSendJSON(store, { object: { storageStatusText: await getStatus() } })
+  const getDiskStatus = () => runQuick('df -h .').catch(
+    () => runQuick('dir | find "bytes free"').then( // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
+      (stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`
+    )
+  )
+
+  return async (store) => responderSendJSON(store, {
+    object: {
+      storageStatusText: [
+        await getPathStatus(),
+        await getDiskStatus()
+      ].filter(Boolean).join('\n')
+    }
+  })
 }
 
 export {

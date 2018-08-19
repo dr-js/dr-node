@@ -7,8 +7,8 @@ import { createServer as createServerStatusCollect } from 'dr-server/sample/stat
 import { createServer as createServerStatusReport } from 'dr-server/sample/statusReport'
 import { clientFileUpload, clientFileDownload, clientFileModify } from 'dr-server/module/clientFile'
 
-import { name as packageName, version as packageVersion } from '../package.json'
 import { MODE_FORMAT_LIST, parseOption, formatUsage } from './option'
+import { name as packageName, version as packageVersion } from '../package.json'
 
 const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, getSingleOption, getSingleOptionOptional }) => {
   const startServer = async (createServer, extraConfig) => {
@@ -94,12 +94,16 @@ const main = async () => {
   const optionData = await parseOption()
   const modeFormat = MODE_FORMAT_LIST.find(({ name }) => optionData.getOptionOptional(name))
 
-  if (modeFormat) {
-    await runMode(modeFormat, optionData).catch((error) => {
-      console.warn(`[Error] in mode: ${modeFormat.name}:`, error.stack || error)
-      process.exit(2)
-    })
-  } else optionData.getOptionOptional('version') ? logJSON({ packageName, packageVersion }) : console.log(formatUsage())
+  if (!modeFormat) {
+    return optionData.getOptionOptional('version')
+      ? logJSON({ packageName, packageVersion })
+      : console.log(formatUsage(null, optionData.getOptionOptional('help') ? null : 'simple'))
+  }
+
+  await runMode(modeFormat, optionData).catch((error) => {
+    console.warn(`[Error] in mode: ${modeFormat.name}:`, error.stack || error)
+    process.exit(2)
+  })
 }
 
 main().catch((error) => {

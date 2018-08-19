@@ -1,5 +1,7 @@
 import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT, DR_BROWSER_SCRIPT } from 'dr-js/module/node/server/commonHTML'
-import { initModal, initLoadingMask, initAuthMask } from 'source/responder/commonHTML'
+import { initModal } from 'source/HTML/Modal'
+import { initAuthMask } from 'source/HTML/AuthMask'
+import { initLoadingMask } from 'source/HTML/LoadingMask'
 import { pathContentStyle, initPathContent } from './HTML/pathContent'
 import { initFileUpload, initUploader } from './HTML/uploader'
 
@@ -92,7 +94,7 @@ const onLoadFunc = () => {
     aCL(qS('#control-panel'), [
       cE('button', { innerText: 'To Root', onclick: () => loadPathWithHistoryState([]) }),
       cE('span', { innerText: '|' }),
-      cE('button', { innerText: 'Refresh', onclick: () => loadPathWithHistoryState() }),
+      cE('button', { innerText: 'Refresh', onclick: () => loadPath(pathContentStore.getState().pathFragList) }),
       cE('button', { id: 'button-sort', onclick: cycleSort }),
       cE('button', { innerText: 'New Directory', onclick: createNewDirectory }),
       cE('span', { innerText: '|' }),

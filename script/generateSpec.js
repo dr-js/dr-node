@@ -1,25 +1,17 @@
 import { resolve } from 'path'
 import { writeFileSync } from 'fs'
 
-import { getDirectoryInfoTree, walkDirectoryInfoTree } from 'dr-js/module/node/file/Directory'
 import { stringIndentLine } from 'dr-js/module/common/format'
 import { formatUsage } from 'source-bin/option'
 
 import { argvFlag, runMain } from 'dev-dep-tool/library/__utils__'
 import { getLogger } from 'dev-dep-tool/library/logger'
-import { createExportParser } from 'dev-dep-tool/library/ExportIndex/parseExport'
+import { collectSourceRouteMap } from 'dev-dep-tool/library/ExportIndex/parseExport'
 import { generateExportInfo } from 'dev-dep-tool/library/ExportIndex/generateInfo'
-import { renderMarkdownFileLink, renderMarkdownExportPath } from 'dev-dep-tool/library/ExportIndex/renderMarkdown'
+import { getMarkdownHeaderLink, renderMarkdownFileLink, renderMarkdownExportPath } from 'dev-dep-tool/library/ExportIndex/renderMarkdown'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
-
-const collectSourceRouteMap = async ({ logger }) => {
-  const { parseExport, getSourceRouteMap } = createExportParser({ logger })
-  const parseWalkExport = ({ path }) => parseExport(path)
-  await walkDirectoryInfoTree(await getDirectoryInfoTree(fromRoot('source')), parseWalkExport)
-  return getSourceRouteMap()
-}
 
 const renderMarkdownBinOptionFormat = () => [
   renderMarkdownFileLink('source-bin/option.js'),
@@ -30,7 +22,7 @@ const renderMarkdownBinOptionFormat = () => [
 
 runMain(async (logger) => {
   logger.padLog(`collect sourceRouteMap`)
-  const sourceRouteMap = await collectSourceRouteMap({ logger })
+  const sourceRouteMap = await collectSourceRouteMap({ pathRootList: [ fromRoot('source') ], logger })
 
   logger.padLog(`generate exportInfo`)
   const exportInfoMap = generateExportInfo({ sourceRouteMap })
@@ -39,8 +31,8 @@ runMain(async (logger) => {
   writeFileSync(fromRoot('SPEC.md'), [
     '# Specification',
     '',
-    '* [Export Path](#export-path)',
-    '* [Bin Option Format](#bin-option-format)',
+    ...[ 'Export Path', 'Bin Option Format' ]
+      .map((text) => `* ${getMarkdownHeaderLink(text)}`),
     '',
     '#### Export Path',
     ...renderMarkdownExportPath({ exportInfoMap, rootPath: PATH_ROOT }),

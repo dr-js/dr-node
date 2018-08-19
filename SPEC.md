@@ -6,6 +6,8 @@
 #### Export Path
 + 📄 [source/clientFile.js](source/clientFile.js)
   - `clientFileDownload`, `clientFileModify`, `clientFileUpload`
++ 📄 [source/function.js](source/function.js)
+  - `isPrivateAddress`, `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
 + 📄 [source/option.js](source/option.js)
   - `AuthFormatConfig`, `FileUploadFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TokenCacheFormatConfig`, `getServerFormatConfig`
 + 📄 [source/configure/auth.js](source/configure/auth.js)
@@ -24,12 +26,12 @@
   - `applyFact`
 + 📄 [source/configure/status/combine.js](source/configure/status/combine.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
-+ 📄 [source/responder/commonHTML.js](source/responder/commonHTML.js)
-  - `initAuthMask`, `initLoadingMask`, `initModal`
-+ 📄 [source/responder/function.js](source/responder/function.js)
-  - `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
-+ 📄 [source/responder/routeList.js](source/responder/routeList.js)
-  - `createResponderRouteList`
++ 📄 [source/HTML/AuthMask.js](source/HTML/AuthMask.js)
+  - `initAuthMask`
++ 📄 [source/HTML/LoadingMask.js](source/HTML/LoadingMask.js)
+  - `initLoadingMask`
++ 📄 [source/HTML/Modal.js](source/HTML/Modal.js)
+  - `initModal`
 + 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)
   - `createResponderExplorer`, `createResponderFileChunkUpload`, `createResponderPathBatchModify`, `createResponderPathModify`, `createResponderServeFile`, `createResponderStorageStatus`
 + 📄 [source/responder/pathContent/explorerHTML.js](source/responder/pathContent/explorerHTML.js)
@@ -61,7 +63,7 @@
 >   --version -v [OPTIONAL] [ARGUMENT=0+]
 >       set to enable
 >   --help -h [OPTIONAL] [ARGUMENT=0+]
->       show help
+>       show full help
 >   --server-path-content --spc [OPTIONAL] [ARGUMENT=0+]
 >       set to enable
 >     --path-upload-root [OPTIONAL-CHECK] [ARGUMENT=1]

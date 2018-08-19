@@ -9,14 +9,13 @@ import {
   createResponderLogEnd
 } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
-import { createResponderRouter, createRouteMap, getRouteParamAny } from 'dr-js/module/node/server/Responder/Router'
+import { createResponderRouter, createRouteMap, getRouteParamAny, createResponderRouteList } from 'dr-js/module/node/server/Responder/Router'
 
 import { configureLogger } from 'dr-server/module/configure/logger'
 import { configureFilePid } from 'dr-server/module/configure/filePid'
 import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
 import { configureServerBase } from 'dr-server/module/configure/serverBase'
 
-import { createResponderRouteList } from 'dr-server/module/responder/routeList'
 import {
   createResponderExplorer,
   createResponderPathModify,

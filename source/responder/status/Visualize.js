@@ -1,7 +1,7 @@
 import { transformCache } from 'dr-js/module/common/immutable/function'
 import { responderSendBufferCompress } from 'dr-js/module/node/server/Responder/Send'
 
-import { prepareBufferDataHTML, prepareBufferDataJSON } from 'source/responder/function'
+import { prepareBufferDataHTML, prepareBufferDataJSON } from 'source/function'
 import { getHTML } from './visualizeHTML'
 
 const createResponderStatusVisualize = async (
