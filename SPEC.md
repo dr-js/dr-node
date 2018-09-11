@@ -32,6 +32,8 @@
   - `initLoadingMask`
 + 📄 [source/HTML/Modal.js](source/HTML/Modal.js)
   - `initModal`
++ 📄 [source/HTML/function.js](source/HTML/function.js)
+  - `DR_BROWSER_SCRIPT`
 + 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)
   - `createResponderExplorer`, `createResponderFileChunkUpload`, `createResponderPathBatchModify`, `createResponderPathModify`, `createResponderServeFile`, `createResponderStorageStatus`
 + 📄 [source/responder/pathContent/explorerHTML.js](source/responder/pathContent/explorerHTML.js)
