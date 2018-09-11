@@ -14,8 +14,8 @@ import { uploadFileByChunk } from 'source/task/getFileChunkUpload'
 
 // TODO: handle logging properly
 
-const getAuthFetch = async (fileAuthConfig) => {
-  const timedLookupData = await loadLookupFile(fileAuthConfig)
+const getAuthFetch = async (fileAuth) => {
+  const timedLookupData = await loadLookupFile(fileAuth)
   return async (url, config) => {
     const response = await fetch(url, { ...config, headers: { ...config.headers, 'auth-check-code': generateCheckCode(timedLookupData) } })
     if (!response.ok) throw new Error(`[Error][AuthFetch] status: ${response.status}`)
@@ -28,13 +28,13 @@ const clientFileUpload = async ({
   fileBuffer = readFileSync(fileInputPath),
   filePath,
   urlFileUpload,
-  fileAuthConfig,
+  fileAuth,
   maxRetry = 3,
   wait = 1000,
   log = console.log
 }) => {
   const startTime = clock()
-  const authFetch = await getAuthFetch(fileAuthConfig)
+  const authFetch = await getAuthFetch(fileAuth)
 
   log && log(`[clientFileUpload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
 
@@ -60,11 +60,11 @@ const clientFileDownload = async ({
   fileOutputPath,
   filePath,
   urlFileDownload,
-  fileAuthConfig,
+  fileAuth,
   log = console.log
 }) => {
   const startTime = clock()
-  const authFetch = await getAuthFetch(fileAuthConfig)
+  const authFetch = await getAuthFetch(fileAuth)
 
   log && log(`[clientFileDownload] file: ${filePath}`)
 
@@ -86,11 +86,11 @@ const clientFileModify = async ({
   filePath: relativePathFrom = '',
   filePathTo: relativePathTo,
   urlFileModify,
-  fileAuthConfig,
+  fileAuth,
   log = console.log
 }) => {
   const startTime = clock()
-  const authFetch = await getAuthFetch(fileAuthConfig)
+  const authFetch = await getAuthFetch(fileAuth)
 
   log && log(`[clientFileModify] modify: ${modifyType}, file: ${relativePathFrom}, fileTo: ${relativePathTo}`)
 

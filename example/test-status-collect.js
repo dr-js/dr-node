@@ -5,9 +5,9 @@ const SERVER_TAG = 'status-collect'
 const main = async () => {
   const { start, timer } = await createServer({
     // pathLogDirectory: `${__dirname}/log-${SERVER_TAG}-gitignore`,
-    // prefixLogFile: SERVER_TAG,
+    // logFilePrefix: SERVER_TAG,
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
-    fileAuthConfig: `${__dirname}/.timed-lookup-gitignore.key`,
+    fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
 
     statusCollectPath: `${__dirname}/fact-${SERVER_TAG}-gitignore`,
     statusCollectUrl: `http://localhost:8001/status-report`,

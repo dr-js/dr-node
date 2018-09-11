@@ -3,7 +3,7 @@ import { ConfigPresetNode } from 'dr-js/module/node/module/Option'
 const { SingleString, SingleInteger, SinglePath, BooleanFlag } = ConfigPresetNode
 
 // protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
-// pathLogDirectory, prefixLogFile
+// pathLogDirectory, logFilePrefix
 // filePid
 const getServerFormatConfig = (extendFormatList = []) => ({
   ...SingleString,
@@ -26,15 +26,15 @@ const getServerFormatConfig = (extendFormatList = []) => ({
     {
       ...SinglePath,
       optional: true,
-      name: 'path-log',
+      name: 'log-path',
       extendFormatList: [
-        { ...SingleString, optional: true, name: 'prefix-log-file' } // TODO: change to `log-file-prefix`
+        { ...SingleString, optional: true, name: 'log-file-prefix' }
       ]
     },
     {
       ...SinglePath,
       optional: true,
-      name: 'file-pid',
+      name: 'pid-file',
       extendFormatList: [
         { ...BooleanFlag, name: 'pid-ignore-exist' }
       ]
@@ -47,18 +47,19 @@ const getServerFormatConfig = (extendFormatList = []) => ({
 const TokenCacheFormatConfig = {
   ...SinglePath,
   optional: true,
-  name: 'file-token-cache',
+  name: 'token-cache-file',
   extendFormatList: [
-    { ...SingleInteger, optional: true, name: 'token-size' },
-    { ...SingleInteger, optional: true, name: 'token-expire-time' }
+    { ...SingleInteger, optional: true, name: 'token-cache-expire-time' },
+    { ...SingleInteger, optional: true, name: 'token-cache-token-size' },
+    { ...SingleInteger, optional: true, name: 'token-cache-size' }
   ]
 }
 
-// fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap
+// fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap
 const AuthFormatConfig = {
   ...SinglePath,
   optional: true,
-  name: 'file-auth-config',
+  name: 'auth-file',
   extendFormatList: [ {
     ...BooleanFlag,
     name: 'auth-gen',
@@ -75,9 +76,9 @@ const AuthFormatConfig = {
 const FileUploadFormatConfig = {
   ...SinglePath,
   optional: true,
-  name: 'path-upload-root',
+  name: 'file-upload-root-path',
   extendFormatList: [
-    { ...SinglePath, name: 'path-upload-merge' }
+    { ...SinglePath, name: 'file-upload-merge-path' }
   ]
 }
 
@@ -85,7 +86,7 @@ const FileUploadFormatConfig = {
 const StatusCollectFormatConfig = {
   ...SinglePath,
   optional: true,
-  name: 'path-status-collect',
+  name: 'status-collect-path',
   extendFormatList: [
     { ...SingleString, optional: true, name: 'status-collect-url' },
     { ...SingleInteger, optional: true, name: 'status-collect-interval' }

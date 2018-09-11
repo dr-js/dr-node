@@ -24,9 +24,9 @@ const createServer = async ({
   // common
   filePid, shouldIgnoreExistPid,
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
-  pathLogDirectory, prefixLogFile,
+  pathLogDirectory, logFilePrefix,
   // auth
-  fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
+  fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
   // status collect
   statusCollectPath, statusCollectUrl, statusCollectInterval
 }) => {
@@ -34,9 +34,9 @@ const createServer = async ({
   const { server, start, stop, option } = await configureServerBase({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })
-  const logger = await configureLogger({ pathLogDirectory, prefixLogFile })
+  const logger = await configureLogger({ pathLogDirectory, logFilePrefix })
   const { generateAuthCheckCode, wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
-    fileAuthConfig, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
+    fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
   })
   const { factDB, timer } = await configureStatusCollector({
     collectPath: statusCollectPath,

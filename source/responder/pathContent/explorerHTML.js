@@ -37,8 +37,6 @@ const onLoadFunc = () => {
     }
   } = window
 
-  // TODO: bind history state
-
   const initExplorer = async ({ authFetch, authDownload }) => {
     const { uploadFileByChunk } = initFileUpload(URL_FILE_UPLOAD)
     const { withAlertModal, withConfirmModal, withPromptModal } = initModal()

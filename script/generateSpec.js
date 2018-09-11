@@ -2,13 +2,14 @@ import { resolve } from 'path'
 import { writeFileSync } from 'fs'
 
 import { stringIndentLine } from 'dr-js/module/common/format'
-import { formatUsage } from 'source-bin/option'
 
-import { argvFlag, runMain } from 'dev-dep-tool/library/__utils__'
+import { argvFlag, runMain } from 'dev-dep-tool/library/main'
 import { getLogger } from 'dev-dep-tool/library/logger'
 import { collectSourceRouteMap } from 'dev-dep-tool/library/ExportIndex/parseExport'
 import { generateExportInfo } from 'dev-dep-tool/library/ExportIndex/generateInfo'
-import { getMarkdownHeaderLink, renderMarkdownFileLink, renderMarkdownExportPath } from 'dev-dep-tool/library/ExportIndex/renderMarkdown'
+import { autoAppendMarkdownHeaderLink, renderMarkdownFileLink, renderMarkdownExportPath } from 'dev-dep-tool/library/ExportIndex/renderMarkdown'
+
+import { formatUsage } from 'source-bin/option'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
@@ -31,14 +32,13 @@ runMain(async (logger) => {
   writeFileSync(fromRoot('SPEC.md'), [
     '# Specification',
     '',
-    ...[ 'Export Path', 'Bin Option Format' ]
-      .map((text) => `* ${getMarkdownHeaderLink(text)}`),
-    '',
-    '#### Export Path',
-    ...renderMarkdownExportPath({ exportInfoMap, rootPath: PATH_ROOT }),
-    '',
-    '#### Bin Option Format',
-    ...renderMarkdownBinOptionFormat(),
+    ...autoAppendMarkdownHeaderLink(
+      '#### Export Path',
+      ...renderMarkdownExportPath({ exportInfoMap, rootPath: PATH_ROOT }),
+      '',
+      '#### Bin Option Format',
+      ...renderMarkdownBinOptionFormat()
+    ),
     ''
   ].join('\n'))
 }, getLogger('generate-spec', argvFlag('quiet')))

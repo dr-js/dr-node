@@ -24,7 +24,7 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   }
 
   const getServerConfig = () => ({
-    filePid: getSingleOptionOptional('file-pid'),
+    filePid: getSingleOptionOptional('pid-file'),
     shouldIgnoreExistPid: getSingleOptionOptional('pid-ignore-exist'),
 
     hostname: getSingleOptionOptional('hostname'),
@@ -35,10 +35,10 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
     fileSSLChain: getSingleOptionOptional('file-SSL-chain'),
     fileSSLDHParam: getSingleOptionOptional('file-SSL-dhparam'),
 
-    pathLogDirectory: getSingleOptionOptional('path-log'),
-    prefixLogFile: getSingleOptionOptional('prefix-log-file'),
+    pathLogDirectory: getSingleOptionOptional('log-path'),
+    logFilePrefix: getSingleOptionOptional('log-file-prefix'),
 
-    fileAuthConfig: getSingleOptionOptional('file-auth-config'),
+    fileAuth: getSingleOptionOptional('auth-file'),
     shouldAuthGen: getOptionOptional('auth-gen'),
     authGenTag: getSingleOptionOptional('auth-gen-tag'),
     authGenSize: getSingleOptionOptional('auth-gen-size'),
@@ -49,12 +49,12 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   switch (modeFormat.name) {
     case 'server-path-content':
       return startServer(createServerPathContent, {
-        uploadRootPath: getSingleOptionOptional('path-upload-root'),
-        uploadMergePath: getSingleOptionOptional('path-upload-merge')
+        uploadRootPath: getSingleOptionOptional('file-upload-root-path'),
+        uploadMergePath: getSingleOptionOptional('file-upload-merge-path')
       })
     case 'server-status-collect':
       return startServer(createServerStatusCollect, {
-        statusCollectPath: getSingleOptionOptional('path-status-collect'),
+        statusCollectPath: getSingleOptionOptional('status-collect-path'),
         statusCollectUrl: getSingleOptionOptional('status-collect-url'),
         statusCollectInterval: getSingleOptionOptional('status-collect-interval')
       })
@@ -68,14 +68,14 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
         fileInputPath: getSingleOption('file-upload-path'),
         filePath: getSingleOption('file-upload-key'),
         urlFileUpload: getSingleOption('file-upload-server-url'),
-        fileAuthConfig: getSingleOption('file-auth-config')
+        fileAuth: getSingleOption('auth-file')
       })
     case 'client-file-download':
       return clientFileDownload({
         fileOutputPath: getSingleOption('file-download-path'),
         filePath: getSingleOption('file-download-key'),
         urlFileDownload: getSingleOption('file-download-server-url'),
-        fileAuthConfig: getSingleOption('file-auth-config')
+        fileAuth: getSingleOption('auth-file')
       })
     case 'client-file-modify':
       return logJSON(await clientFileModify({
@@ -83,7 +83,7 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
         filePath: getSingleOptionOptional('file-modify-key'),
         filePathTo: getSingleOptionOptional('file-modify-key-to'),
         urlFileModify: getSingleOption('file-modify-server-url'),
-        fileAuthConfig: getSingleOption('file-auth-config')
+        fileAuth: getSingleOption('auth-file')
       }))
   }
 }

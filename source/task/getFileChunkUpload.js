@@ -43,7 +43,7 @@ const createFileChunkUpload = async ({
 
     if (chunkByteLength !== chunkBuffer.length) throw new Error(`chunk length mismatch, get: ${chunkBuffer.length}, expect ${chunkByteLength}`)
 
-    if (chunkHashArrayBuffer.byteLength) { // TODO: Currently optional, wait for non-isSecureContext browser crypto
+    if (chunkHashArrayBuffer.byteLength) { // TODO: now optional, wait for non-isSecureContext browser crypto
       const chunkHashBuffer = Buffer.from(chunkHashArrayBuffer)
       const verifyChunkHashBuffer = createHash('sha256').update(chunkBuffer).digest()
       if ((Buffer.compare(chunkHashBuffer, verifyChunkHashBuffer) !== 0)) {

@@ -23,16 +23,19 @@ const saveTokenCache = (tokenCacheMap, fileTokenCache) => {
   writeFileSync(fileTokenCache, tokenPackString)
 }
 
-const TOKEN_SIZE = 128 // in byte
+const TOKEN_SIZE = 128 // in byte, big to prevent conflict, and safer for auth token
 const TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000 // in msec, 30day
-const TOKEN_SIZE_SUM_MAX = 32 * 1024 // token count
+const TOKEN_SIZE_SUM_MAX = 4 * 1024 // token count, old token will be dropped
 const DEFAULT_RESPONDER_CHECK_FAIL = (store) => responderEndWithStatusCode(store, { statusCode: 403 })
+
+// TODO: not used in sample yet
 
 const configureTokenCache = async ({
   fileTokenCache,
   tokenSize = TOKEN_SIZE, // in bytes
   expireTime = TOKEN_EXPIRE_TIME,
-  tokenCacheMap = createCacheMap({ valueSizeSumMax: TOKEN_SIZE_SUM_MAX })
+  tokenSizeSumMax = TOKEN_SIZE_SUM_MAX,
+  tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1 })
 }) => {
   await createDirectory(dirname(fileTokenCache))
   await catchAsync(loadTokenCache, tokenCacheMap, fileTokenCache)
@@ -50,7 +53,7 @@ const configureTokenCache = async ({
   }
   const generateToken = async (tokenObject) => {
     const timestamp = getTimestamp()
-    const token = `${timestamp.toString(36)}-${(await getRandomBufferAsync(tokenSize)).toString('base64')}`
+    const token = `${(await getRandomBufferAsync(tokenSize)).toString('base64').replace(/\W/g, '')}-${timestamp.toString(36)}`
     tokenCacheMap.set(token, { ...tokenObject, timestamp }, 1, Date.now() + expireTime)
     __DEV__ && console.log('assignToken: token', token)
     return token
@@ -59,7 +62,11 @@ const configureTokenCache = async ({
   return {
     tryGetToken,
     generateToken,
-    wrapResponderCheckToken: (responderNext, responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL, headerKey = 'auth-token') => createResponderCheckRateLimit({
+    wrapResponderCheckToken: (
+      responderNext,
+      responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL,
+      headerKey = 'auth-token'
+    ) => createResponderCheckRateLimit({
       checkFunc: (store) => {
         const tokenObject = tryGetToken(store.request.headers[ headerKey ])
         tokenObject && store.setState({ tokenObject })
@@ -68,11 +75,18 @@ const configureTokenCache = async ({
       responderNext,
       responderCheckFail
     }),
-    wrapResponderAssignToken: (responder, headerKey = 'auth-token') => async (store, tokenObject = {}) => {
+    wrapResponderAssignToken: (
+      responder,
+      headerKey = 'auth-token'
+    ) => async (store, tokenObject = {}) => {
       store.response.setHeader(headerKey, await generateToken(tokenObject))
       return responder(store)
     },
-    wrapResponderCheckTokenCookie: (responderNext, responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL, tokenKey = 'auth-token') => createResponderCheckRateLimit({
+    wrapResponderCheckTokenCookie: (
+      responderNext,
+      responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL,
+      tokenKey = 'auth-token'
+    ) => createResponderCheckRateLimit({
       checkFunc: (store) => {
         const tokenObject = tryGetToken(decodeURIComponent(parseCookieString(store.request.headers[ 'cookie' ] || '')[ tokenKey ]))
         tokenObject && store.setState({ tokenObject })
@@ -81,7 +95,11 @@ const configureTokenCache = async ({
       responderNext,
       responderCheckFail
     }),
-    wrapResponderAssignTokenCookie: (responder, tokenKey = 'auth-token', extra = 'path=/; HttpOnly') => async (store, tokenObject = {}) => {
+    wrapResponderAssignTokenCookie: (
+      responder,
+      tokenKey = 'auth-token',
+      extra = 'path=/; HttpOnly'
+    ) => async (store, tokenObject = {}) => {
       const baseCookie = `${tokenKey}=${encodeURIComponent(await generateToken(tokenObject))}; expires=${(new Date(Date.now() + expireTime)).toISOString()}`
       store.response.setHeader('set-cookie', extra ? `${baseCookie}; ${extra}` : baseCookie)
       return responder(store)

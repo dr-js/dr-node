@@ -68,11 +68,11 @@
 >       show full help
 >   --server-path-content --spc [OPTIONAL] [ARGUMENT=0+]
 >       set to enable
->     --path-upload-root [OPTIONAL-CHECK] [ARGUMENT=1]
->       --path-upload-merge [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --file-upload-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --file-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >   --server-status-collect --ssc [OPTIONAL] [ARGUMENT=0+]
 >       set to enable
->     --path-status-collect [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --status-collect-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --status-collect-url [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --status-collect-interval [OPTIONAL-CHECK] [ARGUMENT=1]
 >   --server-status-report --ssr [OPTIONAL] [ARGUMENT=0+]
@@ -102,15 +102,16 @@
 >       --file-SSL-cert [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --file-SSL-chain [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --file-SSL-dhparam [OPTIONAL-CHECK] [ARGUMENT=1]
->     --path-log [OPTIONAL-CHECK] [ARGUMENT=1]
->       --prefix-log-file [OPTIONAL-CHECK] [ARGUMENT=1]
->     --file-pid [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --log-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --log-file-prefix [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --pid-file [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --pid-ignore-exist [OPTIONAL-CHECK] [ARGUMENT=0+]
 >           set to enable
->     --file-token-cache [OPTIONAL-CHECK] [ARGUMENT=1]
->       --token-size [OPTIONAL-CHECK] [ARGUMENT=1]
->       --token-expire-time [OPTIONAL-CHECK] [ARGUMENT=1]
->     --file-auth-config [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --token-cache-file [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --token-cache-expire-time [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --token-cache-token-size [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --token-cache-size [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --auth-file [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --auth-gen [OPTIONAL-CHECK] [ARGUMENT=0+]
 >           set to enable
 >         --auth-gen-tag [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -124,10 +125,10 @@
 >     export DR_SERVER_VERSION="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_SERVER_HELP="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_SERVER_SERVER_PATH_CONTENT="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_SERVER_PATH_UPLOAD_ROOT="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_UPLOAD_MERGE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_FILE_UPLOAD_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_FILE_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_SERVER_STATUS_COLLECT="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_SERVER_PATH_STATUS_COLLECT="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_STATUS_COLLECT_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_STATUS_COLLECT_INTERVAL="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_SERVER_STATUS_REPORT="[OPTIONAL] [ARGUMENT=0+]"
@@ -152,14 +153,15 @@
 >     export DR_SERVER_FILE_SSL_CERT="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_FILE_SSL_CHAIN="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_FILE_SSL_DHPARAM="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_LOG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PREFIX_LOG_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_PID="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_LOG_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_LOG_FILE_PREFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PID_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PID_IGNORE_EXIST="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_FILE_TOKEN_CACHE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_TOKEN_EXPIRE_TIME="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_AUTH_CONFIG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_TOKEN_CACHE_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_TOKEN_CACHE_EXPIRE_TIME="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_TOKEN_CACHE_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_TOKEN_CACHE_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_GEN="[OPTIONAL-CHECK] [ARGUMENT=0+]"
 >     export DR_SERVER_AUTH_GEN_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -172,10 +174,10 @@
 >     "version": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "help": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "serverPathContent": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "pathUploadRoot": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathUploadMerge": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "fileUploadRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "fileUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "serverStatusCollect": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "pathStatusCollect": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "statusCollectPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "statusCollectUrl": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "statusCollectInterval": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "serverStatusReport": [ "[OPTIONAL] [ARGUMENT=0+]" ],
@@ -200,14 +202,15 @@
 >     "fileSSLCert": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "fileSSLChain": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "fileSSLDhparam": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathLog": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "prefixLogFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "filePid": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "logPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "logFilePrefix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "pidFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pidIgnoreExist": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "fileTokenCache": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "tokenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "tokenExpireTime": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileAuthConfig": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "tokenCacheFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "tokenCacheExpireTime": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "tokenCacheTokenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "tokenCacheSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authGen": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
 >     "authGenTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authGenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],

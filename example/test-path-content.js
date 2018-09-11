@@ -5,9 +5,9 @@ const SERVER_TAG = 'path-content'
 const main = async () => {
   const { start } = await createServer({
     // pathLogDirectory: `${__dirname}/log-${SERVER_TAG}-gitignore`,
-    // prefixLogFile: SERVER_TAG,
+    // logFilePrefix: SERVER_TAG,
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
-    fileAuthConfig: `${__dirname}/.timed-lookup-gitignore.key`,
+    fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
     // fileTokenCache: `${__dirname}/.token-cache-gitignore.json`,
     shouldAuthGen: true,
 

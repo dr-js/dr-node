@@ -13,7 +13,7 @@ const loadLookupFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(aw
 // TODO: allow check multiple auth file
 
 const configureAuthTimedLookup = async ({
-  fileAuthConfig,
+  fileAuth,
   shouldAuthGen = false,
   authGenTag,
   authGenSize,
@@ -21,7 +21,7 @@ const configureAuthTimedLookup = async ({
   authGenTimeGap,
   logger
 }) => {
-  const timedLookupData = await loadLookupFile(fileAuthConfig).catch(async (error) => {
+  const timedLookupData = await loadLookupFile(fileAuth).catch(async (error) => {
     if (!shouldAuthGen) {
       console.error('missing auth lookup file', error)
       throw error
@@ -33,7 +33,7 @@ const configureAuthTimedLookup = async ({
       tokenSize: authGenTokenSize,
       timeGap: authGenTimeGap
     })
-    await saveLookupFile(fileAuthConfig, timedLookupData)
+    await saveLookupFile(fileAuth, timedLookupData)
     return timedLookupData
   })
   logger.add('loaded auth lookup file')
