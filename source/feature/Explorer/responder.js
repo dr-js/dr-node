@@ -1,36 +1,16 @@
 import { join } from 'path'
 import { binary } from 'dr-js/module/common/format'
 import { catchAsync } from 'dr-js/module/common/error'
+
 import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
-import { responderSendBufferCompress, responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
+import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderServeStatic } from 'dr-js/module/node/server/Responder/ServeStatic'
 import { runQuiet } from 'dr-js/module/node/system/Run'
 
-import { createFileChunkUpload } from 'source/task/getFileChunkUpload'
-import { createGetPathModify } from 'source/task/getPathModify'
-import { prepareBufferDataHTML } from 'source/function'
-import { getHTML } from './explorerHTML'
-
-const createResponderExplorer = async ({
-  urlAuthCheck = '/auth',
-  urlPathModify = '/path-modify',
-  urlPathBatchModify = '/path-batch-modify',
-  urlFileUpload = '/file-chunk-upload',
-  urlFileServe = '/file-serve',
-  urlStorageStatus = '/storage-status'
-}) => {
-  const bufferData = await prepareBufferDataHTML(Buffer.from(getHTML({
-    URL_AUTH_CHECK: urlAuthCheck,
-    URL_PATH_MODIFY: urlPathModify,
-    URL_PATH_BATCH_MODIFY: urlPathBatchModify,
-    URL_FILE_UPLOAD: urlFileUpload,
-    URL_FILE_SERVE: urlFileServe,
-    URL_STORAGE_STATUS: urlStorageStatus
-  })))
-  return (store) => responderSendBufferCompress(store, bufferData)
-}
+import { createFileChunkUpload } from './task/getFileChunkUpload'
+import { createGetPathModify } from './task/getPathModify'
 
 const createResponderPathModify = (rootPath) => {
   const getPathModify = createGetPathModify(rootPath)
@@ -73,15 +53,12 @@ const createResponderStorageStatus = (rootPath) => {
     await promise
     return (await stdoutBufferPromise).toString()
   }
-
   const getPathStatus = () => runQuick('du -hd1').catch(() => '')// no good win32 alternative
-
   const getDiskStatus = () => runQuick('df -h .').catch(
     () => runQuick('dir | find "bytes free"').then( // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
       (stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`
     )
   )
-
   return async (store) => responderSendJSON(store, {
     object: {
       storageStatusText: [
@@ -93,7 +70,6 @@ const createResponderStorageStatus = (rootPath) => {
 }
 
 export {
-  createResponderExplorer,
   createResponderPathModify,
   createResponderPathBatchModify,
   createResponderServeFile,

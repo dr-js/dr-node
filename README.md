@@ -3,10 +3,12 @@
 [![i:npm]][l:npm]
 [![i:size]][l:size]
 [![i:lint]][l:lint]
+[![i:npm-dev]][l:npm]
 
 A collection of strange functions, for server
 
 [i:npm]: https://img.shields.io/npm/v/dr-server.svg?colorB=blue
+[i:npm-dev]: https://img.shields.io/npm/v/dr-server/dev.svg
 [l:npm]: https://www.npmjs.com/package/dr-server
 [i:size]: https://packagephobia.now.sh/badge?p=dr-server
 [l:size]: https://packagephobia.now.sh/result?p=dr-server

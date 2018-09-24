@@ -1,4 +1,3 @@
-import { fetch } from 'dr-js/module/node/net'
 import { createRequestListener } from 'dr-js/module/node/server/Server'
 import {
   responderEnd,
@@ -14,8 +13,7 @@ import { configureLogger } from 'dr-server/module/configure/logger'
 import { configureFilePid } from 'dr-server/module/configure/filePid'
 import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
 import { configureServerBase } from 'dr-server/module/configure/serverBase'
-import { createResponderStatusReport } from 'dr-server/module/responder/status/Report'
-import { createGetStatusReport } from 'dr-server/module/task/getStatusReport'
+import { configureFeaturePack } from 'dr-server/module/feature/StatusReport/configureFeaturePack'
 
 const createServer = async ({
   // common
@@ -38,16 +36,25 @@ const createServer = async ({
 
   const responderLogEnd = createResponderLogEnd(logger.add)
 
+  const featureStatusReport = await configureFeaturePack({
+    option,
+    logger,
+    routePrefix: '',
+    statusReportProcessTag,
+    wrapResponderCheckAuthCheckCode,
+    generateAuthCheckCode
+  })
+
   const routerMap = createRouteMap([
-    [ '/status-report', 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusReport(statusReportProcessTag)) ],
-    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: '/status-report' }) ],
-    [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
+    [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: featureStatusReport.URL_STATUS_REPORT }) ],
+    ...featureStatusReport.routeList
   ])
 
   server.on('request', createRequestListener({
     responderList: [
-      createResponderParseURL(option),
       createResponderLog(logger.add),
+      createResponderParseURL(option),
       createResponderRouter(routerMap)
     ],
     responderEnd: (store) => {
@@ -56,17 +63,7 @@ const createServer = async ({
     }
   }))
 
-  const getStatusReport = createGetStatusReport(statusReportProcessTag)
-  const reportStatus = async (url) => {
-    const { status } = await fetch(url, {
-      method: 'POST',
-      headers: { 'auth-check-code': generateAuthCheckCode() },
-      body: JSON.stringify(getStatusReport())
-    })
-    __DEV__ && console.log('reported status:', status)
-  }
-
-  return { server, start, stop, option, logger, reportStatus }
+  return { server, start, stop, option, logger, featureStatusReport }
 }
 
 export { createServer }

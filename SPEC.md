@@ -4,10 +4,8 @@
 * [Bin Option Format](#bin-option-format)
 
 #### Export Path
-+ 📄 [source/clientFile.js](source/clientFile.js)
-  - `clientFileDownload`, `clientFileModify`, `clientFileUpload`
 + 📄 [source/function.js](source/function.js)
-  - `isPrivateAddress`, `prepareBufferData`, `prepareBufferDataHTML`, `prepareBufferDataJSON`, `prepareBufferDataPNG`
+  - `isPrivateAddress`
 + 📄 [source/option.js](source/option.js)
   - `AuthFormatConfig`, `FileUploadFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TokenCacheFormatConfig`, `getServerFormatConfig`
 + 📄 [source/configure/auth.js](source/configure/auth.js)
@@ -20,12 +18,38 @@
   - `configureServerBase`
 + 📄 [source/configure/tokenCache.js](source/configure/tokenCache.js)
   - `configureTokenCache`
-+ 📄 [source/configure/status/Collector.js](source/configure/status/Collector.js)
-  - `configureStatusCollector`
-+ 📄 [source/configure/status/applyStatusFact.js](source/configure/status/applyStatusFact.js)
-  - `applyFact`
-+ 📄 [source/configure/status/combine.js](source/configure/status/combine.js)
++ 📄 [source/feature/Explorer/configureFeaturePack.js](source/feature/Explorer/configureFeaturePack.js)
+  - `configureFeaturePack`
++ 📄 [source/feature/Explorer/responder.js](source/feature/Explorer/responder.js)
+  - `createResponderFileChunkUpload`, `createResponderPathBatchModify`, `createResponderPathModify`, `createResponderServeFile`, `createResponderStorageStatus`
++ 📄 [source/feature/Explorer/HTML/main.js](source/feature/Explorer/HTML/main.js)
+  - `getHTML`
++ 📄 [source/feature/Explorer/HTML/pathContent.js](source/feature/Explorer/HTML/pathContent.js)
+  - `initPathContent`, `pathContentStyle`
++ 📄 [source/feature/Explorer/HTML/uploader.js](source/feature/Explorer/HTML/uploader.js)
+  - `initFileUpload`, `initUploader`
++ 📄 [source/feature/Explorer/task/getFileChunkUpload.js](source/feature/Explorer/task/getFileChunkUpload.js)
+  - `createFileChunkUpload`, `uploadFileByChunk`
++ 📄 [source/feature/Explorer/task/getPathModify.js](source/feature/Explorer/task/getPathModify.js)
+  - `createGetPathModify`
++ 📄 [source/feature/StatusCollect/HTML.js](source/feature/StatusCollect/HTML.js)
+  - `getHTML`
++ 📄 [source/feature/StatusCollect/configureFeaturePack.js](source/feature/StatusCollect/configureFeaturePack.js)
+  - `configureFeaturePack`
++ 📄 [source/feature/StatusCollect/responder.js](source/feature/StatusCollect/responder.js)
+  - `createResponderStatusCollect`, `createResponderStatusState`
++ 📄 [source/feature/StatusCollect/configure/applyStatusFact.js](source/feature/StatusCollect/configure/applyStatusFact.js)
+  - `applyStatusFact`
++ 📄 [source/feature/StatusCollect/configure/combineStatus.js](source/feature/StatusCollect/configure/combineStatus.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
++ 📄 [source/feature/StatusCollect/configure/configureStatusCollector.js](source/feature/StatusCollect/configure/configureStatusCollector.js)
+  - `configureStatusCollector`
++ 📄 [source/feature/StatusReport/configureFeaturePack.js](source/feature/StatusReport/configureFeaturePack.js)
+  - `configureFeaturePack`
++ 📄 [source/feature/StatusReport/task/getStatusReport.js](source/feature/StatusReport/task/getStatusReport.js)
+  - `createGetStatusReport`
++ 📄 [source/featureNode/clientFile.js](source/featureNode/clientFile.js)
+  - `clientFileDownload`, `clientFileModify`, `clientFileUpload`
 + 📄 [source/HTML/AuthMask.js](source/HTML/AuthMask.js)
   - `initAuthMask`
 + 📄 [source/HTML/LoadingMask.js](source/HTML/LoadingMask.js)
@@ -34,26 +58,6 @@
   - `initModal`
 + 📄 [source/HTML/function.js](source/HTML/function.js)
   - `DR_BROWSER_SCRIPT`
-+ 📄 [source/responder/pathContent/Explorer.js](source/responder/pathContent/Explorer.js)
-  - `createResponderExplorer`, `createResponderFileChunkUpload`, `createResponderPathBatchModify`, `createResponderPathModify`, `createResponderServeFile`, `createResponderStorageStatus`
-+ 📄 [source/responder/pathContent/explorerHTML.js](source/responder/pathContent/explorerHTML.js)
-  - `getHTML`
-+ 📄 [source/responder/pathContent/HTML/pathContent.js](source/responder/pathContent/HTML/pathContent.js)
-  - `initPathContent`, `pathContentStyle`
-+ 📄 [source/responder/pathContent/HTML/uploader.js](source/responder/pathContent/HTML/uploader.js)
-  - `initFileUpload`, `initUploader`
-+ 📄 [source/responder/status/Report.js](source/responder/status/Report.js)
-  - `createResponderStatusReport`
-+ 📄 [source/responder/status/Visualize.js](source/responder/status/Visualize.js)
-  - `createResponderStatusState`, `createResponderStatusVisualize`
-+ 📄 [source/responder/status/visualizeHTML.js](source/responder/status/visualizeHTML.js)
-  - `getHTML`
-+ 📄 [source/task/getFileChunkUpload.js](source/task/getFileChunkUpload.js)
-  - `createFileChunkUpload`, `uploadFileByChunk`
-+ 📄 [source/task/getPathModify.js](source/task/getPathModify.js)
-  - `createGetPathModify`
-+ 📄 [source/task/getStatusReport.js](source/task/getStatusReport.js)
-  - `createGetStatusReport`
 
 #### Bin Option Format
 📄 [source-bin/option.js](source-bin/option.js)
@@ -66,7 +70,7 @@
 >       set to enable
 >   --help -h [OPTIONAL] [ARGUMENT=0+]
 >       show full help
->   --server-path-content --spc [OPTIONAL] [ARGUMENT=0+]
+>   --server-explorer --se [OPTIONAL] [ARGUMENT=0+]
 >       set to enable
 >     --file-upload-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --file-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -124,7 +128,7 @@
 >     export DR_SERVER_CONFIG="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_SERVER_VERSION="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_SERVER_HELP="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_SERVER_SERVER_PATH_CONTENT="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_SERVER_SERVER_EXPLORER="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_SERVER_FILE_UPLOAD_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_FILE_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_SERVER_STATUS_COLLECT="[OPTIONAL] [ARGUMENT=0+]"
@@ -173,7 +177,7 @@
 >     "config": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "version": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "help": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "serverPathContent": [ "[OPTIONAL] [ARGUMENT=0+]" ],
+>     "serverExplorer": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "fileUploadRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "fileUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "serverStatusCollect": [ "[OPTIONAL] [ARGUMENT=0+]" ],

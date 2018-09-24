@@ -1,12 +1,21 @@
 import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/server/commonHTML'
+
 import { DR_BROWSER_SCRIPT } from 'source/HTML/function'
 import { initModal } from 'source/HTML/Modal'
 import { initAuthMask } from 'source/HTML/AuthMask'
 import { initLoadingMask } from 'source/HTML/LoadingMask'
-import { pathContentStyle, initPathContent } from './HTML/pathContent'
-import { initFileUpload, initUploader } from './HTML/uploader'
 
-const getHTML = (envObject) => COMMON_LAYOUT([
+import { pathContentStyle, initPathContent } from './pathContent'
+import { initFileUpload, initUploader } from './uploader'
+
+const getHTML = ({
+  URL_AUTH_CHECK,
+  URL_PATH_MODIFY,
+  URL_PATH_BATCH_MODIFY,
+  URL_FILE_UPLOAD,
+  URL_FILE_SERVE,
+  URL_STORAGE_STATUS
+}) => COMMON_LAYOUT([
   `<title>Explorer</title>`,
   COMMON_STYLE(),
   mainStyle,
@@ -14,7 +23,21 @@ const getHTML = (envObject) => COMMON_LAYOUT([
 ], [
   `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
-  COMMON_SCRIPT({ ...envObject, initModal, initLoadingMask, initAuthMask, initPathContent, initFileUpload, initUploader, onload: onLoadFunc }),
+  COMMON_SCRIPT({
+    URL_AUTH_CHECK,
+    URL_PATH_MODIFY,
+    URL_PATH_BATCH_MODIFY,
+    URL_FILE_UPLOAD,
+    URL_FILE_SERVE,
+    URL_STORAGE_STATUS,
+    initModal,
+    initLoadingMask,
+    initAuthMask,
+    initPathContent,
+    initFileUpload,
+    initUploader,
+    onload: onLoadFunc
+  }),
   DR_BROWSER_SCRIPT()
 ])
 

@@ -37,7 +37,7 @@ const onLoadFunc = () => {
   const {
     alert,
     qS, cE,
-    URL_STATUS_FETCH, URL_AUTH_CHECK, CONFIG_RENDER_PRESET,
+    URL_STATUS_STATE, URL_AUTH_CHECK, CONFIG_RENDER_PRESET,
     initAuthMask,
     Dr: {
       Common: {
@@ -246,7 +246,7 @@ const onLoadFunc = () => {
       merge0List,
       merge1List,
       merge2List
-    } = await (await authFetch(URL_STATUS_FETCH)).json()
+    } = await (await authFetch(URL_STATUS_STATE)).json()
 
     const sumPresetList = []
     sumPresetList[ sumKeyList.indexOf('error') ] = { order: 0, title: 'error count', valueMin: 0 }

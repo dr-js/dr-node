@@ -6,18 +6,20 @@ import { percent, binary, time } from 'dr-js/module/common/format'
 import { clock } from 'dr-js/module/common/time'
 import { generateCheckCode } from 'dr-js/module/common/module/TimedLookup'
 
-import { fetch } from 'dr-js/module/node/net'
+import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { createDirectory } from 'dr-js/module/node/file/File'
 
 import { loadLookupFile } from 'source/configure/auth'
-import { uploadFileByChunk } from 'source/task/getFileChunkUpload'
+import { uploadFileByChunk } from 'source/feature/Explorer/task/getFileChunkUpload'
 
 // TODO: handle logging properly
+
+// for node client file chunk upload
 
 const getAuthFetch = async (fileAuth) => {
   const timedLookupData = await loadLookupFile(fileAuth)
   return async (url, config) => {
-    const response = await fetch(url, { ...config, headers: { ...config.headers, 'auth-check-code': generateCheckCode(timedLookupData) } })
+    const response = await fetchLikeRequest(url, { ...config, headers: { ...config.headers, 'auth-check-code': generateCheckCode(timedLookupData) } })
     if (!response.ok) throw new Error(`[Error][AuthFetch] status: ${response.status}`)
     return response
   }

@@ -14,7 +14,7 @@ import { configureLogger } from 'dr-server/module/configure/logger'
 import { configureFilePid } from 'dr-server/module/configure/filePid'
 import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
 import { configureServerBase } from 'dr-server/module/configure/serverBase'
-import { configureFeaturePack } from 'dr-server/module/feature/StatusCollect/configureFeaturePack'
+import { configureFeaturePack } from 'dr-server/module/feature/Explorer/configureFeaturePack'
 
 const createServer = async ({
   // common
@@ -23,40 +23,38 @@ const createServer = async ({
   pathLogDirectory, logFilePrefix,
   // auth
   fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
-  // status collect
-  statusCollectPath, statusCollectUrl, statusCollectInterval
+  // file upload
+  uploadRootPath, uploadMergePath
 }) => {
   await configureFilePid({ filePid, shouldIgnoreExistPid })
   const { server, start, stop, option } = await configureServerBase({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })
   const logger = await configureLogger({ pathLogDirectory, logFilePrefix })
-  const { generateAuthCheckCode, wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
+  const { wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
     fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
-  })
-
-  const urlAuthCheck = '/auth'
-
-  const featureStatusCollect = await configureFeaturePack({
-    option,
-    logger,
-    routePrefix: '',
-    statusCollectPath,
-    statusCollectUrl,
-    statusCollectInterval,
-    urlAuthCheck,
-    wrapResponderCheckAuthCheckCode,
-    generateAuthCheckCode
   })
 
   const responderLogEnd = createResponderLogEnd(logger.add)
 
+  const urlAuthCheck = '/auth'
+
+  const featureExplorer = await configureFeaturePack({
+    option,
+    logger,
+    routePrefix: '',
+    uploadRootPath,
+    uploadMergePath,
+    urlAuthCheck,
+    wrapResponderCheckAuthCheckCode
+  })
+
   const routerMap = createRouteMap([
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ],
-    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: featureStatusCollect.URL_HTML }) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routerMap) : (store) => responderEndWithRedirect(store, { redirectUrl: featureExplorer.URL_HTML }) ],
     [ urlAuthCheck, 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
-    ...featureStatusCollect.routeList
-  ])
+    ...featureExplorer.routeList
+  ].filter(Boolean))
 
   server.on('request', createRequestListener({
     responderList: [
@@ -70,7 +68,7 @@ const createServer = async ({
     }
   }))
 
-  return { server, start, stop, option, logger, featureStatusCollect }
+  return { server, start, stop, option, logger, featureExplorer }
 }
 
 export { createServer }

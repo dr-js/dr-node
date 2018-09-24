@@ -1,4 +1,4 @@
-import { setSumRaw, setRangeRaw, combineStatusRaw, combineStatus } from './combine'
+import { setSumRaw, setRangeRaw, combineStatusRaw, combineStatus } from './combineStatus'
 
 const DAY_IN_SECOND = __DEV__
   ? 8 // much faster for dev
@@ -94,7 +94,7 @@ const splitChunk = (inputList, deltaTime, endTime, getTimeFunc, mergeFunc) => {
   return [ clippedInputList, outputList ]
 }
 
-const applyFact = (state, fact) => {
+const applyStatusFact = (state, fact) => {
   const { id, timestamp } = fact
 
   if (id === 1) state = getStartState(timestamp) // TODO: better way for start state with init fact
@@ -142,4 +142,4 @@ const applyFact = (state, fact) => {
   return { ...state, id, timestamp, sumKeyList: nextSumKeyList, rangeKeyList: nextRangeKeyList, statusRawList: [ statusRaw, ...statusRawList ] }
 }
 
-export { applyFact }
+export { applyStatusFact }

@@ -11,6 +11,7 @@ const saveLookupFile = (pathFile, LookupData) => writeFileAsync(pathFile, Buffer
 const loadLookupFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await readFileAsync(pathFile)))
 
 // TODO: allow check multiple auth file
+// TODO: allow optional/toggle check with option
 
 const configureAuthTimedLookup = async ({
   fileAuth,

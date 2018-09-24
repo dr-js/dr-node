@@ -2,10 +2,10 @@
 
 import { getServerInfo } from 'dr-js/bin/server/function'
 
-import { createServer as createServerPathContent } from 'dr-server/sample/pathContent'
+import { createServer as createServerExplorer } from 'dr-server/sample/explorer'
 import { createServer as createServerStatusCollect } from 'dr-server/sample/statusCollect'
 import { createServer as createServerStatusReport } from 'dr-server/sample/statusReport'
-import { clientFileUpload, clientFileDownload, clientFileModify } from 'dr-server/module/clientFile'
+import { clientFileUpload, clientFileDownload, clientFileModify } from 'dr-server/module/featureNode/clientFile'
 
 import { MODE_FORMAT_LIST, parseOption, formatUsage } from './option'
 import { name as packageName, version as packageVersion } from '../package.json'
@@ -47,8 +47,10 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   })
 
   switch (modeFormat.name) {
-    case 'server-path-content':
-      return startServer(createServerPathContent, {
+    // case 'server-config':
+    //   return startServer()
+    case 'server-explorer':
+      return startServer(createServerExplorer, {
         uploadRootPath: getSingleOptionOptional('file-upload-root-path'),
         uploadMergePath: getSingleOptionOptional('file-upload-merge-path')
       })

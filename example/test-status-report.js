@@ -3,9 +3,7 @@ const { createServer } = require('../output-gitignore/sample/statusReport')
 const SERVER_TAG = 'status-report'
 
 const main = async () => {
-  const { start, reportStatus } = await createServer({
-    // pathLogDirectory: `${__dirname}/log-${SERVER_TAG}-gitignore`,
-    // logFilePrefix: SERVER_TAG,
+  const { start, featureStatusReport } = await createServer({
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
 
@@ -18,7 +16,7 @@ const main = async () => {
 
   // push status
   setInterval(() => {
-    reportStatus('http://localhost:8002/status-collect')
+    featureStatusReport.reportStatus('http://localhost:8002/status-collect')
   }, 5000)
 }
 

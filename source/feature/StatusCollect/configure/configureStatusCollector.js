@@ -1,22 +1,23 @@
 import { clock, getTimestamp, createTimer } from 'dr-js/module/common/time'
 import { withRetryAsync, lossyAsync } from 'dr-js/module/common/function'
 import { roundFloat } from 'dr-js/module/common/math/base'
-import { fetch } from 'dr-js/module/node/net'
+import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { createFactDatabase, tryDeleteExtraCache } from 'dr-js/module/node/module/FactDatabase'
 import { addExitListenerAsync, addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
-import { applyFact } from './applyStatusFact'
+import { applyStatusFact } from './applyStatusFact'
 
+const STATUS_COLLECT_INTERVAL = __DEV__ ? 1000 : 5 * 60 * 1000
 const FETCH_RETRY_COUNT = 3
 
 const configureStatusCollector = async ({
   collectPath: pathFactDirectory,
   collectUrl,
-  collectInterval = __DEV__ ? 1000 : 5 * 60 * 1000,
+  collectInterval = STATUS_COLLECT_INTERVAL,
   getExtraHeaders
 }) => {
   const factDB = await createFactDatabase({
     pathFactDirectory,
-    applyFact: applyFact, // (state, fact) => ({ ...state, ...fact }),
+    applyFact: applyStatusFact, // (state, fact) => ({ ...state, ...fact }),
     onError: (error) => console.error('[FactDatabase]', error)
   })
   addExitListenerSync(factDB.end)
@@ -31,7 +32,7 @@ const configureStatusCollector = async ({
     await withRetryAsync(async (retryCount) => {
       __DEV__ && retryCount && console.log(`[fetch] retryCount: ${retryCount}`)
       const timeFetchStart = clock()
-      const { ok, json } = await fetch(collectUrl, { headers: getExtraHeaders ? getExtraHeaders() : {} })
+      const { ok, json } = await fetchLikeRequest(collectUrl, { headers: getExtraHeaders ? getExtraHeaders() : {} })
       if (!ok) throw new Error('fetch no ok')
       const timeOk = roundFloat(clock() - timeFetchStart)
       const status = await json()

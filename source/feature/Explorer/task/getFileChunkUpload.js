@@ -8,8 +8,8 @@ import { toString as arrayBufferToString, fromString } from 'dr-js/module/common
 import { packChainArrayBufferPacket, parseChainArrayBufferPacket } from 'dr-js/module/common/data/ArrayBufferPacket'
 import { createAsyncTaskQueue } from 'dr-js/module/common/module/AsyncTaskQueue'
 
-import { pipeStreamAsync } from 'dr-js/module/node/data/Stream'
 import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
+import { pipeStreamAsync } from 'dr-js/module/node/data/Stream'
 import { createPathPrefixLock, writeFileAsync } from 'dr-js/module/node/file/function'
 import { createDirectory } from 'dr-js/module/node/file/File'
 import { modify } from 'dr-js/module/node/file/Modify'
