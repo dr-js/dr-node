@@ -11,8 +11,6 @@ import {
 const { SingleString, SinglePath, BooleanFlag, Config } = ConfigPresetNode
 
 const MODE_FORMAT_LIST = [
-  // [ 'server-config|sc' ],
-
   [ 'server-explorer|se', [ FileUploadFormatConfig ] ],
   [ 'server-status-collect|ssc', [ StatusCollectFormatConfig ] ],
   [ 'server-status-report|ssr', [ StatusReportFormatConfig ] ],

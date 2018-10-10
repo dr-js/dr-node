@@ -1,4 +1,4 @@
-// only common, not all is checked, check: https://en.wikipedia.org/wiki/Private_network
+// only common address, not all is checked, check: https://en.wikipedia.org/wiki/Private_network
 const isPrivateAddress = (address) => (
   address === '127.0.0.1' || // fast common private ip
   address === '::1' ||
@@ -11,9 +11,3 @@ const isPrivateAddress = (address) => (
 )
 
 export { isPrivateAddress }
-
-// TODO: server structure:
-// TODO:  - static
-// TODO:  - dynamic
-// TODO:  - uri-prefix: for
-// TODO: pluggable server should ba able to ?dynamically? load `[ route, method, responder ]`

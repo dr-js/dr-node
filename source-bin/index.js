@@ -47,8 +47,6 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   })
 
   switch (modeFormat.name) {
-    // case 'server-config':
-    //   return startServer()
     case 'server-explorer':
       return startServer(createServerExplorer, {
         uploadRootPath: getSingleOptionOptional('file-upload-root-path'),
