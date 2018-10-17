@@ -13,7 +13,7 @@ import { name as packageName, version as packageVersion } from '../package.json'
 const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, getSingleOption, getSingleOptionOptional }) => {
   const startServer = async (createServer, extraConfig) => {
     const { start, option, logger } = await createServer({ ...getServerConfig(), ...extraConfig })
-    start()
+    await start()
     logger.add(getServerInfo(
       modeFormat.name,
       option.protocol,

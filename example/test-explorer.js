@@ -1,23 +1,22 @@
+const { getServerInfo } = require('dr-js/bin/server/function')
 const { createServer } = require('../output-gitignore/sample/explorer')
 
 const SERVER_TAG = 'explorer'
 
 const main = async () => {
-  const { start } = await createServer({
+  const { option, start } = await createServer({
+    port: 8003,
+
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
-    // fileTokenCache: `${__dirname}/.token-cache-gitignore.json`,
     shouldAuthGen: true,
 
     uploadRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
-    uploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`,
-
-    protocol: 'http:',
-    hostname: 'localhost',
-    port: 8003
+    uploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`
   })
 
-  start()
+  await start()
+  console.log(getServerInfo(SERVER_TAG, option.protocol, option.hostname, option.port))
 }
 
 main().catch(console.error)

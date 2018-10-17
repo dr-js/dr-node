@@ -1,12 +1,12 @@
 import { resolve } from 'path'
 import { execSync } from 'child_process'
 
-import { argvFlag, runMain } from 'dev-dep-tool/library/main'
-import { getLogger } from 'dev-dep-tool/library/logger'
-import { getScriptFileListFromPathList } from 'dev-dep-tool/library/fileList'
-import { initOutput, verifyOutputBinVersion, packOutput, publishOutput } from 'dev-dep-tool/library/commonOutput'
-import { wrapFileProcessor, fileProcessorBabel } from 'dev-dep-tool/library/fileProcessor'
-import { getTerserOption, minifyFileListWithTerser } from 'dev-dep-tool/library/minify'
+import { argvFlag, runMain } from 'dev-dep-tool/module/main'
+import { getLogger } from 'dev-dep-tool/module/logger'
+import { getScriptFileListFromPathList } from 'dev-dep-tool/module/fileList'
+import { initOutput, verifyOutputBinVersion, packOutput, publishOutput } from 'dev-dep-tool/module/commonOutput'
+import { processFileList, fileProcessorBabel } from 'dev-dep-tool/module/fileProcessor'
+import { getTerserOption, minifyFileListWithTerser } from 'dev-dep-tool/module/minify'
 
 import { binary as formatBinary } from 'dr-js/module/common/format'
 
@@ -16,54 +16,37 @@ const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
 const fromOutput = (...args) => resolve(PATH_OUTPUT, ...args)
 const execOptionRoot = { cwd: fromRoot(), stdio: argvFlag('quiet') ? [ 'ignore', 'ignore', 'inherit' ] : 'inherit', shell: true }
 
-const buildOutput = async ({ logger: { padLog, stepLog } }) => {
-  padLog(`build`)
-
-  stepLog(`build bin`)
+const buildOutput = async ({ logger: { padLog } }) => {
+  padLog(`build bin`)
   execSync('npm run build-bin', execOptionRoot)
 
-  stepLog(`build library`)
+  padLog(`build library`)
   execSync('npm run build-library', execOptionRoot)
 
-  stepLog(`build module`)
+  padLog(`build module`)
   execSync('npm run build-module', execOptionRoot)
 
-  stepLog(`build sample`)
+  padLog(`build sample`)
   execSync('npm run build-sample', execOptionRoot)
 }
 
 const processOutput = async ({ packageJSON, logger }) => {
-  const { padLog, stepLog } = logger
+  const fileListLibraryBin = await getScriptFileListFromPathList([ 'library', 'bin' ], fromOutput)
+  const fileListModuleSample = await getScriptFileListFromPathList([ 'module', 'sample' ], fromOutput)
+  const fileListAll = [ ...fileListLibraryBin, ...fileListModuleSample ]
 
-  padLog(`minify output`)
+  let sizeReduce = 0
 
-  stepLog(`minify bin & library`)
-  await minifyFileListWithTerser({
-    fileList: await getScriptFileListFromPathList([ 'bin', 'library' ], fromOutput),
-    option: getTerserOption(),
-    rootPath: PATH_OUTPUT,
-    logger
-  })
+  sizeReduce += await minifyFileListWithTerser({ fileList: fileListLibraryBin, option: getTerserOption(), rootPath: PATH_OUTPUT, logger })
+  sizeReduce += await minifyFileListWithTerser({ fileList: fileListModuleSample, option: getTerserOption({ isModule: true }), rootPath: PATH_OUTPUT, logger })
 
-  stepLog(`minify module & sample`)
-  await minifyFileListWithTerser({
-    fileList: await getScriptFileListFromPathList([ 'module', 'sample' ], fromOutput),
-    option: getTerserOption({ isModule: true }),
-    rootPath: PATH_OUTPUT,
-    logger
-  })
+  sizeReduce += await processFileList({ fileList: fileListAll, processor: fileProcessorBabel, rootPath: PATH_OUTPUT, logger })
 
-  padLog(`process output`)
-  const processBabel = wrapFileProcessor({ processor: fileProcessorBabel, logger })
-  let sizeCodeReduce = 0
-  for (const filePath of await getScriptFileListFromPathList([ '.' ], fromOutput)) sizeCodeReduce += await processBabel(filePath)
-  stepLog(`output size reduce: ${formatBinary(sizeCodeReduce)}B`)
+  logger.padLog(`total size reduce: ${formatBinary(sizeReduce)}B`)
 }
 
 runMain(async (logger) => {
-  const { padLog } = logger
-
-  padLog(`generate spec`)
+  logger.padLog(`generate spec`)
   execSync('npm run script-generate-spec', execOptionRoot)
 
   const packageJSON = await initOutput({ fromRoot, fromOutput, logger })
