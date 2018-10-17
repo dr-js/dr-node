@@ -1,4 +1,4 @@
-const { getServerInfo } = require('dr-js/bin/server/function')
+const { describeServer } = require('dr-js/bin/function')
 const { createServer } = require('../output-gitignore/sample/explorer')
 
 const SERVER_TAG = 'explorer'
@@ -16,7 +16,7 @@ const main = async () => {
   })
 
   await start()
-  console.log(getServerInfo(SERVER_TAG, option.protocol, option.hostname, option.port))
+  console.log(describeServer(option, SERVER_TAG))
 }
 
 main().catch(console.error)

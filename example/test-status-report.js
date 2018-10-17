@@ -1,4 +1,4 @@
-const { getServerInfo } = require('dr-js/bin/server/function')
+const { describeServer } = require('dr-js/bin/function')
 const { createServer } = require('../output-gitignore/sample/statusReport')
 
 const SERVER_TAG = 'status-report'
@@ -13,7 +13,7 @@ const main = async () => {
   })
 
   await start()
-  console.log(getServerInfo(SERVER_TAG, option.protocol, option.hostname, option.port))
+  console.log(describeServer(option, SERVER_TAG))
 
   // push status
   setInterval(() => featureStatusReport.reportStatus('http://localhost:8002/status-collect'), 5000)

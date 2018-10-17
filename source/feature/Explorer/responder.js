@@ -8,6 +8,7 @@ import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/C
 import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderServeStatic } from 'dr-js/module/node/server/Responder/ServeStatic'
 import { runQuiet } from 'dr-js/module/node/system/Run'
+import { describeSystemStatus } from 'dr-js/module/node/system/Status'
 
 import { createFileChunkUpload } from './task/getFileChunkUpload'
 import { createGetPathModify } from './task/getPathModify'
@@ -53,17 +54,21 @@ const createResponderStorageStatus = (rootPath) => {
     await promise
     return (await stdoutBufferPromise).toString()
   }
+  const getTitle = (title) => `[${title}]`.padEnd(80, '=')
   const getPathStatus = () => runQuick('du -hd1').catch(() => '')// no good win32 alternative
   const getDiskStatus = () => runQuick('df -h .').catch(
-    () => runQuick('dir | find "bytes free"').then( // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
-      (stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`
-    )
+    () => runQuick('dir | find "bytes free"') // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
+      .then((stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`)
+  )
+  const getSystemStatus = () => runQuick('top -b -n 1 | head -n 5').catch(
+    () => describeSystemStatus()
   )
   return async (store) => responderSendJSON(store, {
     object: {
       storageStatusText: [
-        await getPathStatus(),
-        await getDiskStatus()
+        getTitle('Path'), await getPathStatus(),
+        getTitle('Disk'), await getDiskStatus(),
+        getTitle('System'), await getSystemStatus()
       ].filter(Boolean).join('\n')
     }
   })

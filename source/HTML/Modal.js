@@ -26,7 +26,7 @@ const initModal = () => {
 
   const COMMON_FLEX_STYLE = { display: 'flex', flexFlow: 'column' }
   const createFlexRow = (...args) => cE('div', { style: 'display: flex; flex-flow: row; align-items: center; justify-content: center;' }, args)
-  const createMessage = (message) => cE('pre', { innerText: message, style: 'overflow: auto; max-height: 64vh; min-height: 2em; white-space: pre-wrap;' })
+  const createMessage = (message) => cE('pre', { innerText: message, style: 'overflow: auto; max-height: 64vh; min-height: 2em; white-space: pre;' })
 
   const withAlertModal = async (message) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
     Object.assign(modalMainDiv.style, COMMON_FLEX_STYLE)

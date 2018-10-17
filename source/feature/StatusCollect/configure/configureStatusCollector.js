@@ -18,7 +18,7 @@ const configureStatusCollector = async ({
   const factDB = await createFactDatabase({
     pathFactDirectory,
     applyFact: applyStatusFact, // (state, fact) => ({ ...state, ...fact }),
-    onError: (error) => console.error('[FactDatabase]', error)
+    onError: (error) => console.error('[collectStatus][FactDatabase]', error)
   })
   addExitListenerSync(factDB.end)
   addExitListenerAsync(async () => {
@@ -33,7 +33,7 @@ const configureStatusCollector = async ({
       __DEV__ && retryCount && console.log(`[fetch] retryCount: ${retryCount}`)
       const timeFetchStart = clock()
       const { ok, json } = await fetchLikeRequest(collectUrl, { headers: getExtraHeaders ? getExtraHeaders() : {} })
-      if (!ok) throw new Error('fetch no ok')
+      if (!ok) throw new Error('[collectStatus] fetch not ok')
       const timeOk = roundFloat(clock() - timeFetchStart)
       const status = await json()
       const timeDownload = roundFloat(clock() - timeFetchStart - timeOk)
@@ -41,7 +41,7 @@ const configureStatusCollector = async ({
       factDB.add({ timestamp: getTimestamp(), retryCount, status, timeOk, timeDownload })
     }, FETCH_RETRY_COUNT, __DEV__ ? 50 : 500)
   }, (error) => {
-    console.error('[fetch] failed', collectUrl, error)
+    console.error('[collectStatus] fetch failed', collectUrl, error)
     factDB.add({ timestamp: getTimestamp(), error: error.toString() || 'fetch error' })
   }).trigger
 

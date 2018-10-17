@@ -70,8 +70,7 @@ const clientFileDownload = async ({
 
   log && log(`[clientFileDownload] file: ${filePath}`)
 
-  const { buffer } = await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET' })
-  const fileBuffer = await buffer()
+  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET' })).buffer()
   log && log(`[clientFileDownload] get file: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
 
   if (fileOutputPath) {

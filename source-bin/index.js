@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getServerInfo } from 'dr-js/bin/server/function'
+import { describeServer } from 'dr-js/bin/function'
 
 import { createServer as createServerExplorer } from 'dr-server/sample/explorer'
 import { createServer as createServerStatusCollect } from 'dr-server/sample/statusCollect'
@@ -14,13 +14,7 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   const startServer = async (createServer, extraConfig) => {
     const { start, option, logger } = await createServer({ ...getServerConfig(), ...extraConfig })
     await start()
-    logger.add(getServerInfo(
-      modeFormat.name,
-      option.protocol,
-      option.hostname,
-      option.port,
-      Object.entries(extraConfig).map((key, value) => ` - ${key}: ${value}`))
-    )
+    logger.add(describeServer(option, modeFormat.name, Object.entries(extraConfig).map(([ key, value ]) => `${key}: ${value}`)))
   }
 
   const getServerConfig = () => ({
