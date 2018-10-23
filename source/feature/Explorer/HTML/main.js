@@ -9,11 +9,12 @@ import { pathContentStyle, initPathContent } from './pathContent'
 import { initFileUpload, initUploader } from './uploader'
 
 const getHTML = ({
+  IS_SKIP_AUTH = false,
+  IS_READ_ONLY = false,
   URL_AUTH_CHECK,
-  URL_PATH_MODIFY,
-  URL_PATH_BATCH_MODIFY,
-  URL_FILE_UPLOAD,
+  URL_PATH_ACTION,
   URL_FILE_SERVE,
+  URL_FILE_UPLOAD,
   URL_STORAGE_STATUS
 }) => COMMON_LAYOUT([
   `<title>Explorer</title>`,
@@ -24,11 +25,12 @@ const getHTML = ({
   `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
   COMMON_SCRIPT({
+    IS_SKIP_AUTH,
+    IS_READ_ONLY,
     URL_AUTH_CHECK,
-    URL_PATH_MODIFY,
-    URL_PATH_BATCH_MODIFY,
-    URL_FILE_UPLOAD,
+    URL_PATH_ACTION,
     URL_FILE_SERVE,
+    URL_FILE_UPLOAD,
     URL_STORAGE_STATUS,
     initModal,
     initLoadingMask,
@@ -47,10 +49,13 @@ const mainStyle = `<style>
 
 const onLoadFunc = () => {
   const {
-    URL,
+    URL, location,
     qS, cE, aCL,
-    URL_AUTH_CHECK, URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_UPLOAD, URL_FILE_SERVE, URL_STORAGE_STATUS,
+
+    IS_SKIP_AUTH, IS_READ_ONLY,
+    URL_AUTH_CHECK, URL_PATH_ACTION, URL_FILE_SERVE, URL_FILE_UPLOAD, URL_STORAGE_STATUS,
     initModal, initLoadingMask, initAuthMask, initPathContent, initFileUpload, initUploader,
+
     Dr: {
       Common: { Immutable: { StateStore: { createStateStore } } },
       Browser: {
@@ -60,37 +65,36 @@ const onLoadFunc = () => {
     }
   } = window
 
-  const initExplorer = async ({ authFetch, authDownload }) => {
-    const { uploadFileByChunk } = initFileUpload(URL_FILE_UPLOAD)
+  const initExplorer = async ({ authRevoke, authFetch, authDownload }) => {
+    const { uploadFileByChunk } = IS_READ_ONLY ? {} : initFileUpload(URL_FILE_UPLOAD, authFetch)
     const { withAlertModal, withConfirmModal, withPromptModal } = initModal()
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
-    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getModifyPathAsync, getModifyPathBatchAsync, getDownloadFileAsync, renderPathContent } = initPathContent(URL_PATH_MODIFY, URL_PATH_BATCH_MODIFY, URL_FILE_SERVE, withConfirmModal, withPromptModal)
-    const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = initUploader(uploadFileByChunk)
+    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getPathActionAsync, getDownloadFileAsync, renderPathContent } = initPathContent(URL_PATH_ACTION, URL_FILE_SERVE, authFetch, withConfirmModal, withPromptModal, IS_READ_ONLY)
+    const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = IS_READ_ONLY ? {} : initUploader(uploadFileByChunk)
 
     const loadingMaskStore = createStateStore(initialLoadingMaskState)
     const pathContentStore = createStateStore(initialPathContentState)
-    const uploaderStore = createStateStore(initialUploaderState)
+    const uploaderStore = !IS_READ_ONLY && createStateStore(initialUploaderState)
 
-    const loadPathAsync = getLoadPathAsync(pathContentStore, authFetch)
+    const loadPathAsync = getLoadPathAsync(pathContentStore)
 
     const loadPath = wrapLossyLoading(loadingMaskStore, loadPathAsync)
-    const modifyPath = wrapLossyLoading(loadingMaskStore, getModifyPathAsync(pathContentStore, authFetch))
-    const modifyPathBatch = wrapLossyLoading(loadingMaskStore, getModifyPathBatchAsync(pathContentStore, authFetch))
+    const pathAction = wrapLossyLoading(loadingMaskStore, getPathActionAsync(pathContentStore))
     const downloadFile = wrapLossyLoading(loadingMaskStore, getDownloadFileAsync(pathContentStore, authDownload))
-    const uploadFile = wrapLossyLoading(loadingMaskStore, getUploadFileAsync(uploaderStore, authFetch, loadPathAsync))
-    const showStorageStatus = wrapLossyLoading(loadingMaskStore, async () => {
-      const response = await authFetch(URL_STORAGE_STATUS)
-      const { storageStatusText } = await response.json()
+    const uploadFile = !IS_READ_ONLY && wrapLossyLoading(loadingMaskStore, getUploadFileAsync(uploaderStore, loadPathAsync))
+    const showStorageStatus = !IS_READ_ONLY && wrapLossyLoading(loadingMaskStore, async () => {
+      const { storageStatusText } = await (await authFetch(URL_STORAGE_STATUS)).json()
       await withAlertModal(storageStatusText)
     })
-    const appendUploadFileList = getAppendUploadFileList(uploaderStore, () => ({
+    const appendUploadFileList = !IS_READ_ONLY && getAppendUploadFileList(uploaderStore, () => ({
       shouldAppend: !loadingMaskStore.getState().isLoading,
-      pathFragList: pathContentStore.getState().pathFragList
+      relativePath: pathContentStore.getState().pathContent.relativePath
     }))
-    const createNewDirectory = async () => modifyPath('create-directory', [
-      ...pathContentStore.getState().pathFragList,
-      await withPromptModal('Directory Name', `new-directory-${Date.now().toString(36)}`)
-    ].join('/'))
+    const createNewDirectory = async () => pathAction(
+      [ await withPromptModal('Directory Name', `new-directory-${Date.now().toString(36)}`) ],
+      'create-directory',
+      pathContentStore.getState().pathContent.relativePath
+    )
     const updateSort = () => { qS('#button-sort').innerText = `Sort: ${pathContentStore.getState().pathSortType}` }
     const cycleSort = () => {
       cyclePathSortType(pathContentStore)
@@ -98,33 +102,31 @@ const onLoadFunc = () => {
     }
 
     const historyStateStore = createHistoryStateStore()
-    const historyStateListener = (url) => {
-      const pathString = decodeURIComponent((new URL(url)).hash.slice(1))
-      loadPath(pathString.split('/').filter(Boolean))
-    }
+    const historyStateListener = (url) => loadPath(decodeURIComponent((new URL(url)).hash.slice(1)))
     historyStateStore.subscribe(historyStateListener)
-    const loadPathWithHistoryState = (pathFragList = pathContentStore.getState().pathFragList) => {
+    const loadPathWithHistoryState = (relativePath = pathContentStore.getState().pathContent.relativePath) => {
       const urlObject = new URL(historyStateStore.getState())
-      urlObject.hash = `#${encodeURIComponent(pathFragList.join('/'))}`
+      urlObject.hash = `#${encodeURIComponent(relativePath)}`
       historyStateStore.setState(urlObject.toString())
     }
 
     loadingMaskStore.subscribe(() => renderLoadingMask(loadingMaskStore))
-    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPathWithHistoryState, modifyPath, modifyPathBatch, downloadFile))
-    uploaderStore.subscribe(() => renderUploader(uploaderStore, uploadFile, appendUploadFileList))
+    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPathWithHistoryState, pathAction, downloadFile))
+    !IS_READ_ONLY && uploaderStore.subscribe(() => renderUploader(uploaderStore, uploadFile, appendUploadFileList))
 
     aCL(qS('#control-panel'), [
-      cE('button', { innerText: 'To Root', onclick: () => loadPathWithHistoryState([]) }),
+      cE('button', { innerText: 'To Root', onclick: () => loadPathWithHistoryState('.') }),
       cE('span', { innerText: '|' }),
-      cE('button', { innerText: 'Refresh', onclick: () => loadPath(pathContentStore.getState().pathFragList) }),
+      cE('button', { innerText: 'Refresh', onclick: () => loadPath(pathContentStore.getState().pathContent.relativePath) }),
       cE('button', { id: 'button-sort', onclick: cycleSort }),
-      cE('button', { innerText: 'New Directory', onclick: createNewDirectory }),
-      cE('span', { innerText: '|' }),
-      cE('button', { innerText: 'Toggle Upload', onclick: () => uploaderStore.setState({ isActive: !uploaderStore.getState().isActive }) }),
-      cE('button', { innerText: 'Storage Status', onclick: () => showStorageStatus() })
+      !IS_READ_ONLY && cE('button', { innerText: 'New Directory', onclick: createNewDirectory }),
+      !IS_READ_ONLY && cE('span', { innerText: '|' }),
+      !IS_READ_ONLY && cE('button', { innerText: 'Toggle Upload', onclick: () => uploaderStore.setState({ isActive: !uploaderStore.getState().isActive }) }),
+      !IS_READ_ONLY && cE('button', { innerText: 'Storage Status', onclick: () => showStorageStatus() }),
+      cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })
     ])
 
-    applyDragFileListListener(document.body, (fileList) => appendUploadFileList(fileList))
+    !IS_READ_ONLY && applyDragFileListListener(document.body, (fileList) => appendUploadFileList(fileList))
     historyStateListener(historyStateStore.getState())
     updateSort()
 
@@ -133,7 +135,8 @@ const onLoadFunc = () => {
 
   initAuthMask({
     urlAuthCheck: URL_AUTH_CHECK,
-    onAuthPass: initExplorer
+    onAuthPass: initExplorer,
+    isSkipAuth: IS_SKIP_AUTH
   })
 }
 

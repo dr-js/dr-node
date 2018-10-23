@@ -1,7 +1,7 @@
 import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 
-import { createGetStatusReport } from './task/getStatusReport'
+import { createGetStatusReport } from './task/statusReport'
 
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',

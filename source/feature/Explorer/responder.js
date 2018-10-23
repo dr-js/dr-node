@@ -1,34 +1,31 @@
-import { join } from 'path'
-import { binary } from 'dr-js/module/common/format'
+import { posix } from 'path'
 import { catchAsync } from 'dr-js/module/common/error'
+import { stringIndentLine } from 'dr-js/module/common/format'
 
 import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderServeStatic } from 'dr-js/module/node/server/Responder/ServeStatic'
-import { runQuiet } from 'dr-js/module/node/system/Run'
-import { describeSystemStatus } from 'dr-js/module/node/system/Status'
 
-import { createFileChunkUpload } from './task/getFileChunkUpload'
-import { createGetPathModify } from './task/getPathModify'
+import { getCommonServerStatus } from 'source/function'
 
-const createResponderPathModify = (rootPath) => {
-  const getPathModify = createGetPathModify(rootPath)
-  return async (store, modifyType, relativePathFrom, relativePathTo) => responderSendJSON(store, {
-    object: await getPathModify(modifyType, relativePathFrom, relativePathTo)
-  })
-}
+import { createFileChunkUpload } from './task/fileChunkUpload'
+import { createGetPathAction } from './task/pathAction'
 
-const createResponderPathBatchModify = (rootPath) => {
-  const getPathModify = createGetPathModify(rootPath)
-  return async (store, nameList, modifyType, relativePathFrom, relativePathTo) => {
+const createResponderPathAction = (rootPath, isReadOnly, logger) => {
+  const posixNormalize = (relativeRoot, name) => posix.normalize(posix.join(relativeRoot, name))
+  const getPathAction = createGetPathAction(rootPath, isReadOnly)
+  return async (store, nameList, actionType, relativeRootFrom, relativeRootTo) => {
+    logger.add(`[path-action] ${actionType} [${nameList.length}]`)
     const resultList = []
     const errorList = []
     for (const name of nameList) {
-      const { result, error } = await catchAsync(getPathModify, modifyType, join(relativePathFrom, name), relativePathTo && join(relativePathTo, name))
-      const response = { name, modifyType, relativePathFrom, relativePathTo, error, result }
-      error ? errorList.push(response) : resultList.push(response)
+      const relativeFrom = posixNormalize(relativeRootFrom, name)
+      const relativeTo = relativeRootTo && posixNormalize(relativeRootTo, name)
+      const { result, error } = await catchAsync(getPathAction, actionType, relativeFrom, relativeTo)
+      const response = { actionType, relativeFrom, relativeTo, ...result }
+      error ? errorList.push({ ...response, error: error.toString() }) : resultList.push(response)
     }
     return responderSendJSON(store, { object: { resultList, errorList } })
   }
@@ -48,35 +45,15 @@ const createResponderFileChunkUpload = async (option) => {
   }
 }
 
-const createResponderStorageStatus = (rootPath) => {
-  const runQuick = async (command) => {
-    const { promise, stdoutBufferPromise } = runQuiet({ command, option: { cwd: rootPath } })
-    await promise
-    return (await stdoutBufferPromise).toString()
-  }
-  const getTitle = (title) => `[${title}]`.padEnd(80, '=')
-  const getPathStatus = () => runQuick('du -hd1').catch(() => '')// no good win32 alternative
-  const getDiskStatus = () => runQuick('df -h .').catch(
-    () => runQuick('dir | find "bytes free"') // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
-      .then((stdout) => `${binary(Number(stdout.match(/([\d,]+) bytes free/)[ 1 ].replace(/\D/g, '')))}B storage free`)
-  )
-  const getSystemStatus = () => runQuick('top -b -n 1 | head -n 5').catch(
-    () => describeSystemStatus()
-  )
-  return async (store) => responderSendJSON(store, {
-    object: {
-      storageStatusText: [
-        getTitle('Path'), await getPathStatus(),
-        getTitle('Disk'), await getDiskStatus(),
-        getTitle('System'), await getSystemStatus()
-      ].filter(Boolean).join('\n')
-    }
-  })
+const createResponderStorageStatus = (rootPath) => async (store) => {
+  const storageStatusText = (await getCommonServerStatus(rootPath))
+    .map(([ title, output ]) => output && `${`[${title}] `.padEnd(80, '=')}\n${stringIndentLine(output, '  ')}`)
+    .filter(Boolean).join('\n')
+  return responderSendJSON(store, { object: { storageStatusText } })
 }
 
 export {
-  createResponderPathModify,
-  createResponderPathBatchModify,
+  createResponderPathAction,
   createResponderServeFile,
   createResponderFileChunkUpload,
   createResponderStorageStatus

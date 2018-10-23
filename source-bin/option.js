@@ -3,33 +3,39 @@ import {
   getServerFormatConfig,
   TokenCacheFormatConfig,
   AuthFormatConfig,
-  FileUploadFormatConfig,
+  ExplorerFormatConfig,
   StatusCollectFormatConfig,
-  StatusReportFormatConfig
+  StatusReportFormatConfig,
+  TaskRunnerFormatConfig
 } from 'dr-server/module/option'
 
-const { SingleString, SinglePath, BooleanFlag, Config } = ConfigPresetNode
+const { SingleString, AllString, SinglePath, BooleanFlag, Config } = ConfigPresetNode
 
 const MODE_FORMAT_LIST = [
-  [ 'server-explorer|se', [ FileUploadFormatConfig ] ],
-  [ 'server-status-collect|ssc', [ StatusCollectFormatConfig ] ],
-  [ 'server-status-report|ssr', [ StatusReportFormatConfig ] ],
-
-  [ 'client-file-upload|cfu', [
+  [ 'server|s', [ getServerFormatConfig([
+    TokenCacheFormatConfig,
+    AuthFormatConfig,
+    ExplorerFormatConfig,
+    StatusCollectFormatConfig,
+    StatusReportFormatConfig,
+    TaskRunnerFormatConfig
+  ]) ] ],
+  [ 'node-file-upload|nfu', [
     { ...SingleString, name: 'file-upload-server-url' },
     { ...SingleString, name: 'file-upload-key' },
     { ...SinglePath, name: 'file-upload-path' }
   ] ],
-  [ 'client-file-download|cfd', [
+  [ 'node-file-download|nfd', [
     { ...SingleString, name: 'file-download-server-url' },
     { ...SingleString, name: 'file-download-key' },
     { ...SinglePath, name: 'file-download-path' }
   ] ],
-  [ 'client-file-modify|cfm', [
-    { ...SingleString, name: 'file-modify-server-url' },
-    { ...SingleString, name: 'modify-type' },
-    { ...SingleString, optional: true, name: 'file-modify-key' },
-    { ...SingleString, optional: true, name: 'file-modify-key-to' }
+  [ 'node-path-action|npa', [
+    { ...SingleString, name: 'path-action-server-url' },
+    { ...SingleString, name: 'path-action-type' },
+    { ...SingleString, optional: true, name: 'path-action-key' },
+    { ...SingleString, optional: true, name: 'path-action-key-to' },
+    { ...AllString, optional: true, name: 'path-action-name-list' }
   ] ]
 ].map(([ nameConfig, extendFormatList ]) => {
   const [ name, ...aliasNameList ] = nameConfig.split('|')
@@ -42,8 +48,7 @@ const OPTION_CONFIG = {
     Config,
     { ...BooleanFlag, name: 'version', shortName: 'v' },
     { ...BooleanFlag, name: 'help', shortName: 'h', description: `show full help` },
-    ...MODE_FORMAT_LIST,
-    getServerFormatConfig([ TokenCacheFormatConfig, AuthFormatConfig ])
+    ...MODE_FORMAT_LIST
   ]
 }
 

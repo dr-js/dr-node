@@ -1,4 +1,4 @@
-const initFileUpload = (urlFileUpload) => {
+const initFileUpload = (URL_FILE_UPLOAD, authFetch) => {
   const {
     crypto, isSecureContext,
     Dr: {
@@ -11,7 +11,7 @@ const initFileUpload = (urlFileUpload) => {
   } = window
 
   const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
-  const uploadFileByChunk = async (fileBlob, filePath, onProgress, authFetch) => {
+  const uploadFileByChunk = async (fileBlob, filePath, onProgress) => {
     const fileSize = fileBlob.size
     let chunkIndex = 0
     const chunkTotal = Math.ceil(fileSize / CHUNK_SIZE_MAX) || 1
@@ -30,7 +30,7 @@ const initFileUpload = (urlFileUpload) => {
       ])
       onProgress(chunkIndex * CHUNK_SIZE_MAX, fileSize)
       await withRetryAsync(
-        () => authFetch(urlFileUpload, { method: 'POST', body: chainArrayBufferPacket }),
+        () => authFetch(URL_FILE_UPLOAD, { method: 'POST', body: chainArrayBufferPacket }),
         4,
         1000
       )
@@ -62,7 +62,7 @@ const initUploader = (uploadFileByChunk) => {
     uploadStatus: ''
   }
 
-  const getUploadFileAsync = (uploaderStore, authFetch, onUploadComplete) => async () => {
+  const getUploadFileAsync = (uploaderStore, onUploadComplete) => async () => {
     const { uploadFileList: fileList } = uploaderStore.getState()
     uploaderStore.setState({ uploadStatus: 'uploading' })
     const timeStart = clock()
@@ -71,7 +71,7 @@ const initUploader = (uploadFileByChunk) => {
       const onProgress = (current, total) => uploaderStore.setState({
         uploadProgress: objectSet(uploaderStore.getState().uploadProgress, filePath, total ? (current / total) : 1)
       })
-      const { error } = await catchAsync(uploadFileByChunk, fileBlob, filePath, onProgress, authFetch)
+      const { error } = await catchAsync(uploadFileByChunk, fileBlob, filePath, onProgress)
       error && uploadStatusList.push(`Error upload '${filePath}': ${error.stack || (error.target && error.target.error) || error}`)
     }
     uploadStatusList.push(`Done in ${Format.time(clock() - timeStart)} for ${fileList.length} file`)
@@ -87,13 +87,13 @@ const initUploader = (uploadFileByChunk) => {
   }
 
   const getAppendUploadFileList = (uploaderStore, getExtraState) => (fileList = []) => {
-    const { shouldAppend, pathFragList } = getExtraState()
+    const { shouldAppend, relativePath } = getExtraState()
     if (!shouldAppend) return
 
     fileList = Array.from(fileList) // NOTE: convert FileList, for Edge support, do not use `...fileList`
     const dedupSet = new Set()
     const uploadFileList = [
-      ...fileList.map((fileBlob) => ({ filePath: [ ...pathFragList, fileBlob.name ].join('/'), fileBlob })),
+      ...fileList.map((fileBlob) => ({ filePath: `${relativePath}/${fileBlob.name}`, fileBlob })),
       ...uploaderStore.getState().uploadFileList
     ].filter(({ filePath }) => dedupSet.has(filePath) ? false : dedupSet.add(filePath))
     const uploadProgress = uploadFileList.reduce(

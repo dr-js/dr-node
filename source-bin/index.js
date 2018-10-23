@@ -2,10 +2,12 @@
 
 import { describeServer } from 'dr-js/bin/function'
 
-import { createServer as createServerExplorer } from 'dr-server/sample/explorer'
-import { createServer as createServerStatusCollect } from 'dr-server/sample/statusCollect'
-import { createServer as createServerStatusReport } from 'dr-server/sample/statusReport'
-import { clientFileUpload, clientFileDownload, clientFileModify } from 'dr-server/module/featureNode/clientFile'
+import { createServer as createSampleServer } from 'dr-server/sample/server'
+// import { createServer as createServerTaskRunner } from 'dr-server/sample/taskRunner'
+// import { createServer as createServerStatusCollect } from 'dr-server/sample/statusCollect'
+// import { createServer as createServerStatusReport } from 'dr-server/sample/statusReport'
+
+import { fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
 
 import { MODE_FORMAT_LIST, parseOption, formatUsage } from './option'
 import { name as packageName, version as packageVersion } from '../package.json'
@@ -14,7 +16,7 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   const startServer = async (createServer, extraConfig) => {
     const { start, option, logger } = await createServer({ ...getServerConfig(), ...extraConfig })
     await start()
-    logger.add(describeServer(option, modeFormat.name, Object.entries(extraConfig).map(([ key, value ]) => `${key}: ${value}`)))
+    logger.add(describeServer(option, modeFormat.name, Object.entries(extraConfig).map(([ key, value ]) => value !== undefined && `${key}: ${value}`).filter(Boolean)))
   }
 
   const getServerConfig = () => ({
@@ -41,48 +43,46 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   })
 
   switch (modeFormat.name) {
-    case 'server-explorer':
-      return startServer(createServerExplorer, {
-        uploadRootPath: getSingleOptionOptional('file-upload-root-path'),
-        uploadMergePath: getSingleOptionOptional('file-upload-merge-path')
-      })
-    case 'server-status-collect':
-      return startServer(createServerStatusCollect, {
+    case 'server':
+      return startServer(createSampleServer, {
+        explorerRootPath: getSingleOptionOptional('explorer-root-path'),
+        explorerUploadMergePath: getSingleOptionOptional('explorer-upload-merge-path'),
+
         statusCollectPath: getSingleOptionOptional('status-collect-path'),
         statusCollectUrl: getSingleOptionOptional('status-collect-url'),
-        statusCollectInterval: getSingleOptionOptional('status-collect-interval')
-      })
-    case 'server-status-report':
-      return startServer(createServerStatusReport, {
-        statusReportProcessTag: getSingleOptionOptional('status-report-process-tag')
-      })
+        statusCollectInterval: getSingleOptionOptional('status-collect-interval'),
 
-    case 'client-file-upload':
-      return clientFileUpload({
+        statusReportProcessTag: getSingleOptionOptional('status-report-process-tag'),
+
+        taskRunnerRootPath: getSingleOptionOptional('task-runner-root-path')
+      })
+    case 'node-file-upload':
+      return fileUpload({
         fileInputPath: getSingleOption('file-upload-path'),
         filePath: getSingleOption('file-upload-key'),
         urlFileUpload: getSingleOption('file-upload-server-url'),
         fileAuth: getSingleOption('auth-file')
       })
-    case 'client-file-download':
-      return clientFileDownload({
+    case 'node-file-download':
+      return fileDownload({
         fileOutputPath: getSingleOption('file-download-path'),
         filePath: getSingleOption('file-download-key'),
         urlFileDownload: getSingleOption('file-download-server-url'),
         fileAuth: getSingleOption('auth-file')
       })
-    case 'client-file-modify':
-      return logJSON(await clientFileModify({
-        modifyType: getSingleOption('modify-type'),
-        filePath: getSingleOptionOptional('file-modify-key'),
-        filePathTo: getSingleOptionOptional('file-modify-key-to'),
-        urlFileModify: getSingleOption('file-modify-server-url'),
+    case 'node-path-action':
+      return logJSON(await pathAction({
+        nameList: getOptionOptional('path-action-name-list'),
+        actionType: getSingleOption('path-action-type'),
+        key: getSingleOptionOptional('path-action-key'),
+        keyTo: getSingleOptionOptional('path-action-key-to'),
+        urlPathAction: getSingleOption('path-action-server-url'),
         fileAuth: getSingleOption('auth-file')
       }))
   }
 }
 
-const logJSON = (object) => console.log(JSON.stringify(object, null, '  '))
+const logJSON = (object) => console.log(JSON.stringify(object, null, 2))
 
 const main = async () => {
   const optionData = await parseOption()

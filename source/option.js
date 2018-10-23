@@ -73,12 +73,12 @@ const AuthFormatConfig = {
 }
 
 // uploadRootPath, uploadMergePath
-const FileUploadFormatConfig = {
+const ExplorerFormatConfig = {
   ...SinglePath,
   optional: true,
-  name: 'file-upload-root-path',
+  name: 'explorer-root-path',
   extendFormatList: [
-    { ...SinglePath, name: 'file-upload-merge-path' }
+    { ...SinglePath, name: 'explorer-upload-merge-path' }
   ]
 }
 
@@ -96,11 +96,14 @@ const StatusCollectFormatConfig = {
 // statusReportProcessTag
 const StatusReportFormatConfig = { ...SingleString, optional: true, name: 'status-report-process-tag' }
 
+const TaskRunnerFormatConfig = { ...SinglePath, optional: true, name: 'task-runner-root-path' }
+
 export {
   getServerFormatConfig,
   TokenCacheFormatConfig,
   AuthFormatConfig,
-  FileUploadFormatConfig,
+  ExplorerFormatConfig,
   StatusCollectFormatConfig,
-  StatusReportFormatConfig
+  StatusReportFormatConfig,
+  TaskRunnerFormatConfig
 }

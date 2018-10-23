@@ -5,8 +5,7 @@ import { getRouteParamAny } from 'dr-js/module/node/server/Responder/Router'
 
 import { getHTML } from './HTML/main'
 import {
-  createResponderPathModify,
-  createResponderPathBatchModify,
+  createResponderPathAction,
   createResponderServeFile,
   createResponderFileChunkUpload,
   createResponderStorageStatus
@@ -15,63 +14,63 @@ import {
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
 
-  uploadRootPath,
-  uploadMergePath,
+  isReadOnly = false,
+
+  explorerRootPath,
+  explorerUploadMergePath,
 
   // TODO: maybe less specific, or optional?
-  urlAuthCheck = '', // [ '/auth', 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ]
+  isSkipAuth = false,
+  urlAuthCheck = '',
   wrapResponderCheckAuthCheckCode = (responder) => responder
 }) => {
+  if (isReadOnly === Boolean(explorerUploadMergePath)) throw new Error(`expect either isReadOnly: ${isReadOnly} or explorerUploadMergePath: ${explorerUploadMergePath}`)
+  if (isSkipAuth === Boolean(urlAuthCheck)) throw new Error(`expect either isSkipAuth: ${isSkipAuth} or urlAuthCheck: ${urlAuthCheck}`)
+
   const URL_HTML = `${routePrefix}/explorer`
-  const URL_PATH_MODIFY = `${routePrefix}/path-modify`
-  const URL_PATH_BATCH_MODIFY = `${routePrefix}/path-batch-modify`
-  const URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`
+  const URL_PATH_ACTION = `${routePrefix}/path-action`
   const URL_FILE_SERVE = `${routePrefix}/file-serve`
+  const URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`
   const URL_STORAGE_STATUS = `${routePrefix}/storage-status`
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
+    IS_SKIP_AUTH: isSkipAuth,
+    IS_READ_ONLY: isReadOnly,
     URL_AUTH_CHECK: urlAuthCheck,
-    URL_PATH_MODIFY,
-    URL_PATH_BATCH_MODIFY,
-    URL_FILE_UPLOAD,
+    URL_PATH_ACTION,
     URL_FILE_SERVE,
+    URL_FILE_UPLOAD,
     URL_STORAGE_STATUS
   })), BASIC_EXTENSION_MAP.html)
 
-  const responderPathModify = createResponderPathModify(uploadRootPath)
-  const responderPathBatchModify = createResponderPathBatchModify(uploadRootPath)
-  const responderFileChunkUpload = await createResponderFileChunkUpload({
-    rootPath: uploadRootPath,
-    mergePath: uploadMergePath,
+  const responderPathAction = createResponderPathAction(explorerRootPath, isReadOnly, logger)
+  const responderFileServe = createResponderServeFile(explorerRootPath)
+  const responderFileChunkUpload = !isReadOnly && await createResponderFileChunkUpload({
+    rootPath: explorerRootPath,
+    mergePath: explorerUploadMergePath,
     onError: (error) => {
-      logger.add(`[ERROR] ${error}`)
+      logger.add(`[ERROR][FileChunkUpload] ${error}`)
       console.error(error)
     }
   })
-  const responderFileServe = createResponderServeFile(uploadRootPath)
-  const responderStorageStatus = createResponderStorageStatus(uploadRootPath)
+  const responderStorageStatus = !isReadOnly && createResponderStorageStatus(explorerRootPath)
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
-    [ URL_PATH_MODIFY, 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
-      const { modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
-      return responderPathModify(store, modifyType, relativePathFrom, relativePathTo)
+    [ URL_PATH_ACTION, 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
+      const { nameList, actionType, relativeFrom, relativeTo } = JSON.parse(await receiveBufferAsync(store.request))
+      return responderPathAction(store, nameList, actionType, relativeFrom, relativeTo)
     }) ],
-    [ URL_PATH_BATCH_MODIFY, 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
-      const { nameList, modifyType, relativePathFrom, relativePathTo } = JSON.parse(await receiveBufferAsync(store.request))
-      return responderPathBatchModify(store, nameList, modifyType, relativePathFrom, relativePathTo)
-    }) ],
-    [ URL_FILE_UPLOAD, 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
     [ `${URL_FILE_SERVE}/*`, 'GET', wrapResponderCheckAuthCheckCode((store) => responderFileServe(store, decodeURIComponent(getRouteParamAny(store)))) ],
-    [ URL_STORAGE_STATUS, 'GET', wrapResponderCheckAuthCheckCode(responderStorageStatus) ]
-  ]
+    !isReadOnly && [ URL_FILE_UPLOAD, 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
+    !isReadOnly && [ URL_STORAGE_STATUS, 'GET', wrapResponderCheckAuthCheckCode(responderStorageStatus) ]
+  ].filter(Boolean)
 
   return {
     URL_HTML,
-    URL_PATH_MODIFY,
-    URL_PATH_BATCH_MODIFY,
-    URL_FILE_UPLOAD,
+    URL_PATH_ACTION,
     URL_FILE_SERVE,
+    URL_FILE_UPLOAD,
     URL_STORAGE_STATUS,
     routeList
   }

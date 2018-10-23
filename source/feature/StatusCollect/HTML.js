@@ -35,7 +35,7 @@ h2, h4 { padding: 4px 2px 2px; }
 
 const onLoadFunc = () => {
   const {
-    alert,
+    alert, location,
     qS, cE,
     URL_STATUS_STATE, URL_AUTH_CHECK, CONFIG_RENDER_PRESET,
     initAuthMask,
@@ -238,7 +238,7 @@ const onLoadFunc = () => {
   }
   const formatBinaryData = (value) => `${Format.binary(value)}B`
 
-  const fetchStatusState = lossyAsync(async (authFetch) => {
+  const fetchStatusState = lossyAsync(async (authRevoke, authFetch) => {
     const {
       sumKeyList,
       rangeKeyList,
@@ -285,6 +285,7 @@ const onLoadFunc = () => {
     createRenderStatusButton('render-merge-0', 'RenderMerge0', renderMergeList, () => GET_STATE().merge0List, { ...CONFIG_RENDER_PRESET.Merge0, formatPosition: formatTimestamp })
     createRenderStatusButton('render-merge-1', 'RenderMerge1', renderMergeList, () => GET_STATE().merge1List, { ...CONFIG_RENDER_PRESET.Merge1, formatPosition: formatTimestamp })
     createRenderStatusButton('render-merge-2', 'RenderMerge2', renderMergeList, () => GET_STATE().merge2List, { ...CONFIG_RENDER_PRESET.Merge2, formatPosition: formatTimestamp })
+    qS('#control-panel').appendChild(cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) }))
 
     qS('#render-status-raw').click()
   }).trigger
@@ -298,9 +299,9 @@ const onLoadFunc = () => {
 
   initAuthMask({
     urlAuthCheck: URL_AUTH_CHECK,
-    onAuthPass: ({ authFetch }) => {
+    onAuthPass: ({ authRevoke, authFetch }) => {
       qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(authFetch) }))
-      fetchStatusState(authFetch)
+      fetchStatusState(authRevoke, authFetch)
     }
   })
 }

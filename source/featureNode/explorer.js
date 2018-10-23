@@ -10,9 +10,7 @@ import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { createDirectory } from 'dr-js/module/node/file/File'
 
 import { loadLookupFile } from 'source/configure/auth'
-import { uploadFileByChunk } from 'source/feature/Explorer/task/getFileChunkUpload'
-
-// TODO: handle logging properly
+import { uploadFileByChunk } from 'source/feature/Explorer/task/fileChunkUpload'
 
 // for node client file chunk upload
 
@@ -25,7 +23,7 @@ const getAuthFetch = async (fileAuth) => {
   }
 }
 
-const clientFileUpload = async ({
+const fileUpload = async ({
   fileInputPath,
   fileBuffer = readFileSync(fileInputPath),
   filePath,
@@ -38,15 +36,15 @@ const clientFileUpload = async ({
   const startTime = clock()
   const authFetch = await getAuthFetch(fileAuth)
 
-  log && log(`[clientFileUpload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
+  log && log(`[Upload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
 
   await uploadFileByChunk({
     fileBuffer,
     filePath,
-    onProgress: (uploadedSize, totalSize) => log && log(`[clientFileUpload] uploading ${percent(uploadedSize / totalSize)} (${time(clock() - startTime)})`),
+    onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)} (${time(clock() - startTime)})`),
     uploadFileChunkBuffer: async (chainBufferPacket, { chunkIndex }) => withRetryAsync(
       async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket }).catch((error) => {
-        const message = `[ERROR][clientFileUpload] upload chunk ${chunkIndex} of ${filePath}`
+        const message = `[ERROR][Upload] upload chunk ${chunkIndex} of ${filePath}`
         log && log(message, error)
         throw new Error(message)
       }),
@@ -55,10 +53,10 @@ const clientFileUpload = async ({
     )
   })
 
-  log && log(`[clientFileUpload] done: ${filePath} (${time(clock() - startTime)})`)
+  log && log(`[Upload] done: ${filePath} (${time(clock() - startTime)})`)
 }
 
-const clientFileDownload = async ({
+const fileDownload = async ({
   fileOutputPath,
   filePath,
   urlFileDownload,
@@ -68,38 +66,43 @@ const clientFileDownload = async ({
   const startTime = clock()
   const authFetch = await getAuthFetch(fileAuth)
 
-  log && log(`[clientFileDownload] file: ${filePath}`)
+  log && log(`[Download] file: ${filePath}`)
 
   const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET' })).buffer()
-  log && log(`[clientFileDownload] get file: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
+  log && log(`[Download] get: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
 
   if (fileOutputPath) {
     await createDirectory(dirname(fileOutputPath))
     writeFileSync(fileOutputPath, fileBuffer)
-    log && log(`[clientFileDownload] done: ${fileOutputPath} (${time(clock() - startTime)})`)
+    log && log(`[Download] done: ${fileOutputPath} (${time(clock() - startTime)})`)
   }
 
   return fileBuffer
 }
 
-const clientFileModify = async ({
-  modifyType,
-  filePath: relativePathFrom = '',
-  filePathTo: relativePathTo,
-  urlFileModify,
+const pathAction = async ({
+  nameList = [ '' ],
+  actionType,
+  key: relativeFrom = '',
+  keyTo: relativeTo,
+  urlPathAction,
   fileAuth,
   log = console.log
 }) => {
   const startTime = clock()
   const authFetch = await getAuthFetch(fileAuth)
 
-  log && log(`[clientFileModify] modify: ${modifyType}, file: ${relativePathFrom}, fileTo: ${relativePathTo}`)
+  log && log(`[Action|${actionType}] key: ${relativeFrom}, keyTo: ${relativeTo}, nameList: [${nameList}]`)
 
-  const result = await (await authFetch(urlFileModify, { method: 'POST', body: JSON.stringify({ modifyType, relativePathFrom, relativePathTo }) })).json()
+  const result = await (await authFetch(urlPathAction, { method: 'POST', body: JSON.stringify({ nameList, actionType, relativeFrom, relativeTo }) })).json()
 
-  log && log(`[clientFileModify] modify: ${modifyType} (${time(clock() - startTime)})`)
+  log && log(`[Action|${actionType}] done (${time(clock() - startTime)})`)
 
-  return result
+  return result // should check errorList
 }
 
-export { clientFileUpload, clientFileDownload, clientFileModify }
+export {
+  fileUpload,
+  fileDownload,
+  pathAction
+}

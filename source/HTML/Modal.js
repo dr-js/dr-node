@@ -26,7 +26,7 @@ const initModal = () => {
 
   const COMMON_FLEX_STYLE = { display: 'flex', flexFlow: 'column' }
   const createFlexRow = (...args) => cE('div', { style: 'display: flex; flex-flow: row; align-items: center; justify-content: center;' }, args)
-  const createMessage = (message) => cE('pre', { innerText: message, style: 'overflow: auto; max-height: 64vh; min-height: 2em; white-space: pre;' })
+  const createMessage = (message) => cE('pre', { innerText: message, style: 'overflow: auto; max-height: 64vh; white-space: pre;' })
 
   const withAlertModal = async (message) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
     Object.assign(modalMainDiv.style, COMMON_FLEX_STYLE)
@@ -38,34 +38,67 @@ const initModal = () => {
     setTimeout(() => confirmButton.focus(), 200)
   }))
 
-  const withConfirmModal = async (message) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
+  const withConfirmModal = async (
+    message,
+    textConfirm = 'Confirm',
+    textCancel = 'Cancel'
+  ) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
     Object.assign(modalMainDiv.style, COMMON_FLEX_STYLE)
-    const confirmButton = cE('button', { innerText: 'Confirm', onclick: () => resolve(true) })
+    const confirmButton = cE('button', { innerText: textConfirm, onclick: () => resolve(true) })
     aCL(modalMainDiv, [
       createMessage(message),
       createFlexRow(
-        cE('button', { innerText: 'Cancel', onclick: () => resolve(false) }),
+        cE('button', { innerText: textCancel, onclick: () => resolve(false) }),
         confirmButton
       )
     ])
     setTimeout(() => confirmButton.focus(), 200)
   }))
 
-  const withPromptModal = async (message, defaultValue = '') => withModal(({ modalMainDiv }) => new Promise((resolve) => {
+  const withPromptModal = async (
+    message,
+    defaultValue = '',
+    textConfirm = 'Confirm',
+    textCancel = 'Cancel'
+  ) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
     Object.assign(modalMainDiv.style, COMMON_FLEX_STYLE)
     const promptInput = cE('input', { value: defaultValue })
     aCL(modalMainDiv, [
       createMessage(message),
       promptInput,
       createFlexRow(
-        cE('button', { innerText: 'Cancel', onclick: () => resolve(null) }),
-        cE('button', { innerText: 'Confirm', onclick: () => resolve(promptInput.value) })
+        cE('button', { innerText: textCancel, onclick: () => resolve(null) }),
+        cE('button', { innerText: textConfirm, onclick: () => resolve(promptInput.value) })
       )
     ])
     setTimeout(() => promptInput.focus(), 200)
   }))
 
-  return { MODAL_Z_INDEX, renderModal, withModal, withAlertModal, withConfirmModal, withPromptModal }
+  const withPromptExtModal = async (
+    inputInfoList, // [ [ message, defaultValue = '' ] ]
+    textConfirm = 'Confirm',
+    textCancel = 'Cancel'
+  ) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
+    Object.assign(modalMainDiv.style, COMMON_FLEX_STYLE)
+
+    const inputElementList = inputInfoList.reduce((o, [ message, defaultValue ]) => {
+      o.push(createMessage(message), cE('input', { value: defaultValue }))
+      return o
+    }, [])
+
+    console.log({ inputInfoList, inputElementList })
+
+    aCL(modalMainDiv, [
+      ...inputElementList,
+      createFlexRow(
+        cE('button', { innerText: textCancel, onclick: () => resolve(null) }),
+        cE('button', { innerText: textConfirm, onclick: () => resolve(inputElementList.filter((v, index) => index % 2).map((inputElement) => inputElement.value)) })
+      )
+    ])
+    setTimeout(() => inputElementList[ 1 ].focus(), 200)
+  }))
+
+  return { MODAL_Z_INDEX, renderModal, withModal, withAlertModal, withConfirmModal, withPromptModal, withPromptExtModal }
 }
 
 export { initModal }

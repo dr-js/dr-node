@@ -35,7 +35,7 @@ const configureTokenCache = async ({
   tokenSize = TOKEN_SIZE, // in bytes
   expireTime = TOKEN_EXPIRE_TIME,
   tokenSizeSumMax = TOKEN_SIZE_SUM_MAX,
-  tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1 })
+  tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1, eventHub: null })
 }) => {
   await createDirectory(dirname(fileTokenCache))
   await catchAsync(loadTokenCache, tokenCacheMap, fileTokenCache)
