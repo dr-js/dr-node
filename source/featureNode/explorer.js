@@ -29,6 +29,7 @@ const fileUpload = async ({
   filePath,
   urlFileUpload,
   fileAuth,
+  timeout = 30 * 1000,
   maxRetry = 3,
   wait = 1000,
   log = console.log
@@ -43,7 +44,7 @@ const fileUpload = async ({
     filePath,
     onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)} (${time(clock() - startTime)})`),
     uploadFileChunkBuffer: async (chainBufferPacket, { chunkIndex }) => withRetryAsync(
-      async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket }).catch((error) => {
+      async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket, timeout }).catch((error) => {
         const message = `[ERROR][Upload] upload chunk ${chunkIndex} of ${filePath}`
         log && log(message, error)
         throw new Error(message)
@@ -61,6 +62,7 @@ const fileDownload = async ({
   filePath,
   urlFileDownload,
   fileAuth,
+  timeout = 30 * 1000,
   log = console.log
 }) => {
   const startTime = clock()
@@ -68,7 +70,7 @@ const fileDownload = async ({
 
   log && log(`[Download] file: ${filePath}`)
 
-  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET' })).buffer()
+  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET', timeout })).buffer()
   log && log(`[Download] get: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
 
   if (fileOutputPath) {
@@ -87,6 +89,7 @@ const pathAction = async ({
   keyTo: relativeTo,
   urlPathAction,
   fileAuth,
+  timeout = 30 * 1000,
   log = console.log
 }) => {
   const startTime = clock()
@@ -94,7 +97,7 @@ const pathAction = async ({
 
   log && log(`[Action|${actionType}] key: ${relativeFrom}, keyTo: ${relativeTo}, nameList: [${nameList}]`)
 
-  const result = await (await authFetch(urlPathAction, { method: 'POST', body: JSON.stringify({ nameList, actionType, relativeFrom, relativeTo }) })).json()
+  const result = await (await authFetch(urlPathAction, { method: 'POST', body: JSON.stringify({ nameList, actionType, relativeFrom, relativeTo }), timeout })).json()
 
   log && log(`[Action|${actionType}] done (${time(clock() - startTime)})`)
 

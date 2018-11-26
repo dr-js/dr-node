@@ -1,3 +1,4 @@
+import { createSecureContext } from 'tls'
 import { createServer } from 'dr-js/module/node/server/Server'
 import { readFileAsync } from 'dr-js/module/node/file/function'
 
@@ -11,27 +12,46 @@ const configureServerBase = async ({
   fileSSLCert,
   fileSSLChain,
   fileSSLDHParam, // Diffie-Hellman Key Exchange
-  extraHostContextList = [] // [ [ 'hostname', { key, cert, ca, dhparam, .. or other SSL option } ] ]
+  ...extraOption
 }) => {
   const isHttps = protocol === 'https:'
-  const server = createServer({
+  return createServer({
     protocol,
     hostname,
     port,
     key: await loadFile(isHttps && fileSSLKey),
     cert: await loadFile(isHttps && fileSSLCert),
     ca: await loadFile(isHttps && fileSSLChain),
-    dhparam: await loadFile(isHttps && fileSSLDHParam)
+    dhparam: await loadFile(isHttps && fileSSLDHParam),
+    ...extraOption
   })
-
-  // for multi HTTPS host server, check:
-  //   https://en.wikipedia.org/wiki/Server_Name_Indication
-  //   https://nodejs.org/api/tls.html#tls_server_addcontext_hostname_context
-  extraHostContextList.length && extraHostContextList.forEach(([ hostname, contextOption ]) => isHttps
-    ? server.addContext(hostname, contextOption)
-    : console.warn(`[ServerBase] non-HTTPS server, skipped SNI secure context: ${hostname}`)
-  )
-  return server
 }
 
-export { configureServerBase }
+// for multi HTTPS host server, check `SNICallback`:
+//   https://en.wikipedia.org/wiki/Server_Name_Indication
+//   https://github.com/nodejs/node/issues/17567
+const getServerSNIOption = async (
+  hostnameConfigMap // { [hostname]: { fileSSLKey, fileSSLCert, fileSSLChain } }
+) => {
+  const secureContextMap = {}
+  for (const [ hostname, { fileSSLKey, fileSSLCert, fileSSLChain } ] of Object.entries(hostnameConfigMap)) {
+    secureContextMap[ hostname ] = {
+      key: await loadFile(fileSSLKey),
+      cert: await loadFile(fileSSLCert),
+      ca: await loadFile(fileSSLChain)
+    }
+  }
+  const defaultSecureContext = Object.keys(secureContextMap)[ 0 ] // NOTE: use the first as default
+  return {
+    ...defaultSecureContext, // for skipping duplicate config for SSL in configureServerBase
+    SNICallback: (hostname, callback) => callback(
+      null,
+      createSecureContext(secureContextMap[ hostname ] || defaultSecureContext)
+    )
+  }
+}
+
+export {
+  configureServerBase,
+  getServerSNIOption
+}

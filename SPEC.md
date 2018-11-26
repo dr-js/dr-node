@@ -15,7 +15,7 @@
 + 📄 [source/configure/logger.js](source/configure/logger.js)
   - `configureLogger`
 + 📄 [source/configure/serverBase.js](source/configure/serverBase.js)
-  - `configureServerBase`
+  - `configureServerBase`, `getServerSNIOption`
 + 📄 [source/configure/tokenCache.js](source/configure/tokenCache.js)
   - `configureTokenCache`
 + 📄 [source/feature/Explorer/configureFeaturePack.js](source/feature/Explorer/configureFeaturePack.js)
