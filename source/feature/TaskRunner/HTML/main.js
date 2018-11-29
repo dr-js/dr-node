@@ -46,7 +46,7 @@ const onLoadFunc = () => {
     initModal, initLoadingMask, initAuthMask, initTaskList,
 
     Dr: {
-      Common: { Immutable: { StateStore: { createStateStore } }, Math: { getRandomId } }
+      Common: { Immutable: { StateStore: { createStateStore } } }
     }
   } = window
 
@@ -54,7 +54,7 @@ const onLoadFunc = () => {
     const { withAlertModal, withConfirmModal, withPromptModal, withPromptExtModal } = initModal()
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
     const {
-      initialTaskListState, cycleTaskSortType, authFetchTaskActionJSON, getLoadTaskListAsync, getTaskActionAsync, renderTaskList
+      initialTaskListState, cycleTaskSortType, authFetchTaskActionJSON, getLoadTaskListAsync, getTaskActionAsync, getSetTaskConfigAsync, renderTaskList
     } = initTaskList(URL_TASK_ACTION, authFetch, withAlertModal, withConfirmModal, withPromptModal, withPromptExtModal)
 
     const loadingMaskStore = createStateStore(initialLoadingMaskState)
@@ -62,41 +62,12 @@ const onLoadFunc = () => {
 
     const loadTaskList = wrapLossyLoading(loadingMaskStore, getLoadTaskListAsync(taskListStore))
     const taskAction = wrapLossyLoading(loadingMaskStore, getTaskActionAsync(taskListStore))
+    const setTaskConfigAsync = getSetTaskConfigAsync(taskAction)
 
     const showProcessStatus = wrapLossyLoading(loadingMaskStore, async () => {
       const { processStatus } = await authFetchTaskActionJSON('process-status')
       await withAlertModal(processStatus)
     })
-
-    const createNewTask = async () => {
-      const resultList = await withPromptExtModal([
-        [ 'key (immutable)', getRandomId('Task-') ],
-        [ 'task.command', '' ],
-        [ 'task.argList', '[]' ],
-        [ 'task.cwd', '' ],
-        [ 'task.env', '{}' ],
-        [ 'task.shell', 'true' ],
-        [ 'info.note', '' ]
-      ])
-      if (!resultList) return
-      const [
-        key,
-        taskCommand,
-        taskArgListRaw,
-        taskCwd,
-        taskEnvRaw,
-        taskShellRaw,
-        infoNote
-      ] = resultList
-      const taskArgList = JSON.parse(taskArgListRaw)
-      const taskEnv = JSON.parse(taskEnvRaw)
-      const taskShell = taskShellRaw === 'true'
-      return taskAction('set-task-config', {
-        key,
-        task: { command: taskCommand, argList: taskArgList, cwd: taskCwd, env: taskEnv, shell: taskShell },
-        info: { note: infoNote }
-      })
-    }
 
     const updateSort = () => { qS('#button-sort').innerText = `Sort: ${taskListStore.getState().taskSortType}` }
     const cycleSort = () => {
@@ -105,13 +76,13 @@ const onLoadFunc = () => {
     }
 
     loadingMaskStore.subscribe(() => renderLoadingMask(loadingMaskStore))
-    taskListStore.subscribe(() => renderTaskList(taskListStore, qS('#main-panel'), loadTaskList, taskAction))
+    taskListStore.subscribe(() => renderTaskList(taskListStore, qS('#main-panel'), loadTaskList, taskAction, setTaskConfigAsync))
 
     aCL(qS('#control-panel'), [
       cE('button', { innerText: 'Refresh', onclick: () => loadTaskList() }),
       cE('button', { id: 'button-sort', onclick: cycleSort }),
       cE('span', { innerText: '|' }),
-      cE('button', { innerText: 'New Task', onclick: createNewTask }),
+      cE('button', { innerText: 'New Task', onclick: () => setTaskConfigAsync() }),
       cE('span', { innerText: '|' }),
       cE('button', { innerText: 'Process Status', onclick: () => showProcessStatus() }),
       cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })

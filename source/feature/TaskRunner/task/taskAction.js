@@ -22,6 +22,7 @@ const FILE_TASK_LOG = 'task.log'
 //     cwd: ''
 //     env: {}
 //     shell: true
+//     resetLog: true
 //   info
 //     note: '' | [ '' ] | {} | whatever
 //     timeCreate
@@ -44,12 +45,13 @@ const verifyAndFormatConfig = ({ key, task, info = {} }, getPath) => {
 
   basicObject(task, 'invalid task')
   const taskPath = getPath(key)
-  const { command, argList = [], cwd = taskPath, env = {}, shell = true } = task
+  const { command, argList = [], cwd = taskPath, env = {}, shell = true, resetLog = true } = task
   verifyString(command, 'task.command')
   basicArray(argList, 'invalid task.argList')
   basicObject(env, 'invalid task.env')
   boolean(shell, 'invalid task.shell')
-  task = { command, argList, cwd: toPosixPath(relative(taskPath, resolve(taskPath, cwd))), env, shell }
+  boolean(resetLog, 'invalid task.resetLog')
+  task = { command, argList, cwd: toPosixPath(relative(taskPath, resolve(taskPath, cwd))), env, shell, resetLog }
 
   basicObject(info, 'invalid info')
   const { note } = info
@@ -120,6 +122,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     'start-task': async ({ key }) => {
       const config = await loadConfig(key)
       if (await existTaskProcess(config)) throw new Error(`task exist`)
+      config.task.resetLog && await taskAction[ 'reset-task-log' ]({ key })
       const { processInfo } = await startDetachedProcess(config.task, getLogPath(key))
       await saveConfig({ ...config, status: { processInfo, timeStart: getTimestamp() } })
     },

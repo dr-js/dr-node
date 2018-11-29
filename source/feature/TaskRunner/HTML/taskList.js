@@ -19,14 +19,16 @@ const initTaskList = (
 ) => {
   const {
     cE, aCL,
-    Dr: { Common: { Compare: { compareString } } }
+    Dr: { Common: { Compare: { compareString }, Math: { getRandomId } } }
   } = window
 
-  const SORT_FUNC = {
-    KEY: ({ key: a }, { key: b }) => compareString(a, b),
-    COMMAND: ({ task: { command: a } }, { task: { command: b } }) => compareString(a, b),
-    TIME_CREATE: ({ info: { timeCreate: a } }, { info: { timeCreate: b } }) => b - a // newer first
-  }
+  const KEY = (a, b) => compareString(a.key, b.key)
+  const COMMAND = (a, b) => compareString(a.task.command, b.task.command) || KEY(a, b)
+  const NOTE = (a, b) => compareString(a.info.note, b.info.note) || COMMAND(a, b)
+  const TIME_CREATE = (a, b) => b.info.timeCreate - a.info.timeCreate || COMMAND(a, b) // newer first
+  const TIME_UPDATE = (a, b) => b.info.timeUpdate - a.info.timeUpdate || COMMAND(a, b) // newer first
+
+  const SORT_FUNC = { COMMAND, NOTE, TIME_CREATE, TIME_UPDATE }
   const SORT_TYPE_LIST = Object.keys(SORT_FUNC)
 
   const initialTaskListState = {
@@ -52,7 +54,43 @@ const initTaskList = (
     await getLoadTaskListAsync(taskListStore)
   }
 
-  const renderTaskList = (taskListStore, parentElement, loadTaskList, taskAction) => {
+  const getSetTaskConfigAsync = (taskAction) => async (config = { key: getRandomId('Task-'), task: {}, info: {} }) => {
+    const resultList = await withPromptExtModal([
+      [ 'task.command', config.task.command || '' ],
+      [ 'task.argList', JSON.stringify(config.task.argList) || '[]' ],
+      [ 'task.cwd', config.task.cwd || '' ],
+      [ 'task.env', JSON.stringify(config.task.env) || '{}' ],
+      [ 'task.shell', config.task.shell || 'true' ],
+      [ 'task.resetLog', config.task.resetLog || 'true' ],
+      [ 'info.note', config.info.note || '' ]
+    ])
+    if (!resultList) return
+    const [
+      taskCommand,
+      taskArgList,
+      taskCwd,
+      taskEnv,
+      taskShell,
+      taskResetLog,
+      infoNote
+    ] = resultList
+    return taskAction('set-task-config', {
+      key: config.key,
+      task: {
+        command: taskCommand,
+        argList: JSON.parse(taskArgList),
+        cwd: taskCwd,
+        env: JSON.parse(taskEnv),
+        shell: taskShell === 'true',
+        resetLog: taskResetLog === 'true'
+      },
+      info: {
+        note: infoNote
+      }
+    })
+  }
+
+  const renderTaskList = (taskListStore, parentElement, loadTaskList, taskAction, setTaskConfigAsync) => {
     const { taskSortType, configList } = taskListStore.getState()
 
     const TEXT_DETAIL = '🔎'
@@ -62,34 +100,6 @@ const initTaskList = (
     const TEXT_LOG = '📃'
     const TEXT_LOG_RESET = '♻️'
     const TEXT_DELETE = '🗑️'
-
-    const doEditConfig = async (config) => {
-      const resultList = await withPromptExtModal([
-        [ 'task.command', config.task.command ],
-        [ 'task.argList', JSON.stringify(config.task.argList) ],
-        [ 'task.cwd', config.task.cwd ],
-        [ 'task.env', JSON.stringify(config.task.env) ],
-        [ 'task.shell', config.task.shell ],
-        [ 'info.note', config.info.note ]
-      ])
-      if (!resultList) return
-      const [
-        taskCommand,
-        taskArgListRaw,
-        taskCwd,
-        taskEnvRaw,
-        taskShellRaw,
-        infoNote
-      ] = resultList
-      const taskArgList = JSON.parse(taskArgListRaw)
-      const taskEnv = JSON.parse(taskEnvRaw)
-      const taskShell = taskShellRaw === 'true'
-      return taskAction('set-task-config', {
-        key: config.key,
-        task: { command: taskCommand, argList: taskArgList, cwd: taskCwd, env: taskEnv, shell: taskShell },
-        info: { note: infoNote }
-      })
-    }
 
     parentElement.innerHTML = ''
     aCL(parentElement, [
@@ -102,9 +112,9 @@ const initTaskList = (
           const { key, task, info, status } = config
           const isRunning = Boolean(status && status.processInfo)
           return cE('div', { className: 'item' }, [
-            cE('span', { className: 'name button', innerText: `📄|${key} - ${info.note || task.command}` }),
+            cE('span', { className: 'name button', innerText: `📄|${info.note ? `[Note] ${info.note} ` : ``}[Command] ${task.command}` }),
             cE('button', { className: 'edit', innerText: TEXT_DETAIL, onclick: async () => withAlertModal(JSON.stringify(config, null, 2)) }),
-            cE('button', { className: 'edit', innerText: TEXT_EDIT, disabled: isRunning, onclick: async () => doEditConfig(config) }),
+            cE('button', { className: 'edit', innerText: TEXT_EDIT, disabled: isRunning, onclick: () => setTaskConfigAsync(config) }),
             cE('button', { className: 'edit', innerText: isRunning ? TEXT_STOP : TEXT_START, onclick: async () => (await withConfirmModal(`${isRunning ? 'Stop' : 'Start'} task: ${key}?`)) && taskAction(isRunning ? 'stop-task' : 'start-task', config) }),
             cE('button', { className: 'edit', innerText: TEXT_LOG, onclick: async () => withAlertModal((await authFetchTaskActionText((await withConfirmModal(`Get tail instead of full log for task: ${config.key}?`, 'Tail log', 'Full log')) ? 'get-task-log-tail' : 'get-task-log', config)) || '[no log]') }),
             cE('button', { className: 'edit', innerText: TEXT_LOG_RESET, onclick: async () => (await withConfirmModal(`Reset log of task: ${key}?`)) && taskAction('reset-task-log', config) }),
@@ -120,6 +130,7 @@ const initTaskList = (
     authFetchTaskActionJSON,
     getLoadTaskListAsync,
     getTaskActionAsync,
+    getSetTaskConfigAsync,
     renderTaskList
   }
 }

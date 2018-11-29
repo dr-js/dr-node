@@ -81,7 +81,7 @@ const initModal = () => {
   ) => withModal(({ modalMainDiv }) => new Promise((resolve) => {
     Object.assign(modalMainDiv.style, COMMON_FLEX_STYLE)
 
-    const inputElementList = inputInfoList.reduce((o, [ message, defaultValue ]) => {
+    const inputElementList = inputInfoList.reduce((o, [ message, defaultValue = '' ]) => {
       o.push(createMessage(message), cE('input', { value: defaultValue }))
       return o
     }, [])
