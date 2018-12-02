@@ -7,9 +7,9 @@
 + 📄 [source/function.js](source/function.js)
   - `getCommonServerStatus`, `isPrivateAddress`
 + 📄 [source/option.js](source/option.js)
-  - `AuthFormatConfig`, `ExplorerFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TaskRunnerFormatConfig`, `TokenCacheFormatConfig`, `getServerFormatConfig`
+  - `AuthFormatConfig`, `AuthGroupFormatConfig`, `ExplorerFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TaskRunnerFormatConfig`, `TokenCacheFormatConfig`, `getServerFormatConfig`
 + 📄 [source/configure/auth.js](source/configure/auth.js)
-  - `configureAuthTimedLookup`, `loadLookupFile`, `saveLookupFile`
+  - `configureAuthTimedLookup`, `configureAuthTimedLookupGroup`, `loadLookupFile`, `saveLookupFile`
 + 📄 [source/configure/filePid.js](source/configure/filePid.js)
   - `configureFilePid`
 + 📄 [source/configure/logger.js](source/configure/logger.js)
@@ -106,6 +106,9 @@
 >           --auth-gen-size [OPTIONAL-CHECK] [ARGUMENT=1]
 >           --auth-gen-token-size [OPTIONAL-CHECK] [ARGUMENT=1]
 >           --auth-gen-time-gap [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --auth-group-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>         --auth-group-default-tag [OPTIONAL-CHECK] [ARGUMENT=1]
+>         --auth-group-key-suffix [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --explorer-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >         --explorer-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --status-collect-path [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -158,6 +161,9 @@
 >     export DR_SERVER_AUTH_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_GEN_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_GEN_TIME_GAP="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -207,6 +213,9 @@
 >     "authGenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authGenTokenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authGenTimeGap": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authGroupPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authGroupDefaultTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authGroupKeySuffix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "statusCollectPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],

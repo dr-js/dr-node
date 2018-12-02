@@ -3,10 +3,6 @@
 import { describeServer } from 'dr-js/bin/function'
 
 import { createServer as createSampleServer } from 'dr-server/sample/server'
-// import { createServer as createServerTaskRunner } from 'dr-server/sample/taskRunner'
-// import { createServer as createServerStatusCollect } from 'dr-server/sample/statusCollect'
-// import { createServer as createServerStatusReport } from 'dr-server/sample/statusReport'
-
 import { fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
 
 import { MODE_FORMAT_LIST, parseOption, formatUsage } from './option'
@@ -16,12 +12,18 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
   const startServer = async (createServer, extraConfig) => {
     const { start, option, logger } = await createServer({ ...getServerConfig(), ...extraConfig })
     await start()
-    logger.add(describeServer(option, modeFormat.name, Object.entries(extraConfig).map(([ key, value ]) => value !== undefined && `${key}: ${value}`).filter(Boolean)))
+    logger.add(describeServer(
+      option,
+      modeFormat.name,
+      Object.entries(extraConfig)
+        .map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
+        .filter(Boolean)
+    ))
   }
 
   const getServerConfig = () => ({
     filePid: getSingleOptionOptional('pid-file'),
-    shouldIgnoreExistPid: getSingleOptionOptional('pid-ignore-exist'),
+    shouldIgnoreExistPid: Boolean(getOptionOptional('pid-ignore-exist')),
 
     hostname: getSingleOptionOptional('hostname'),
     port: getSingleOptionOptional('port'),
@@ -35,11 +37,15 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
     logFilePrefix: getSingleOptionOptional('log-file-prefix'),
 
     fileAuth: getSingleOptionOptional('auth-file'),
-    shouldAuthGen: getOptionOptional('auth-gen'),
+    shouldAuthGen: Boolean(getOptionOptional('auth-gen')),
     authGenTag: getSingleOptionOptional('auth-gen-tag'),
     authGenSize: getSingleOptionOptional('auth-gen-size'),
     authGenTokenSize: getSingleOptionOptional('auth-gen-token-size'),
-    authGenTimeGap: getSingleOptionOptional('auth-gen-time-gap')
+    authGenTimeGap: getSingleOptionOptional('auth-gen-time-gap'),
+
+    pathAuthGroup: getSingleOptionOptional('auth-group-path'),
+    authGroupDefaultTag: getSingleOptionOptional('auth-group-default-tag'),
+    authGroupKeySuffix: getSingleOptionOptional('auth-group-key-suffix')
   })
 
   switch (modeFormat.name) {

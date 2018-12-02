@@ -1,18 +1,14 @@
 import { createRequestListener } from 'dr-js/module/node/server/Server'
 import {
-  responderEnd,
-  responderEndWithStatusCode,
-  responderEndWithRedirect,
-  createResponderParseURL,
-  createResponderLog,
-  createResponderLogEnd
+  responderEnd, responderEndWithStatusCode, responderEndWithRedirect,
+  createResponderParseURL, createResponderLog, createResponderLogEnd
 } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap, createResponderRouteList } from 'dr-js/module/node/server/Responder/Router'
 
 import { configureLogger } from 'dr-server/module/configure/logger'
 import { configureFilePid } from 'dr-server/module/configure/filePid'
-import { configureAuthTimedLookup } from 'dr-server/module/configure/auth'
+import { configureAuthTimedLookup, configureAuthTimedLookupGroup } from 'dr-server/module/configure/auth'
 import { configureServerBase } from 'dr-server/module/configure/serverBase'
 import { configureFeaturePack as configureFeaturePackExplorer } from 'dr-server/module/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusCollect } from 'dr-server/module/feature/StatusCollect/configureFeaturePack'
@@ -27,6 +23,8 @@ const createServer = async ({
 
   // auth
   fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
+  // auth-group
+  pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix,
 
   // explorer
   explorerRootPath, explorerUploadMergePath,
@@ -42,9 +40,16 @@ const createServer = async ({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })
   const logger = await configureLogger({ pathLogDirectory, logFilePrefix })
-  const { generateAuthCheckCode, wrapResponderCheckAuthCheckCode } = await configureAuthTimedLookup({
-    fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger
-  })
+  const { wrapResponderCheckAuthCheckCode, generateAuthCheckCode } = fileAuth
+    ? await configureAuthTimedLookup({ fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
+    : await configureAuthTimedLookupGroup({
+      pathAuthDirectory: pathAuthGroup,
+      getFileNameForTag: authGroupKeySuffix ? (tag) => `${tag}${authGroupKeySuffix}` : undefined,
+      logger
+    }).then(({ wrapResponderCheckAuthCheckCode, generateAuthCheckCodeForTag }) => ({
+      wrapResponderCheckAuthCheckCode,
+      generateAuthCheckCode: () => generateAuthCheckCodeForTag(authGroupDefaultTag)
+    }))
 
   const responderLogEnd = createResponderLogEnd(logger.add)
 

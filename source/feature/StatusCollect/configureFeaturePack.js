@@ -25,7 +25,7 @@ const configureFeaturePack = async ({
     collectPath: statusCollectPath,
     collectUrl: statusCollectUrl,
     collectInterval: statusCollectInterval,
-    getExtraHeaders: () => ({ 'auth-check-code': generateAuthCheckCode() })
+    getExtraHeaders: async () => ({ 'auth-check-code': await generateAuthCheckCode() })
   })
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({

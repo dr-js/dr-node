@@ -23,7 +23,7 @@ const configureFeaturePack = async ({
   const reportStatus = async (url) => { // TODO: move out
     const { status } = await fetchLikeRequest(url, {
       method: 'POST',
-      headers: { 'auth-check-code': generateAuthCheckCode() },
+      headers: { 'auth-check-code': await generateAuthCheckCode() },
       body: JSON.stringify(getStatusReport())
     })
     __DEV__ && console.log('reported status:', status)

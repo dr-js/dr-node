@@ -33,7 +33,7 @@ const DEFAULT_RESPONDER_CHECK_FAIL = (store) => responderEndWithStatusCode(store
 const configureTokenCache = async ({
   fileTokenCache,
   tokenSize = TOKEN_SIZE, // in bytes
-  expireTime = TOKEN_EXPIRE_TIME,
+  tokenExpireTime = TOKEN_EXPIRE_TIME,
   tokenSizeSumMax = TOKEN_SIZE_SUM_MAX,
   tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1, eventHub: null })
 }) => {
@@ -54,7 +54,7 @@ const configureTokenCache = async ({
   const generateToken = async (tokenObject) => {
     const timestamp = getTimestamp()
     const token = `${(await getRandomBufferAsync(tokenSize)).toString('base64').replace(/\W/g, '')}-${timestamp.toString(36)}`
-    tokenCacheMap.set(token, { ...tokenObject, timestamp }, 1, Date.now() + expireTime)
+    tokenCacheMap.set(token, { ...tokenObject, timestamp }, 1, Date.now() + tokenExpireTime)
     __DEV__ && console.log('assignToken: token', token)
     return token
   }

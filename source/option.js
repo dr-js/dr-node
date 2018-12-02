@@ -72,6 +72,17 @@ const AuthFormatConfig = {
   } ]
 }
 
+// pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix
+const AuthGroupFormatConfig = {
+  ...SinglePath,
+  optional: true,
+  name: 'auth-group-path',
+  extendFormatList: [
+    { ...SingleString, name: 'auth-group-default-tag' },
+    { ...SingleString, optional: true, name: 'auth-group-key-suffix' }
+  ]
+}
+
 // uploadRootPath, uploadMergePath
 const ExplorerFormatConfig = {
   ...SinglePath,
@@ -102,6 +113,7 @@ export {
   getServerFormatConfig,
   TokenCacheFormatConfig,
   AuthFormatConfig,
+  AuthGroupFormatConfig,
   ExplorerFormatConfig,
   StatusCollectFormatConfig,
   StatusReportFormatConfig,

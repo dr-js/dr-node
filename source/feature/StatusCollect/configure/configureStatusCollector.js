@@ -32,7 +32,7 @@ const configureStatusCollector = async ({
     await withRetryAsync(async (retryCount) => {
       __DEV__ && retryCount && console.log(`[fetch] retryCount: ${retryCount}`)
       const timeFetchStart = clock()
-      const { ok, json } = await fetchLikeRequest(collectUrl, { headers: getExtraHeaders ? getExtraHeaders() : {} })
+      const { ok, json } = await fetchLikeRequest(collectUrl, { headers: getExtraHeaders ? await getExtraHeaders() : {} })
       if (!ok) throw new Error('[collectStatus] fetch not ok')
       const timeOk = roundFloat(clock() - timeFetchStart)
       const status = await json()

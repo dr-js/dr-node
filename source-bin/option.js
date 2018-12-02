@@ -3,6 +3,7 @@ import {
   getServerFormatConfig,
   TokenCacheFormatConfig,
   AuthFormatConfig,
+  AuthGroupFormatConfig,
   ExplorerFormatConfig,
   StatusCollectFormatConfig,
   StatusReportFormatConfig,
@@ -15,6 +16,7 @@ const MODE_FORMAT_LIST = [
   [ 'server|s', [ getServerFormatConfig([
     TokenCacheFormatConfig,
     AuthFormatConfig,
+    AuthGroupFormatConfig,
     ExplorerFormatConfig,
     StatusCollectFormatConfig,
     StatusReportFormatConfig,
