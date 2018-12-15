@@ -1,8 +1,5 @@
 import { createRequestListener } from 'dr-js/module/node/server/Server'
-import {
-  responderEnd, responderEndWithStatusCode, responderEndWithRedirect,
-  createResponderParseURL, createResponderLog, createResponderLogEnd
-} from 'dr-js/module/node/server/Responder/Common'
+import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap, createResponderRouteList } from 'dr-js/module/node/server/Responder/Router'
 
@@ -51,7 +48,7 @@ const createServer = async ({
       generateAuthCheckCode: () => generateAuthCheckCodeForTag(authGroupDefaultTag)
     }))
 
-  const responderLogEnd = createResponderLogEnd(logger.add)
+  const responderLogEnd = createResponderLogEnd({ log: logger.add })
 
   const urlAuthCheck = '/auth'
 
@@ -103,7 +100,7 @@ const createServer = async ({
 
   const routeMap = createRouteMap([
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ],
-    [ '/', 'GET', __DEV__ ? createResponderRouteList(() => routeMap) : (store) => responderEndWithRedirect(store, { redirectUrl }) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList({ getRouterMap: () => routeMap }) : (store) => responderEndWithRedirect(store, { redirectUrl }) ],
     [ urlAuthCheck, 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
     ...(featureExplorer ? featureExplorer.routeList : []),
     ...(featureStatusCollect ? featureStatusCollect.routeList : []),
@@ -113,9 +110,8 @@ const createServer = async ({
 
   server.on('request', createRequestListener({
     responderList: [
-      createResponderLog(logger.add),
-      createResponderParseURL(option),
-      createResponderRouter(routeMap)
+      createResponderLog({ log: logger.add }),
+      createResponderRouter({ routeMap, baseUrl: option.baseUrl })
     ],
     responderEnd: (store) => {
       responderEnd(store)

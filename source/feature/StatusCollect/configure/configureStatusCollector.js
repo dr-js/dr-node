@@ -15,15 +15,15 @@ const configureStatusCollector = async ({
   collectInterval = STATUS_COLLECT_INTERVAL,
   getExtraHeaders
 }) => {
-  const factDB = await createFactDatabase({
+  const factDatabase = await createFactDatabase({
     pathFactDirectory,
     applyFact: applyStatusFact, // (state, fact) => ({ ...state, ...fact }),
     onError: (error) => console.error('[collectStatus][FactDatabase]', error)
   })
-  addExitListenerSync(factDB.end)
+  addExitListenerSync(factDatabase.end)
   addExitListenerAsync(async () => {
-    factDB.end()
-    await factDB.getSaveFactCachePromise()
+    factDatabase.end()
+    await factDatabase.getSaveFactCachePromise()
   })
   await tryDeleteExtraCache({ pathFactDirectory })
 
@@ -38,16 +38,16 @@ const configureStatusCollector = async ({
       const status = await json()
       const timeDownload = roundFloat(clock() - timeFetchStart - timeOk)
       __DEV__ && console.log('[fetch] pass, get status', status.timestamp, getTimestamp())
-      factDB.add({ timestamp: getTimestamp(), retryCount, status, timeOk, timeDownload })
+      factDatabase.add({ timestamp: getTimestamp(), retryCount, status, timeOk, timeDownload })
     }, FETCH_RETRY_COUNT, __DEV__ ? 50 : 500)
   }, (error) => {
     console.error('[collectStatus] fetch failed', collectUrl, error)
-    factDB.add({ timestamp: getTimestamp(), error: error.toString() || 'fetch error' })
+    factDatabase.add({ timestamp: getTimestamp(), error: error.toString() || 'fetch error' })
   }).trigger
 
   const timer = createTimer({ func: collectStatus, delay: collectInterval })
 
-  return { factDB, timer, collectStatus }
+  return { factDatabase, timer, collectStatus }
 }
 
 export { configureStatusCollector }

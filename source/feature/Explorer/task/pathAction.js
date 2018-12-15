@@ -1,7 +1,7 @@
 import { relative } from 'path'
 
 import { catchAsync } from 'dr-js/module/common/error'
-import { createPathPrefixLock, toPosixPath } from 'dr-js/module/node/file/function'
+import { statAsync, createPathPrefixLock, toPosixPath } from 'dr-js/module/node/file/function'
 import { createDirectory } from 'dr-js/module/node/file/File'
 import { getDirectorySubInfoList, getDirectoryInfoTree, walkDirectoryInfoTree } from 'dr-js/module/node/file/Directory'
 import { modify } from 'dr-js/module/node/file/Modify'
@@ -32,7 +32,8 @@ const pathReadActionMap = {
 
 const pathEditActionMap = {
   ...modify,
-  'create-directory': (absolutePath) => createDirectory(absolutePath)
+  'create-directory': (absolutePath) => createDirectory(absolutePath),
+  'stat': (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs }))
 }
 
 // relativePath should be under rootPath

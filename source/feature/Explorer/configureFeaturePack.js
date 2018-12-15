@@ -16,16 +16,16 @@ const configureFeaturePack = async ({
 
   isReadOnly = false,
 
-  explorerRootPath,
-  explorerUploadMergePath,
+  explorerRootPath: rootPath,
+  explorerUploadMergePath: mergePath,
 
   // TODO: maybe less specific, or optional?
   isSkipAuth = false,
   urlAuthCheck = '',
   wrapResponderCheckAuthCheckCode = (responder) => responder
 }) => {
-  if (isReadOnly === Boolean(explorerUploadMergePath)) throw new Error(`expect either isReadOnly: ${isReadOnly} or explorerUploadMergePath: ${explorerUploadMergePath}`)
-  if (isSkipAuth === Boolean(urlAuthCheck)) throw new Error(`expect either isSkipAuth: ${isSkipAuth} or urlAuthCheck: ${urlAuthCheck}`)
+  if (isReadOnly === Boolean(mergePath)) throw new Error(`[Explorer] expect either isReadOnly: ${isReadOnly} or mergePath: ${mergePath}`)
+  if (isSkipAuth === Boolean(urlAuthCheck)) throw new Error(`[Explorer] expect either isSkipAuth: ${isSkipAuth} or urlAuthCheck: ${urlAuthCheck}`)
 
   const URL_HTML = `${routePrefix}/explorer`
   const URL_PATH_ACTION = `${routePrefix}/path-action`
@@ -43,17 +43,17 @@ const configureFeaturePack = async ({
     URL_STORAGE_STATUS
   })), BASIC_EXTENSION_MAP.html)
 
-  const responderPathAction = createResponderPathAction(explorerRootPath, isReadOnly, logger)
-  const responderFileServe = createResponderServeFile(explorerRootPath)
+  const responderPathAction = createResponderPathAction({ rootPath, isReadOnly, logger })
+  const responderFileServe = createResponderServeFile({ rootPath })
   const responderFileChunkUpload = !isReadOnly && await createResponderFileChunkUpload({
-    rootPath: explorerRootPath,
-    mergePath: explorerUploadMergePath,
+    rootPath,
+    mergePath,
     onError: (error) => {
       logger.add(`[ERROR][FileChunkUpload] ${error}`)
       console.error(error)
     }
   })
-  const responderStorageStatus = !isReadOnly && createResponderStorageStatus(explorerRootPath)
+  const responderStorageStatus = !isReadOnly && createResponderStorageStatus({ rootPath })
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],

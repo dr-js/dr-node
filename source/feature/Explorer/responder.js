@@ -13,11 +13,11 @@ import { getCommonServerStatus } from 'source/function'
 import { createFileChunkUpload } from './task/fileChunkUpload'
 import { createGetPathAction } from './task/pathAction'
 
-const createResponderPathAction = (rootPath, isReadOnly, logger) => {
+const createResponderPathAction = ({ rootPath, isReadOnly, logger }) => {
   const posixNormalize = (relativeRoot, name) => posix.normalize(posix.join(relativeRoot, name))
   const getPathAction = createGetPathAction(rootPath, isReadOnly)
   return async (store, nameList, actionType, relativeRootFrom, relativeRootTo) => {
-    logger.add(`[path-action] ${actionType} [${nameList.length}]`)
+    logger.add(`[path-action|${actionType}] ${relativeRootFrom || ''} : ${relativeRootTo || ''} (${nameList.join(', ')})`)
     const resultList = []
     const errorList = []
     for (const name of nameList) {
@@ -31,7 +31,7 @@ const createResponderPathAction = (rootPath, isReadOnly, logger) => {
   }
 }
 
-const createResponderServeFile = (rootPath) => {
+const createResponderServeFile = ({ rootPath }) => {
   const getPath = createPathPrefixLock(rootPath)
   const responderServeStatic = createResponderServeStatic({ expireTime: 1000 }) // 1000 ms expire
   return (store, relativePath) => responderServeStatic(store, getPath(relativePath))
@@ -45,7 +45,7 @@ const createResponderFileChunkUpload = async (option) => {
   }
 }
 
-const createResponderStorageStatus = (rootPath) => async (store) => {
+const createResponderStorageStatus = ({ rootPath }) => async (store) => {
   const storageStatusText = (await getCommonServerStatus(rootPath))
     .map(([ title, output ]) => output && `${`[${title}] `.padEnd(80, '=')}\n${stringIndentLine(output, '  ')}`)
     .filter(Boolean).join('\n')

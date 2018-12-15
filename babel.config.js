@@ -5,7 +5,7 @@ const isBuildBin = BABEL_ENV.includes('build-bin') // for rewriting import form 
 
 module.exports = {
   presets: [
-    [ '@babel/env', { targets: { node: '8.8' }, modules: isModule ? false : 'commonjs' } ]
+    [ '@babel/env', { targets: { node: '10' }, modules: isModule ? false : 'commonjs' } ]
   ],
   plugins: [
     !isModule && [ '@babel/plugin-proposal-object-rest-spread', { loose: true, useBuiltIns: true } ], // NOTE: for Edge(17.17134) support check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#Spread_in_object_literals

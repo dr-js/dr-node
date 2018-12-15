@@ -21,7 +21,7 @@ const configureFeaturePack = async ({
   const URL_STATUS_STATE = `${routePrefix}/status-state`
   const URL_STATUS_COLLECT = `${routePrefix}/status-collect`
 
-  const { factDB, timer, collectStatus } = await configureStatusCollector({
+  const { factDatabase, timer, collectStatus } = await configureStatusCollector({
     collectPath: statusCollectPath,
     collectUrl: statusCollectUrl,
     collectInterval: statusCollectInterval,
@@ -48,8 +48,8 @@ const configureFeaturePack = async ({
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
-    [ URL_STATUS_STATE, 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusState(factDB.getState)) ],
-    [ URL_STATUS_COLLECT, 'POST', wrapResponderCheckAuthCheckCode(createResponderStatusCollect(factDB)) ]
+    [ URL_STATUS_STATE, 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusState({ getStatusState: factDatabase.getState })) ],
+    [ URL_STATUS_COLLECT, 'POST', wrapResponderCheckAuthCheckCode(createResponderStatusCollect({ addStatus: factDatabase.add })) ]
   ]
 
   return {
@@ -57,7 +57,7 @@ const configureFeaturePack = async ({
     URL_STATUS_STATE,
     URL_STATUS_COLLECT,
     routeList,
-    factDB,
+    factDatabase,
     timer,
     collectStatus
   }

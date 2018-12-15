@@ -6,15 +6,15 @@ import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { responderSendBufferCompress, prepareBufferDataAsync } from 'dr-js/module/node/server/Responder/Send'
 
-const createResponderStatusState = (getStatusState) => {
+const createResponderStatusState = ({ getStatusState }) => {
   const getBufferDataAsync = transformCache((statusState) => prepareBufferDataAsync(Buffer.from(JSON.stringify(statusState))), BASIC_EXTENSION_MAP.json)
   return async (store) => responderSendBufferCompress(store, await getBufferDataAsync(getStatusState()))
 }
 
-const createResponderStatusCollect = (factDB) => async (store) => {
+const createResponderStatusCollect = ({ addStatus }) => async (store) => {
   const statusBuffer = await receiveBufferAsync(store.request)
   __DEV__ && console.log(`statusBuffer`, statusBuffer.toString())
-  factDB.add({
+  addStatus({
     timestamp: getTimestamp(),
     retryCount: 0, // TODO: strange value
     status: JSON.parse(statusBuffer),

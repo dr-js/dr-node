@@ -21,7 +21,7 @@ const configureFeaturePack = async ({
     URL_TASK_ACTION
   })), BASIC_EXTENSION_MAP.html)
 
-  const responderTaskAction = createResponderTaskAction(taskRunnerRootPath, logger)
+  const responderTaskAction = createResponderTaskAction({ rootPath: taskRunnerRootPath, logger })
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
