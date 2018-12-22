@@ -13,7 +13,7 @@ const configureFilePid = async ({
 
   __DEV__ && !shouldIgnoreExistPid && console.log('check existing pid file', filePid)
   !shouldIgnoreExistPid && catchSync(() => {
-    const existingPid = readFileSync(filePid, { encoding: 'utf8' })
+    const existingPid = String(readFileSync(filePid))
     if (!existingPid) return
     console.warn(`[FilePid] get existing pid: ${existingPid}, exit process...`)
     return process.exit(-1)

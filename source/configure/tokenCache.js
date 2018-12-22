@@ -14,7 +14,7 @@ import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/C
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
 const loadTokenCache = async (tokenCacheMap, fileTokenCache) => {
-  tokenCacheMap.parseList(JSON.parse(await readFileAsync(fileTokenCache, { encoding: 'utf8' })))
+  tokenCacheMap.parseList(JSON.parse(await readFileAsync(fileTokenCache)))
   __DEV__ && console.log('loaded token cache file', fileTokenCache)
 }
 
