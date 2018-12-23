@@ -7,6 +7,7 @@ import { getScriptFileListFromPathList } from 'dr-dev/module/fileList'
 import { initOutput, verifyOutputBinVersion, packOutput, publishOutput } from 'dr-dev/module/commonOutput'
 import { processFileList, fileProcessorBabel } from 'dr-dev/module/fileProcessor'
 import { getTerserOption, minifyFileListWithTerser } from 'dr-dev/module/minify'
+import { writeLicenseFile } from 'dr-dev/module/license'
 
 import { binary as formatBinary } from 'dr-js/module/common/format'
 
@@ -50,6 +51,7 @@ runMain(async (logger) => {
   execSync('npm run script-generate-spec', execOptionRoot)
 
   const packageJSON = await initOutput({ fromRoot, fromOutput, logger })
+  writeLicenseFile(fromRoot('LICENSE'), packageJSON.license, packageJSON.author)
 
   if (!argvFlag('pack')) return
 

@@ -22,6 +22,9 @@ const createFileChunkUpload = async ({
   rootPath,
   mergePath,
   onError,
+  onUploadStart, // good place to do extra check/auth, before the initial chunk is saved
+  onUploadChunk, // after chunk saved
+  onUploadEnd, // after merged file created
   expireTime = CACHE_EXPIRE_TIME,
   chunkCacheMap = GET_DEFAULT_CACHE_MAP()
 }) => {
@@ -54,26 +57,34 @@ const createFileChunkUpload = async ({
     const cacheKey = `${cacheKeyPrefix}-${relativePath}-${chunkTotal}`
     let chunkData = chunkCacheMap.get(cacheKey)
     if (chunkData === undefined) {
+      onUploadStart && await onUploadStart({ relativePath, chunkTotal })
       const filePath = getPath(relativePath)
       const tempPath = resolve(mergePath, getRandomId(cacheKey).replace(/[^\w-.]/g, '_'))
       await createDirectory(tempPath)
-      chunkData = { tempPath, filePath, chunkTotal, chunkList: [] }
+      chunkData = { tempPath, filePath, relativePath, chunkTotal, chunkList: [] }
     }
 
     const chunkPath = resolve(chunkData.tempPath, `chunk-${chunkIndex}-${chunkTotal}`)
     await writeFileAsync(chunkPath, chunkBuffer)
-    chunkData.chunkList[ chunkIndex ] = { chunkIndex, chunkPath }
-    __DEV__ && console.log(`[save chunk]`, { chunkIndex, chunkPath })
+    chunkData.chunkList[ chunkIndex ] = { chunkIndex, chunkByteLength, chunkPath }
+    __DEV__ && console.log(`[save chunk]`, chunkData.chunkList[ chunkIndex ])
+    onUploadChunk && await onUploadChunk({ relativePath, chunkTotal, chunkData, chunkIndex })
 
     const chunkCacheCount = Object.keys(chunkData.chunkList).length
     if (chunkCacheCount === chunkTotal) {
-      __DEV__ && console.log(`[save chunk to file]`, chunkData.filePath)
+      __DEV__ && console.log(`[merge chunk to file]`, chunkData.filePath)
       await createDirectory(dirname(chunkData.filePath))
       await writeFileAsync(chunkData.filePath, '') // reset old file
-      for (const { chunkPath } of chunkData.chunkList) await pipeStreamAsync(createWriteStream(chunkData.filePath, { flags: 'a' }), createReadStream(chunkPath))
+      for (const { chunkPath } of chunkData.chunkList) {
+        await pipeStreamAsync(
+          createWriteStream(chunkData.filePath, { flags: 'a' }),
+          createReadStream(chunkPath)
+        )
+      }
       await modify.delete(chunkData.tempPath)
       chunkCacheMap.delete(cacheKey)
       __DEV__ && console.log(`##[done]`, chunkCacheMap.size, cacheKey)
+      onUploadEnd && await onUploadEnd({ relativePath, chunkTotal, chunkData })
     } else if (chunkCacheCount > 1) {
       chunkCacheMap.touch(cacheKey, Date.now() + expireTime)
       __DEV__ && console.log(`##[touch]`, chunkCacheMap.size, cacheKey)

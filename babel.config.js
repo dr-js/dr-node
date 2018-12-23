@@ -13,10 +13,12 @@ module.exports = {
     [ 'module-resolver', {
       root: [ './' ],
       alias: isModule ? undefined : {
-        'dr-dev/module/(.+)': 'dr-dev/library/',
-        'dr-js/module/(.+)': 'dr-js/library/',
-        'dr-server/module/(.+)': isBuildBin ? './source/' : './library/',
-        'dr-server/sample/(.+)': './sample/'
+        '^dr-dev/module/(.+)': 'dr-dev/library/\\1',
+        '^dr-js/module/(.+)': 'dr-js/library/\\1',
+        '^dr-server/sample/(.+)': './sample/\\1',
+        '^dr-server/module/(.+)': isBuildBin
+          ? './source/\\1'
+          : './library/\\1'
       }
     } ]
   ].filter(Boolean),
