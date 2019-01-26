@@ -100,7 +100,7 @@ const createServer = async ({
 
   const routeMap = createRouteMap([
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ],
-    [ '/', 'GET', __DEV__ ? createResponderRouteList({ getRouterMap: () => routeMap }) : (store) => responderEndWithRedirect(store, { redirectUrl }) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList({ getRouteMap: () => routeMap }) : (store) => responderEndWithRedirect(store, { redirectUrl }) ],
     [ urlAuthCheck, 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
     ...(featureExplorer ? featureExplorer.routeList : []),
     ...(featureStatusCollect ? featureStatusCollect.routeList : []),
