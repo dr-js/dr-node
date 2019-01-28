@@ -5,6 +5,8 @@ import { configureStatusCollector } from './configure/configureStatusCollector'
 import { createResponderStatusState, createResponderStatusCollect } from './responder'
 import { getHTML } from './HTML'
 
+const DEFAULT_AUTH_KEY = 'auth-check-code'
+
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
 
@@ -13,9 +15,10 @@ const configureFeaturePack = async ({
   statusCollectInterval,
 
   // TODO: maybe less specific, or optional?
-  urlAuthCheck = '', // [ '/auth', 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ]
-  wrapResponderCheckAuthCheckCode = (responder) => responder,
-  generateAuthCheckCode = () => ''
+  urlAuthCheck = '',
+  authKey = DEFAULT_AUTH_KEY,
+  createResponderCheckAuth = ({ responderNext }) => responderNext,
+  generateAuth = () => ''
 }) => {
   const URL_HTML = `${routePrefix}/status-visualize`
   const URL_STATUS_STATE = `${routePrefix}/status-state`
@@ -25,7 +28,7 @@ const configureFeaturePack = async ({
     collectPath: statusCollectPath,
     collectUrl: statusCollectUrl,
     collectInterval: statusCollectInterval,
-    getExtraHeaders: async () => ({ 'auth-check-code': await generateAuthCheckCode() })
+    getExtraHeaders: async () => ({ [ authKey ]: await generateAuth() })
   })
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
@@ -48,8 +51,12 @@ const configureFeaturePack = async ({
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
-    [ URL_STATUS_STATE, 'GET', wrapResponderCheckAuthCheckCode(createResponderStatusState({ getStatusState: factDatabase.getState })) ],
-    [ URL_STATUS_COLLECT, 'POST', wrapResponderCheckAuthCheckCode(createResponderStatusCollect({ addStatus: factDatabase.add })) ]
+    [ URL_STATUS_STATE, 'GET', createResponderCheckAuth({
+      responderNext: createResponderStatusState({ getStatusState: factDatabase.getState })
+    }) ],
+    [ URL_STATUS_COLLECT, 'POST', createResponderCheckAuth({
+      responderNext: createResponderStatusCollect({ addStatus: factDatabase.add })
+    }) ]
   ]
 
   return {

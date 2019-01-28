@@ -11,7 +11,7 @@ const configureFeaturePack = async ({
   taskRunnerRootPath,
 
   urlAuthCheck = '',
-  wrapResponderCheckAuthCheckCode = (responder) => responder
+  createResponderCheckAuth = ({ responderNext }) => responderNext
 }) => {
   const URL_HTML = `${routePrefix}/task-runner`
   const URL_TASK_ACTION = `${routePrefix}/task-action`
@@ -25,9 +25,11 @@ const configureFeaturePack = async ({
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
-    [ URL_TASK_ACTION, 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
-      const { type, payload } = JSON.parse(await receiveBufferAsync(store.request))
-      return responderTaskAction(store, type, payload)
+    [ URL_TASK_ACTION, 'POST', createResponderCheckAuth({
+      responderNext: async (store) => {
+        const { type, payload } = JSON.parse(await receiveBufferAsync(store.request))
+        return responderTaskAction(store, type, payload)
+      }
     }) ]
   ].filter(Boolean)
 

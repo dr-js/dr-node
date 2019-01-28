@@ -22,7 +22,7 @@ const configureFeaturePack = async ({
   // TODO: maybe less specific, or optional?
   isSkipAuth = false,
   urlAuthCheck = '',
-  wrapResponderCheckAuthCheckCode = (responder) => responder
+  createResponderCheckAuth = ({ responderNext }) => responderNext
 }) => {
   if (isReadOnly === Boolean(mergePath)) throw new Error(`[Explorer] expect either isReadOnly: ${isReadOnly} or mergePath: ${mergePath}`)
   if (isSkipAuth === Boolean(urlAuthCheck)) throw new Error(`[Explorer] expect either isSkipAuth: ${isSkipAuth} or urlAuthCheck: ${urlAuthCheck}`)
@@ -57,13 +57,17 @@ const configureFeaturePack = async ({
 
   const routeList = [
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
-    [ URL_PATH_ACTION, 'POST', wrapResponderCheckAuthCheckCode(async (store) => {
-      const { nameList, actionType, relativeFrom, relativeTo } = JSON.parse(await receiveBufferAsync(store.request))
-      return responderPathAction(store, nameList, actionType, relativeFrom, relativeTo)
+    [ URL_PATH_ACTION, 'POST', createResponderCheckAuth({
+      responderNext: async (store) => {
+        const { nameList, actionType, relativeFrom, relativeTo } = JSON.parse(await receiveBufferAsync(store.request))
+        return responderPathAction(store, nameList, actionType, relativeFrom, relativeTo)
+      }
     }) ],
-    [ `${URL_FILE_SERVE}/*`, 'GET', wrapResponderCheckAuthCheckCode((store) => responderFileServe(store, decodeURIComponent(getRouteParamAny(store)))) ],
-    !isReadOnly && [ URL_FILE_UPLOAD, 'POST', wrapResponderCheckAuthCheckCode(responderFileChunkUpload) ],
-    !isReadOnly && [ URL_STORAGE_STATUS, 'GET', wrapResponderCheckAuthCheckCode(responderStorageStatus) ]
+    [ `${URL_FILE_SERVE}/*`, 'GET', createResponderCheckAuth({
+      responderNext: (store) => responderFileServe(store, decodeURIComponent(getRouteParamAny(store)))
+    }) ],
+    !isReadOnly && [ URL_FILE_UPLOAD, 'POST', createResponderCheckAuth({ responderNext: responderFileChunkUpload }) ],
+    !isReadOnly && [ URL_STORAGE_STATUS, 'GET', createResponderCheckAuth({ responderNext: responderStorageStatus }) ]
   ].filter(Boolean)
 
   return {

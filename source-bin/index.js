@@ -45,7 +45,8 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
 
     pathAuthGroup: getSingleOptionOptional('auth-group-path'),
     authGroupDefaultTag: getSingleOptionOptional('auth-group-default-tag'),
-    authGroupKeySuffix: getSingleOptionOptional('auth-group-key-suffix')
+    authGroupKeySuffix: getSingleOptionOptional('auth-group-key-suffix'),
+    authGroupVerifyRequestTag: getSingleOptionOptional('auth-group-verify-request-tag')
   })
 
   switch (modeFormat.name) {
@@ -67,14 +68,16 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
         fileInputPath: getSingleOption('file-upload-path'),
         filePath: getSingleOption('file-upload-key'),
         urlFileUpload: getSingleOption('file-upload-server-url'),
-        fileAuth: getSingleOption('auth-file')
+        fileAuth: getSingleOption('auth-file'),
+        authKey: getSingleOptionOptional('node-auth-key')
       })
     case 'node-file-download':
       return fileDownload({
         fileOutputPath: getSingleOption('file-download-path'),
         filePath: getSingleOption('file-download-key'),
         urlFileDownload: getSingleOption('file-download-server-url'),
-        fileAuth: getSingleOption('auth-file')
+        fileAuth: getSingleOption('auth-file'),
+        authKey: getSingleOptionOptional('node-auth-key')
       })
     case 'node-path-action':
       return logJSON(await pathAction({
@@ -83,7 +86,8 @@ const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, ge
         key: getSingleOptionOptional('path-action-key'),
         keyTo: getSingleOptionOptional('path-action-key-to'),
         urlPathAction: getSingleOption('path-action-server-url'),
-        fileAuth: getSingleOption('auth-file')
+        fileAuth: getSingleOption('auth-file'),
+        authKey: getSingleOptionOptional('node-auth-key')
       }))
   }
 }

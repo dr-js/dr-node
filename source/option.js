@@ -1,6 +1,6 @@
 import { ConfigPresetNode } from 'dr-js/module/node/module/Option'
 
-const { SingleString, SingleInteger, SinglePath, BooleanFlag } = ConfigPresetNode
+const { SingleString, SingleInteger, SinglePath, SingleFunction, BooleanFlag } = ConfigPresetNode
 
 // protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
 // pathLogDirectory, logFilePrefix
@@ -72,14 +72,15 @@ const AuthFormatConfig = {
   } ]
 }
 
-// pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix
+// pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix, authGroupVerifyRequestTag
 const AuthGroupFormatConfig = {
   ...SinglePath,
   optional: true,
   name: 'auth-group-path',
   extendFormatList: [
     { ...SingleString, name: 'auth-group-default-tag' },
-    { ...SingleString, optional: true, name: 'auth-group-key-suffix' }
+    { ...SingleString, optional: true, name: 'auth-group-key-suffix' },
+    { ...SingleFunction, optional: true, name: 'auth-group-verify-request-tag' }
   ]
 }
 

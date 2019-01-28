@@ -50,7 +50,8 @@ const OPTION_CONFIG = {
     Config,
     { ...BooleanFlag, name: 'version', shortName: 'v' },
     { ...BooleanFlag, name: 'help', shortName: 'h', description: `show full help` },
-    ...MODE_FORMAT_LIST
+    ...MODE_FORMAT_LIST,
+    { ...SingleString, optional: true, name: 'node-auth-key' }
   ]
 }
 

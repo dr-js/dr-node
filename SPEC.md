@@ -74,8 +74,8 @@
 > ```
 > CLI Usage:
 >   --config -c [OPTIONAL] [ARGUMENT=1]
->       # from JSON: set to 'path/to/config.json'
->       # from ENV: set to 'env'
+>       from ENV: set to 'env'
+>       from JS/JSON file: set to 'path/to/config.js|json'
 >   --version -v [OPTIONAL] [ARGUMENT=0+]
 >       set to enable
 >   --help -h [OPTIONAL] [ARGUMENT=0+]
@@ -109,6 +109,7 @@
 >       --auth-group-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >         --auth-group-default-tag [OPTIONAL-CHECK] [ARGUMENT=1]
 >         --auth-group-key-suffix [OPTIONAL-CHECK] [ARGUMENT=1]
+>         --auth-group-verify-request-tag [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --explorer-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >         --explorer-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --status-collect-path [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -133,6 +134,7 @@
 >     --path-action-key [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --path-action-key-to [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --path-action-name-list [OPTIONAL-CHECK] [ARGUMENT=1+]
+>   --node-auth-key [OPTIONAL] [ARGUMENT=1]
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
@@ -164,6 +166,7 @@
 >     export DR_SERVER_AUTH_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_GROUP_VERIFY_REQUEST_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -185,8 +188,9 @@
 >     export DR_SERVER_PATH_ACTION_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PATH_ACTION_KEY_TO="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PATH_ACTION_NAME_LIST="[OPTIONAL-CHECK] [ARGUMENT=1+]"
+>     export DR_SERVER_NODE_AUTH_KEY="[OPTIONAL] [ARGUMENT=1]"
 >   "
-> JSON Usage:
+> CONFIG Usage:
 >   {
 >     "config": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "version": [ "[OPTIONAL] [ARGUMENT=0+]" ],
@@ -216,6 +220,7 @@
 >     "authGroupPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authGroupDefaultTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authGroupKeySuffix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authGroupVerifyRequestTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "statusCollectPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
@@ -237,5 +242,6 @@
 >     "pathActionKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pathActionKeyTo": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pathActionNameList": [ "[OPTIONAL-CHECK] [ARGUMENT=1+]" ],
+>     "nodeAuthKey": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >   }
 > ```

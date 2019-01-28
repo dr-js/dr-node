@@ -1,5 +1,5 @@
 const { describeServer } = require('dr-js/bin/function')
-const { createServer } = require('../output-gitignore/sample/statusCollect')
+const { createServer } = require('../output-gitignore/sample/server')
 
 const SERVER_TAG = 'status-collect'
 

@@ -14,10 +14,12 @@ import { uploadFileByChunk } from 'source/feature/Explorer/task/fileChunkUpload'
 
 // for node client file chunk upload
 
-const getAuthFetch = async (fileAuth) => {
+const DEFAULT_AUTH_KEY = 'auth-check-code'
+
+const getAuthFetch = async (fileAuth, authKey) => {
   const timedLookupData = await loadLookupFile(fileAuth)
   return async (url, config) => {
-    const response = await fetchLikeRequest(url, { ...config, headers: { ...config.headers, 'auth-check-code': generateCheckCode(timedLookupData) } })
+    const response = await fetchLikeRequest(url, { ...config, headers: { ...config.headers, [ authKey ]: generateCheckCode(timedLookupData) } })
     if (!response.ok) throw new Error(`[Error][AuthFetch] status: ${response.status}`)
     return response
   }
@@ -29,13 +31,14 @@ const fileUpload = async ({
   filePath,
   urlFileUpload,
   fileAuth,
+  authKey = DEFAULT_AUTH_KEY,
   timeout = 30 * 1000,
   maxRetry = 3,
   wait = 1000,
   log = console.log
 }) => {
   const stepper = createStepper()
-  const authFetch = await getAuthFetch(fileAuth)
+  const authFetch = await getAuthFetch(fileAuth, authKey)
 
   log && log(`[Upload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
 
@@ -62,11 +65,12 @@ const fileDownload = async ({
   filePath,
   urlFileDownload,
   fileAuth,
+  authKey = DEFAULT_AUTH_KEY,
   timeout = 30 * 1000,
   log = console.log
 }) => {
   const stepper = createStepper()
-  const authFetch = await getAuthFetch(fileAuth)
+  const authFetch = await getAuthFetch(fileAuth, authKey)
 
   log && log(`[Download] file: ${filePath}`)
 
@@ -89,11 +93,12 @@ const pathAction = async ({
   keyTo: relativeTo,
   urlPathAction,
   fileAuth,
+  authKey = DEFAULT_AUTH_KEY,
   timeout = 30 * 1000,
   log = console.log
 }) => {
   const stepper = createStepper()
-  const authFetch = await getAuthFetch(fileAuth)
+  const authFetch = await getAuthFetch(fileAuth, authKey)
 
   log && log(`[Action|${actionType}] key: ${relativeFrom}, keyTo: ${relativeTo}, nameList: [${nameList}]`)
 

@@ -21,7 +21,7 @@ const createServer = async ({
   // auth
   fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
   // auth-group
-  pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix,
+  pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix, authGroupVerifyRequestTag,
 
   // explorer
   explorerRootPath, explorerUploadMergePath,
@@ -37,15 +37,16 @@ const createServer = async ({
     protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
   })
   const logger = await configureLogger({ pathLogDirectory, logFilePrefix })
-  const { wrapResponderCheckAuthCheckCode, generateAuthCheckCode } = fileAuth
+  const { createResponderCheckAuth, generateAuth } = fileAuth
     ? await configureAuthTimedLookup({ fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
     : await configureAuthTimedLookupGroup({
       pathAuthDirectory: pathAuthGroup,
       getFileNameForTag: authGroupKeySuffix ? (tag) => `${tag}${authGroupKeySuffix}` : undefined,
+      verifyRequestTag: authGroupVerifyRequestTag || undefined,
       logger
-    }).then(({ wrapResponderCheckAuthCheckCode, generateAuthCheckCodeForTag }) => ({
-      wrapResponderCheckAuthCheckCode,
-      generateAuthCheckCode: () => generateAuthCheckCodeForTag(authGroupDefaultTag)
+    }).then(({ createResponderCheckAuth, generateAuthForTag }) => ({
+      createResponderCheckAuth,
+      generateAuth: () => generateAuthForTag(authGroupDefaultTag)
     }))
 
   const responderLogEnd = createResponderLogEnd({ log: logger.add })
@@ -59,7 +60,7 @@ const createServer = async ({
     explorerRootPath,
     explorerUploadMergePath,
     urlAuthCheck,
-    wrapResponderCheckAuthCheckCode
+    createResponderCheckAuth
   })
 
   const featureStatusCollect = statusCollectPath && await configureFeaturePackStatusCollect({
@@ -70,8 +71,8 @@ const createServer = async ({
     statusCollectUrl,
     statusCollectInterval,
     urlAuthCheck,
-    wrapResponderCheckAuthCheckCode,
-    generateAuthCheckCode
+    createResponderCheckAuth,
+    generateAuth
   })
 
   const featureStatusReport = statusReportProcessTag && await configureFeaturePackStatusReport({
@@ -79,8 +80,8 @@ const createServer = async ({
     logger,
     routePrefix: '',
     statusReportProcessTag,
-    wrapResponderCheckAuthCheckCode,
-    generateAuthCheckCode
+    createResponderCheckAuth,
+    generateAuth
   })
 
   const featureTaskRunner = taskRunnerRootPath && await configureFeaturePackTaskRunner({
@@ -89,7 +90,7 @@ const createServer = async ({
     routePrefix: '',
     taskRunnerRootPath,
     urlAuthCheck,
-    wrapResponderCheckAuthCheckCode
+    createResponderCheckAuth
   })
 
   const redirectUrl = featureExplorer ? featureExplorer.URL_HTML
@@ -97,11 +98,13 @@ const createServer = async ({
       : featureStatusReport ? featureStatusReport.URL_HTML
         : featureTaskRunner ? featureTaskRunner.URL_HTML
           : ''
-
   const routeMap = createRouteMap([
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ],
-    [ '/', 'GET', __DEV__ ? createResponderRouteList({ getRouteMap: () => routeMap }) : (store) => responderEndWithRedirect(store, { redirectUrl }) ],
-    [ urlAuthCheck, 'GET', wrapResponderCheckAuthCheckCode((store) => responderEndWithStatusCode(store, { statusCode: 200 })) ],
+    [ '/', 'GET', __DEV__ ? createResponderRouteList({ getRouteMap: () => routeMap })
+      : redirectUrl ? (store) => responderEndWithRedirect(store, { redirectUrl })
+        : (store) => responderEndWithStatusCode(store, { statusCode: 400 })
+    ],
+    [ urlAuthCheck, 'GET', createResponderCheckAuth({ responderNext: (store) => responderEndWithStatusCode(store, { statusCode: 200 }) }) ],
     ...(featureExplorer ? featureExplorer.routeList : []),
     ...(featureStatusCollect ? featureStatusCollect.routeList : []),
     ...(featureStatusReport ? featureStatusReport.routeList : []),
@@ -119,7 +122,17 @@ const createServer = async ({
     }
   }))
 
-  return { server, start, stop, option, logger, featureExplorer }
+  return {
+    server,
+    start,
+    stop,
+    option,
+    logger,
+    featureExplorer,
+    featureStatusCollect,
+    featureStatusReport,
+    featureTaskRunner
+  }
 }
 
 export { createServer }

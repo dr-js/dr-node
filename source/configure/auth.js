@@ -1,4 +1,3 @@
-import { catchSync, catchAsync } from 'dr-js/module/common/error'
 import {
   verifyCheckCode, verifyParsedCheckCode,
   generateCheckCode, generateLookupData,
@@ -12,7 +11,7 @@ import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
-const DEFAULT_AUTH_TAG = 'auth-check-code'
+const DEFAULT_AUTH_KEY = 'auth-check-code'
 const DEFAULT_RESPONDER_CHECK_FAIL = (store) => responderEndWithStatusCode(store, { statusCode: 403 })
 
 const saveLookupFile = (pathFile, LookupData) => writeFileAsync(pathFile, Buffer.from(packDataArrayBuffer(LookupData)))
@@ -44,33 +43,32 @@ const configureAuthTimedLookup = async ({
   })
   logger.add('loaded auth lookup file')
 
-  const generateAuthCheckCode = () => generateCheckCode(timedLookupData)
+  const generateAuth = () => generateCheckCode(timedLookupData)
 
   return {
-    wrapResponderCheckAuthCheckCode: (
+    createResponderCheckAuth: ({
       responderNext,
       responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL,
-      authTag = DEFAULT_AUTH_TAG
-    ) => createResponderCheckRateLimit({
+      authKey = DEFAULT_AUTH_KEY
+    }) => createResponderCheckRateLimit({
       checkFunc: (store) => {
         const { url: { searchParams } } = store.getState()
-        const authCheckCode = searchParams.get(authTag) || store.request.headers[ authTag ]
-        const { error } = catchSync(verifyCheckCode, timedLookupData, authCheckCode)
-        error && logger.add(`[ERROR] verifyCheckCode: ${error}`)
-        !error && store.setState({ timedLookupData })
-        return !error
+        const authCheckCode = searchParams.get(authKey) || store.request.headers[ authKey ]
+        verifyCheckCode(timedLookupData, authCheckCode)
+        store.setState({ timedLookupData })
+        return true // pass check
       },
       responderNext,
       responderCheckFail
     }),
-    wrapResponderAssignAuthCheckCode: (
+    createResponderAssignAuth: ({
       responder,
-      authTag = DEFAULT_AUTH_TAG
-    ) => (store) => {
-      store.response.setHeader(authTag, generateAuthCheckCode())
+      authKey = DEFAULT_AUTH_KEY
+    }) => (store) => {
+      store.response.setHeader(authKey, generateAuth())
       return responder(store)
     },
-    generateAuthCheckCode
+    generateAuth
   }
 }
 
@@ -78,10 +76,15 @@ const AUTH_EXPIRE_TIME = 5 * 60 * 1000 // 5min, in msec
 const AUTH_SIZE_SUM_MAX = 4 * 1024 * 1024 // 4MiB, in byte
 
 const INVALID_AUTH = 'INVALID_AUTH'
+const checkValidAuthData = (timedLookupData) => {
+  if (timedLookupData === INVALID_AUTH) throw new Error(INVALID_AUTH)
+  return timedLookupData
+}
 
 const configureAuthTimedLookupGroup = async ({
   pathAuthDirectory, // NOTE: the file name should match `getFileNameForTag`
   getFileNameForTag = (tag) => `${tag}.key`,
+  verifyRequestTag, // (store, tag) => { if (isFail) throw new Error() }, mostly for per route auth
   authExpireTime = AUTH_EXPIRE_TIME,
   authSizeSumMax = AUTH_SIZE_SUM_MAX,
   authCacheMap = createCacheMap({ valueSizeSumMax: authSizeSumMax, valueSizeSingleMax: authSizeSumMax, eventHub: null }),
@@ -96,53 +99,43 @@ const configureAuthTimedLookupGroup = async ({
         logger.add(`loaded auth lookup file for tag: ${tag}`)
         return timedLookupData
       }, (error) => {
-        __DEV__ && console.log('getTimedLookupData', error)
+        __DEV__ && console.log('getTimedLookupData failed', error)
         authCacheMap.set(tag, INVALID_AUTH, 1, Date.now() + authExpireTime)
         logger.add(`no auth lookup file for tag: ${tag}`)
         return INVALID_AUTH
       })
 
-  const checkInvalid = (timedLookupData) => {
-    if (timedLookupData === INVALID_AUTH) throw new Error(INVALID_AUTH)
-    return timedLookupData
-  }
-
-  const verifyAuthCheckCode = async (authCheckCode) => {
-    const parsedCheckCode = parseCheckCode(authCheckCode)
-    const tag = parsedCheckCode[ 0 ]
-    const timedLookupData = checkInvalid(await getTimedLookupData(tag))
-    verifyParsedCheckCode(timedLookupData, parsedCheckCode)
-    return timedLookupData
-  }
-
-  const generateAuthCheckCodeForTag = async (tag) => generateCheckCode(checkInvalid(await getTimedLookupData(tag)))
+  const generateAuthForTag = async (tag) => generateCheckCode(checkValidAuthData(await getTimedLookupData(tag)))
 
   return {
-    wrapResponderCheckAuthCheckCode: (
+    createResponderCheckAuth: ({
       responderNext,
       responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL,
-      authTag = DEFAULT_AUTH_TAG
-    ) => createResponderCheckRateLimit({
+      authKey = DEFAULT_AUTH_KEY
+    }) => createResponderCheckRateLimit({
       checkFunc: async (store) => {
         const { url: { searchParams } } = store.getState()
-        const authCheckCode = searchParams.get(authTag) || store.request.headers[ authTag ]
-        const { result: timedLookupData, error } = await catchAsync(verifyAuthCheckCode, authCheckCode)
-        error && logger.add(`[ERROR] verifyCheckCode: ${error}`)
-        !error && store.setState({ timedLookupData })
-        return !error
+        const authCheckCode = searchParams.get(authKey) || store.request.headers[ authKey ]
+        const parsedCheckCode = parseCheckCode(authCheckCode)
+        const tag = parsedCheckCode[ 0 ]
+        verifyRequestTag && await verifyRequestTag(store, tag) // pre tag check
+        const timedLookupData = checkValidAuthData(await getTimedLookupData(tag))
+        verifyParsedCheckCode(timedLookupData, parsedCheckCode)
+        store.setState({ timedLookupData })
+        return true // pass check
       },
       responderNext,
       responderCheckFail
     }),
-    wrapResponderAssignAuthCheckCodeForTag: (
-      responder,
+    createResponderAssignAuthTag: ({
       tag,
-      authTag = DEFAULT_AUTH_TAG
-    ) => async (store) => {
-      store.response.setHeader(authTag, await generateAuthCheckCodeForTag(tag))
+      responder,
+      authKey = DEFAULT_AUTH_KEY
+    }) => async (store) => {
+      store.response.setHeader(authKey, await generateAuthForTag(tag))
       return responder(store)
     },
-    generateAuthCheckCodeForTag
+    generateAuthForTag
   }
 }
 
