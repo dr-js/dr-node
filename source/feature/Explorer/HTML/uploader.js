@@ -48,7 +48,7 @@ const initUploader = (uploadFileByChunk) => {
     Dr: {
       Common: {
         Format,
-        Time: { clock },
+        Time: { createStepper },
         Error: { catchAsync },
         Immutable: { Object: { objectSet, objectDelete, objectPickKey } }
       }
@@ -65,7 +65,7 @@ const initUploader = (uploadFileByChunk) => {
   const getUploadFileAsync = (uploaderStore, onUploadComplete) => async () => {
     const { uploadFileList: fileList } = uploaderStore.getState()
     uploaderStore.setState({ uploadStatus: 'uploading' })
-    const timeStart = clock()
+    const stepper = createStepper()
     const uploadStatusList = []
     for (const { filePath, fileBlob } of fileList) {
       const onProgress = (current, total) => uploaderStore.setState({
@@ -74,7 +74,7 @@ const initUploader = (uploadFileByChunk) => {
       const { error } = await catchAsync(uploadFileByChunk, fileBlob, filePath, onProgress)
       error && uploadStatusList.push(`Error upload '${filePath}': ${error.stack || (error.target && error.target.error) || error}`)
     }
-    uploadStatusList.push(`Done in ${Format.time(clock() - timeStart)} for ${fileList.length} file`)
+    uploadStatusList.push(`Done in ${Format.time(stepper())} for ${fileList.length} file`)
     {
       const { uploadFileList, uploadProgress } = uploaderStore.getState()
       uploaderStore.setState({

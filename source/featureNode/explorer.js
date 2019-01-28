@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'fs'
 
 import { withRetryAsync } from 'dr-js/module/common/function'
 import { percent, binary, time } from 'dr-js/module/common/format'
-import { clock } from 'dr-js/module/common/time'
+import { createStepper } from 'dr-js/module/common/time'
 import { generateCheckCode } from 'dr-js/module/common/module/TimedLookup'
 
 import { fetchLikeRequest } from 'dr-js/module/node/net'
@@ -34,7 +34,7 @@ const fileUpload = async ({
   wait = 1000,
   log = console.log
 }) => {
-  const startTime = clock()
+  const stepper = createStepper()
   const authFetch = await getAuthFetch(fileAuth)
 
   log && log(`[Upload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
@@ -42,7 +42,7 @@ const fileUpload = async ({
   await uploadFileByChunk({
     fileBuffer,
     filePath,
-    onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)} (${time(clock() - startTime)})`),
+    onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)} (+${time(stepper())})`),
     uploadFileChunkBuffer: async (chainBufferPacket, { chunkIndex }) => withRetryAsync(
       async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket, timeout }).catch((error) => {
         const message = `[ERROR][Upload] upload chunk ${chunkIndex} of ${filePath}`
@@ -54,7 +54,7 @@ const fileUpload = async ({
     )
   })
 
-  log && log(`[Upload] done: ${filePath} (${time(clock() - startTime)})`)
+  log && log(`[Upload] done: ${filePath} (+${time(stepper())})`)
 }
 
 const fileDownload = async ({
@@ -65,18 +65,18 @@ const fileDownload = async ({
   timeout = 30 * 1000,
   log = console.log
 }) => {
-  const startTime = clock()
+  const stepper = createStepper()
   const authFetch = await getAuthFetch(fileAuth)
 
   log && log(`[Download] file: ${filePath}`)
 
   const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET', timeout })).buffer()
-  log && log(`[Download] get: ${binary(fileBuffer.length)}B (${time(clock() - startTime)})`)
+  log && log(`[Download] get: ${binary(fileBuffer.length)}B (+${time(stepper())})`)
 
   if (fileOutputPath) {
     await createDirectory(dirname(fileOutputPath))
     writeFileSync(fileOutputPath, fileBuffer)
-    log && log(`[Download] done: ${fileOutputPath} (${time(clock() - startTime)})`)
+    log && log(`[Download] done: ${fileOutputPath} (+${time(stepper())})`)
   }
 
   return fileBuffer
@@ -92,14 +92,14 @@ const pathAction = async ({
   timeout = 30 * 1000,
   log = console.log
 }) => {
-  const startTime = clock()
+  const stepper = createStepper()
   const authFetch = await getAuthFetch(fileAuth)
 
   log && log(`[Action|${actionType}] key: ${relativeFrom}, keyTo: ${relativeTo}, nameList: [${nameList}]`)
 
   const result = await (await authFetch(urlPathAction, { method: 'POST', body: JSON.stringify({ nameList, actionType, relativeFrom, relativeTo }), timeout })).json()
 
-  log && log(`[Action|${actionType}] done (${time(clock() - startTime)})`)
+  log && log(`[Action|${actionType}] done (+${time(stepper())})`)
 
   return result // should check errorList
 }
