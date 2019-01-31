@@ -8,11 +8,9 @@ import { createCacheMap } from 'dr-js/module/common/data/CacheMap'
 
 import { readFileAsync, writeFileAsync, createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
-import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
 const DEFAULT_AUTH_KEY = 'auth-check-code'
-const DEFAULT_RESPONDER_CHECK_FAIL = (store) => responderEndWithStatusCode(store, { statusCode: 403 })
 
 const saveLookupFile = (pathFile, LookupData) => writeFileAsync(pathFile, Buffer.from(packDataArrayBuffer(LookupData)))
 const loadLookupFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await readFileAsync(pathFile)))
@@ -24,6 +22,7 @@ const configureAuthTimedLookup = async ({
   authGenSize,
   authGenTokenSize,
   authGenTimeGap,
+  authKey = DEFAULT_AUTH_KEY,
   logger
 }) => {
   const timedLookupData = await loadLookupFile(fileAuth).catch(async (error) => {
@@ -48,8 +47,7 @@ const configureAuthTimedLookup = async ({
   return {
     createResponderCheckAuth: ({
       responderNext,
-      responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL,
-      authKey = DEFAULT_AUTH_KEY
+      responderDeny
     }) => createResponderCheckRateLimit({
       checkFunc: (store) => {
         const { url: { searchParams } } = store.getState()
@@ -59,12 +57,9 @@ const configureAuthTimedLookup = async ({
         return true // pass check
       },
       responderNext,
-      responderCheckFail
+      responderDeny
     }),
-    createResponderAssignAuth: ({
-      responder,
-      authKey = DEFAULT_AUTH_KEY
-    }) => (store) => {
+    createResponderAssignAuth: ({ responder }) => (store) => {
       store.response.setHeader(authKey, generateAuth())
       return responder(store)
     },
@@ -88,6 +83,7 @@ const configureAuthTimedLookupGroup = async ({
   authExpireTime = AUTH_EXPIRE_TIME,
   authSizeSumMax = AUTH_SIZE_SUM_MAX,
   authCacheMap = createCacheMap({ valueSizeSumMax: authSizeSumMax, valueSizeSingleMax: authSizeSumMax, eventHub: null }),
+  authKey = DEFAULT_AUTH_KEY,
   logger
 }) => {
   const getPath = createPathPrefixLock(pathAuthDirectory)
@@ -110,8 +106,7 @@ const configureAuthTimedLookupGroup = async ({
   return {
     createResponderCheckAuth: ({
       responderNext,
-      responderCheckFail = DEFAULT_RESPONDER_CHECK_FAIL,
-      authKey = DEFAULT_AUTH_KEY
+      responderDeny
     }) => createResponderCheckRateLimit({
       checkFunc: async (store) => {
         const { url: { searchParams } } = store.getState()
@@ -125,13 +120,9 @@ const configureAuthTimedLookupGroup = async ({
         return true // pass check
       },
       responderNext,
-      responderCheckFail
+      responderDeny
     }),
-    createResponderAssignAuthTag: ({
-      tag,
-      responder,
-      authKey = DEFAULT_AUTH_KEY
-    }) => async (store) => {
+    createResponderAssignAuthForTag: ({ responder, tag }) => async (store) => {
       store.response.setHeader(authKey, await generateAuthForTag(tag))
       return responder(store)
     },
