@@ -3,25 +3,30 @@ import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, cre
 import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap, createResponderRouteList } from 'dr-js/module/node/server/Responder/Router'
 
-import { configureLogger } from 'dr-server/module/configure/logger'
-import { configureFilePid } from 'dr-server/module/configure/filePid'
+import { configureLog } from 'dr-server/module/configure/log'
+import { configurePid } from 'dr-server/module/configure/pid'
 import { configureAuthTimedLookup, configureAuthTimedLookupGroup } from 'dr-server/module/configure/auth'
-import { configureServerBase } from 'dr-server/module/configure/serverBase'
+import { configurePermission } from 'dr-server/module/configure/permission'
+import { configureServer } from 'dr-server/module/configure/server'
 import { configureFeaturePack as configureFeaturePackExplorer } from 'dr-server/module/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusCollect } from 'dr-server/module/feature/StatusCollect/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusReport } from 'dr-server/module/feature/StatusReport/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackTaskRunner } from 'dr-server/module/feature/TaskRunner/configureFeaturePack'
 
 const createServer = async ({
-  // common
-  filePid, shouldIgnoreExistPid,
+  // server
   protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam,
-  pathLogDirectory, logFilePrefix,
 
+  // log
+  pathLogDirectory, logFilePrefix,
+  // pid
+  filePid, shouldIgnoreExistPid,
   // auth
   fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
   // auth-group
   pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix, authGroupVerifyRequestTag,
+  // permission
+  permissionType, permissionFunc, permissionFile,
 
   // explorer
   explorerRootPath, explorerUploadMergePath,
@@ -32,65 +37,71 @@ const createServer = async ({
   // task-runner
   taskRunnerRootPath
 }) => {
-  await configureFilePid({ filePid, shouldIgnoreExistPid })
-  const { server, start, stop, option } = await configureServerBase({
-    protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
-  })
-  const logger = await configureLogger({ pathLogDirectory, logFilePrefix })
-  const { createResponderCheckAuth, generateAuth } = fileAuth
+  await configurePid({ filePid, shouldIgnoreExistPid })
+
+  const { server, start, stop, option } = await configureServer({ protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam })
+
+  const logger = await configureLog({ pathLogDirectory, logFilePrefix })
+
+  const { createResponderCheckAuth, authFetch } = fileAuth
     ? await configureAuthTimedLookup({ fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap, logger })
     : await configureAuthTimedLookupGroup({
       pathAuthDirectory: pathAuthGroup,
       getFileNameForTag: authGroupKeySuffix ? (tag) => `${tag}${authGroupKeySuffix}` : undefined,
       verifyRequestTag: authGroupVerifyRequestTag || undefined,
       logger
-    }).then(({ createResponderCheckAuth, generateAuthForTag }) => ({
+    }).then(({ createResponderCheckAuth, authFetchForTag }) => ({
       createResponderCheckAuth,
-      generateAuth: () => generateAuthForTag(authGroupDefaultTag)
+      authFetch: (url, option) => authFetchForTag(url, option, authGroupDefaultTag)
     }))
+
+  const { checkPermission } = await configurePermission({ permissionType, permissionFunc, permissionFile, logger })
 
   const responderLogEnd = createResponderLogEnd({ log: logger.add })
 
+  const routePrefix = ''
   const urlAuthCheck = '/auth'
 
   const featureExplorer = explorerRootPath && await configureFeaturePackExplorer({
     option,
     logger,
-    routePrefix: '',
+    routePrefix,
     explorerRootPath,
     explorerUploadMergePath,
     urlAuthCheck,
-    createResponderCheckAuth
+    createResponderCheckAuth,
+    checkPermission
   })
 
   const featureStatusCollect = statusCollectPath && await configureFeaturePackStatusCollect({
     option,
     logger,
-    routePrefix: '',
+    routePrefix,
     statusCollectPath,
     statusCollectUrl,
     statusCollectInterval,
     urlAuthCheck,
     createResponderCheckAuth,
-    generateAuth
+    authFetch
   })
 
   const featureStatusReport = statusReportProcessTag && await configureFeaturePackStatusReport({
     option,
     logger,
-    routePrefix: '',
+    routePrefix,
     statusReportProcessTag,
     createResponderCheckAuth,
-    generateAuth
+    authFetch
   })
 
   const featureTaskRunner = taskRunnerRootPath && await configureFeaturePackTaskRunner({
     option,
     logger,
-    routePrefix: '',
+    routePrefix,
     taskRunnerRootPath,
     urlAuthCheck,
-    createResponderCheckAuth
+    createResponderCheckAuth,
+    checkPermission
   })
 
   const redirectUrl = featureExplorer ? featureExplorer.URL_HTML

@@ -4,25 +4,17 @@ import { readFileSync, writeFileSync } from 'fs'
 import { withRetryAsync } from 'dr-js/module/common/function'
 import { percent, binary, time } from 'dr-js/module/common/format'
 import { createStepper } from 'dr-js/module/common/time'
-import { generateCheckCode } from 'dr-js/module/common/module/TimedLookup'
 
-import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { createDirectory } from 'dr-js/module/node/file/File'
 
-import { loadLookupFile } from 'source/configure/auth'
+import { loadLookupFile, authFetchTimedLookup } from 'source/configure/auth'
 import { uploadFileByChunk } from 'source/feature/Explorer/task/fileChunkUpload'
 
 // for node client file chunk upload
 
-const DEFAULT_AUTH_KEY = 'auth-check-code'
-
 const getAuthFetch = async (fileAuth, authKey) => {
   const timedLookupData = await loadLookupFile(fileAuth)
-  return async (url, config) => {
-    const response = await fetchLikeRequest(url, { ...config, headers: { ...config.headers, [ authKey ]: generateCheckCode(timedLookupData) } })
-    if (!response.ok) throw new Error(`[Error][AuthFetch] status: ${response.status}`)
-    return response
-  }
+  return async (url, config) => authFetchTimedLookup(url, config, timedLookupData, authKey)
 }
 
 const fileUpload = async ({
@@ -31,7 +23,7 @@ const fileUpload = async ({
   filePath,
   urlFileUpload,
   fileAuth,
-  authKey = DEFAULT_AUTH_KEY,
+  authKey,
   timeout = 30 * 1000,
   maxRetry = 3,
   wait = 1000,
@@ -65,7 +57,7 @@ const fileDownload = async ({
   filePath,
   urlFileDownload,
   fileAuth,
-  authKey = DEFAULT_AUTH_KEY,
+  authKey,
   timeout = 30 * 1000,
   log = console.log
 }) => {
@@ -93,7 +85,7 @@ const pathAction = async ({
   keyTo: relativeTo,
   urlPathAction,
   fileAuth,
-  authKey = DEFAULT_AUTH_KEY,
+  authKey,
   timeout = 30 * 1000,
   log = console.log
 }) => {

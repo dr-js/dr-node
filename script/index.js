@@ -4,7 +4,7 @@ import { execSync } from 'child_process'
 import { argvFlag, runMain } from 'dr-dev/module/main'
 import { getLogger } from 'dr-dev/module/logger'
 import { getScriptFileListFromPathList } from 'dr-dev/module/fileList'
-import { initOutput, verifyOutputBinVersion, packOutput, publishOutput } from 'dr-dev/module/commonOutput'
+import { initOutput, verifyOutputBinVersion, verifyNoGitignore, packOutput, publishOutput } from 'dr-dev/module/commonOutput'
 import { processFileList, fileProcessorBabel } from 'dr-dev/module/fileProcessor'
 import { getTerserOption, minifyFileListWithTerser } from 'dr-dev/module/minify'
 import { writeLicenseFile } from 'dr-dev/module/license'
@@ -47,16 +47,25 @@ const processOutput = async ({ packageJSON, logger }) => {
 }
 
 runMain(async (logger) => {
-  logger.padLog(`generate spec`)
-  execSync('npm run script-generate-spec', execOptionRoot)
+  await verifyNoGitignore({ path: fromRoot('source'), logger })
+  await verifyNoGitignore({ path: fromRoot('source-bin'), logger })
+  await verifyNoGitignore({ path: fromRoot('source-sample'), logger })
 
   const packageJSON = await initOutput({ fromRoot, fromOutput, logger })
   writeLicenseFile(fromRoot('LICENSE'), packageJSON.license, packageJSON.author)
+
+  logger.padLog(`generate spec`)
+  execSync('npm run script-generate-spec', execOptionRoot)
 
   if (!argvFlag('pack')) return
 
   await buildOutput({ logger })
   await processOutput({ packageJSON, logger })
+
+  if (argvFlag('test', 'publish', 'publish-dev')) {
+    logger.padLog(`test test-server`)
+    execSync(`npm run test-server`, execOptionRoot)
+  }
 
   await verifyOutputBinVersion({ fromOutput, packageJSON, logger })
 

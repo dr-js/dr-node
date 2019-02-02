@@ -1,11 +1,10 @@
 import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
+import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { responderSendBufferCompress, prepareBufferDataAsync } from 'dr-js/module/node/server/Responder/Send'
 
 import { configureStatusCollector } from './configure/configureStatusCollector'
 import { createResponderStatusState, createResponderStatusCollect } from './responder'
 import { getHTML } from './HTML'
-
-const DEFAULT_AUTH_KEY = 'auth-check-code'
 
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
@@ -14,11 +13,9 @@ const configureFeaturePack = async ({
   statusCollectUrl,
   statusCollectInterval,
 
-  // TODO: maybe less specific, or optional?
   urlAuthCheck = '',
-  authKey = DEFAULT_AUTH_KEY,
   createResponderCheckAuth = ({ responderNext }) => responderNext,
-  generateAuth = () => ''
+  authFetch = fetchLikeRequest
 }) => {
   const URL_HTML = `${routePrefix}/status-visualize`
   const URL_STATUS_STATE = `${routePrefix}/status-state`
@@ -28,7 +25,7 @@ const configureFeaturePack = async ({
     collectPath: statusCollectPath,
     collectUrl: statusCollectUrl,
     collectInterval: statusCollectInterval,
-    getExtraHeaders: async () => ({ [ authKey ]: await generateAuth() })
+    authFetch
   })
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({

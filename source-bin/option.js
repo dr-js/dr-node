@@ -1,60 +1,46 @@
-import { ConfigPresetNode, prepareOption } from 'dr-js/module/node/module/Option'
+import { ConfigPreset, prepareOption, parseCompactFormat as parse } from 'dr-js/module/node/module/Option/preset'
 import {
-  getServerFormatConfig,
-  TokenCacheFormatConfig,
+  LogFormatConfig,
+  PidFormatConfig,
   AuthFormatConfig,
   AuthGroupFormatConfig,
+  PermissionFormatConfig,
+  // TokenCacheFormatConfig,
+} from 'dr-server/module/configure/option'
+import {
+  getServerFormatConfig,
   ExplorerFormatConfig,
   StatusCollectFormatConfig,
   StatusReportFormatConfig,
   TaskRunnerFormatConfig
-} from 'dr-server/module/option'
-
-const { SingleString, AllString, SinglePath, BooleanFlag, Config } = ConfigPresetNode
-
-const MODE_FORMAT_LIST = [
-  [ 'server|s', [ getServerFormatConfig([
-    TokenCacheFormatConfig,
-    AuthFormatConfig,
-    AuthGroupFormatConfig,
-    ExplorerFormatConfig,
-    StatusCollectFormatConfig,
-    StatusReportFormatConfig,
-    TaskRunnerFormatConfig
-  ]) ] ],
-  [ 'node-file-upload|nfu', [
-    { ...SingleString, name: 'file-upload-server-url' },
-    { ...SingleString, name: 'file-upload-key' },
-    { ...SinglePath, name: 'file-upload-path' }
-  ] ],
-  [ 'node-file-download|nfd', [
-    { ...SingleString, name: 'file-download-server-url' },
-    { ...SingleString, name: 'file-download-key' },
-    { ...SinglePath, name: 'file-download-path' }
-  ] ],
-  [ 'node-path-action|npa', [
-    { ...SingleString, name: 'path-action-server-url' },
-    { ...SingleString, name: 'path-action-type' },
-    { ...SingleString, optional: true, name: 'path-action-key' },
-    { ...SingleString, optional: true, name: 'path-action-key-to' },
-    { ...AllString, optional: true, name: 'path-action-name-list' }
-  ] ]
-].map(([ nameConfig, extendFormatList ]) => {
-  const [ name, ...aliasNameList ] = nameConfig.split('|')
-  return { ...BooleanFlag, name, aliasNameList, extendFormatList }
-})
+} from 'dr-server/module/feature/option'
+import {
+  NodeExplorerFormatConfig
+} from 'dr-server/module/featureNode/option'
 
 const OPTION_CONFIG = {
   prefixENV: 'dr-server',
   formatList: [
-    Config,
-    { ...BooleanFlag, name: 'version', shortName: 'v' },
-    { ...BooleanFlag, name: 'help', shortName: 'h', description: `show full help` },
-    ...MODE_FORMAT_LIST,
-    { ...SingleString, optional: true, name: 'node-auth-key' }
+    ConfigPreset.Config,
+    parse('help,h/T|show full help'),
+    parse('quiet,q/T|less log'),
+    parse('version,v/T|show version'),
+    getServerFormatConfig([
+      LogFormatConfig,
+      PidFormatConfig,
+      AuthFormatConfig,
+      AuthGroupFormatConfig,
+      PermissionFormatConfig,
+      // TokenCacheFormatConfig,
+      ExplorerFormatConfig,
+      StatusCollectFormatConfig,
+      StatusReportFormatConfig,
+      TaskRunnerFormatConfig
+    ]),
+    NodeExplorerFormatConfig
   ]
 }
 
 const { parseOption, formatUsage } = prepareOption(OPTION_CONFIG)
 
-export { MODE_FORMAT_LIST, parseOption, formatUsage }
+export { parseOption, formatUsage }

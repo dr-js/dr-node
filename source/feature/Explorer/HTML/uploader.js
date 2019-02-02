@@ -1,4 +1,7 @@
-const initFileUpload = (URL_FILE_UPLOAD, authFetch) => {
+const initFileUpload = (
+  URL_FILE_UPLOAD,
+  authFetch
+) => {
   const {
     crypto, isSecureContext,
     Dr: {
@@ -42,7 +45,9 @@ const initFileUpload = (URL_FILE_UPLOAD, authFetch) => {
   return { uploadFileByChunk }
 }
 
-const initUploader = (uploadFileByChunk) => {
+const initUploader = (
+  uploadFileByChunk
+) => {
   const {
     qS, cE,
     Dr: {

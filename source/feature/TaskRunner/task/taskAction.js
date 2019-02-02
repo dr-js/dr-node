@@ -11,6 +11,33 @@ import { modify } from 'dr-js/module/node/file/Modify'
 import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, checkProcessExist, tryKillProcessTreeNode } from 'dr-js/module/node/system/ProcessStatus'
 import { collectAllProcessStatus } from 'dr-js/bin/function'
 
+const TASK_CONFIG_SET = 'set-task-config'
+const TASK_CONFIG_GET = 'get-task-config'
+
+const TASK_START = 'start-task'
+const TASK_STOP = 'stop-task'
+const TASK_DELETE = 'delete-task'
+const TASK_LIST = 'list-task'
+
+const TASK_LOG_GET = 'get-task-log'
+const TASK_LOG_GET_TAIL = 'get-task-log-tail'
+const TASK_LOG_RESET = 'reset-task-log'
+
+const PROCESS_STATUS = 'process-status'
+
+const TASK_ACTION_TYPE = { // NOTE: should always refer action type form here
+  TASK_CONFIG_SET,
+  TASK_CONFIG_GET,
+  TASK_START,
+  TASK_STOP,
+  TASK_DELETE,
+  TASK_LIST,
+  TASK_LOG_GET,
+  TASK_LOG_GET_TAIL,
+  TASK_LOG_RESET,
+  PROCESS_STATUS
+}
+
 const FILE_TASK_CONFIG = 'task.config.json'
 const FILE_TASK_LOG = 'task.log'
 
@@ -109,8 +136,8 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
   const saveConfig = (config) => writeFileAsync(getConfigPath(config.key), JSON.stringify(config))
   const loadConfig = async (key) => JSON.parse(await readFileAsync(getConfigPath(key)))
 
-  const taskAction = {
-    'set-task-config': async (payload) => {
+  const TASK_ACTION_MAP = {
+    [ TASK_CONFIG_SET ]: async (payload) => {
       let config = verifyAndFormatConfig(payload, getPath)
       const existConfig = await loadConfig(config.key).catch(onLoadConfigError)
       if (existConfig && await existTaskProcess(existConfig)) throw new Error(`config task running`)
@@ -118,25 +145,25 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
       await createDirectory(getPath(config.key))
       await saveConfig(config)
     },
-    'get-task-config': ({ key }) => loadConfig(key).catch(onLoadConfigError),
-    'start-task': async ({ key }) => {
+    [ TASK_CONFIG_GET ]: ({ key }) => loadConfig(key).catch(onLoadConfigError),
+    [ TASK_START ]: async ({ key }) => {
       const config = await loadConfig(key)
       if (await existTaskProcess(config)) throw new Error(`task exist`)
-      config.task.resetLog && await taskAction[ 'reset-task-log' ]({ key })
+      config.task.resetLog && await TASK_ACTION_MAP[ TASK_LOG_RESET ]({ key })
       const { processInfo } = await startDetachedProcess(config.task, getLogPath(key))
       await saveConfig({ ...config, status: { processInfo, timeStart: getTimestamp() } })
     },
-    'stop-task': async ({ key }) => {
+    [ TASK_STOP ]: async ({ key }) => {
       const config = await loadConfig(key)
       config.status && config.status.processInfo && await tryKillProcessTreeNode(config.status.processInfo)
       await saveConfig({ ...config, status: null })
     },
-    'delete-task': async ({ key }) => {
+    [ TASK_DELETE ]: async ({ key }) => {
       const config = await loadConfig(key)
       if (await existTaskProcess(config)) throw new Error(`task process running at: ${config.status.processInfo.pid}`)
       await modify.delete(getPath(key))
     },
-    'list-task': async () => {
+    [ TASK_LIST ]: async () => {
       const configList = []
       for (const { name, stat } of await getDirectorySubInfoList(rootPath).catch(() => [])) {
         const config = stat.isDirectory() && await loadConfig(name).catch(onLoadConfigError)
@@ -144,23 +171,26 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
       }
       return { configList }
     },
-    'get-task-log': async ({ key }) => ({ stream: createReadStream(getLogPath(key)) }),
-    'get-task-log-tail': async ({ key, tailSize = 4 * 1024 }) => {
+    [ TASK_LOG_GET ]: async ({ key }) => ({ stream: createReadStream(getLogPath(key)) }),
+    [ TASK_LOG_GET_TAIL ]: async ({ key, tailSize = 4 * 1024 }) => {
       const logPath = getLogPath(key)
       const { size } = await statAsync(logPath)
       return { stream: createReadStream(logPath, { start: Math.max(size - tailSize, 0) }) } // TODO: may break UTF8 char
     },
-    'reset-task-log': async ({ key }) => truncateAsync(getLogPath(key)),
-    'process-status': async ({ outputMode = 'tree', isHumanReadableOutput = true }) => ({
+    [ TASK_LOG_RESET ]: async ({ key }) => truncateAsync(getLogPath(key)),
+    [ PROCESS_STATUS ]: async ({ outputMode = 'tree', isHumanReadableOutput = true }) => ({
       processStatus: await collectAllProcessStatus(outputMode, isHumanReadableOutput)
     })
   }
 
   return async (type, payload) => {
     __DEV__ && console.log('[TaskAction]', type, payload)
-    const extraData = await taskAction[ type ](payload)
+    const extraData = await TASK_ACTION_MAP[ type ](payload)
     return { type, ...extraData }
   }
 }
 
-export { createTaskAction }
+export {
+  TASK_ACTION_TYPE,
+  createTaskAction
+}

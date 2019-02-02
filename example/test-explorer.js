@@ -5,14 +5,15 @@ const SERVER_TAG = 'explorer'
 
 const main = async () => {
   const { option, start } = await createServer({
-    port: 8003,
+    port: 8001,
 
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
     shouldAuthGen: true,
+    permissionType: 'allow',
 
-    uploadRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
-    uploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`
+    explorerRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
+    explorerUploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`
   })
 
   await start()

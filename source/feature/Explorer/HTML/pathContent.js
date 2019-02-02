@@ -12,10 +12,11 @@ h2, h6 { margin: 0.5em 4px; }
 const initPathContent = (
   URL_PATH_ACTION,
   URL_FILE_SERVE,
+  IS_READ_ONLY = true,
+  PATH_ACTION_TYPE,
   authFetch,
   withConfirmModal,
-  withPromptModal,
-  isReadOnly = true
+  withPromptModal
 ) => {
   const {
     qS, cE, aCL,
@@ -52,14 +53,17 @@ const initPathContent = (
 
   const doLoadPath = async (pathContentStore, relativePath = pathContentStore.getState().pathContent.relativePath) => {
     const { resultList: [ { relativeFrom: nextRelativePath, directoryList, fileList } ] } = await authFetchPathAction({
-      nameList: [ '' ], actionType: 'path-content', relativeFrom: relativePath || PATH_ROOT
+      nameList: [ '' ], actionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT, relativeFrom: relativePath || PATH_ROOT
     })
     pathContentStore.setState({ pathContent: { relativePath: nextRelativePath || PATH_ROOT, directoryList, fileList } })
   }
 
   const getLoadPathAsync = (pathContentStore) => async (relativePath) => doLoadPath(pathContentStore, relativePath)
   const getPathActionAsync = (pathContentStore) => async (nameList, actionType, relativeFrom, relativeTo) => {
-    if ((actionType === 'move' || actionType === 'copy') && (!relativeTo || relativeTo === relativeFrom)) return
+    if (
+      (actionType === PATH_ACTION_TYPE.PATH_MOVE || actionType === PATH_ACTION_TYPE.PATH_COPY) &&
+      (!relativeTo || relativeTo === relativeFrom)
+    ) return
     await authFetchPathAction({ nameList, actionType, relativeFrom, relativeTo })
     await doLoadPath(pathContentStore)
   }
@@ -96,9 +100,9 @@ const initPathContent = (
     const selectEditSelectSome = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_SOME), onclick: doSelectRemaining })
     const selectEditSelectAll = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_ALL), onclick: doSelectNone })
 
-    const selectEditMove = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_CUT), onclick: async () => pathAction([ ...selectNameSet ], 'move', relativePath, await withPromptModal(`Batch Move ${selectNameSet.size} Path To`, relativePath)) })
-    const selectEditCopy = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_COPY), onclick: async () => pathAction([ ...selectNameSet ], 'copy', relativePath, await withPromptModal(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
-    const selectEditDelete = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_DELETE), onclick: async () => (await withConfirmModal(`Batch Delete ${selectNameSet.size} Path In: ${pathName(relativePath)}?`)) && pathAction([ ...selectNameSet ], 'delete', relativePath) })
+    const selectEditMove = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_CUT), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_MOVE, relativePath, await withPromptModal(`Batch Move ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditCopy = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_COPY), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditDelete = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_DELETE), onclick: async () => (await withConfirmModal(`Batch Delete ${selectNameSet.size} Path In: ${pathName(relativePath)}?`)) && pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
 
     const updateSelectStatus = () => aCL(qS('.select', ''), [
       !selectNameSet.size ? selectEditSelectNone : (selectNameSet.size < (directoryList.length + fileList.length)) ? selectEditSelectSome : selectEditSelectAll,
@@ -127,10 +131,10 @@ const initPathContent = (
       return element
     }
 
-    const renderCommonEditList = (relativePath) => (isReadOnly || (window.innerWidth <= 480)) ? [] : [
-      cE('button', { className: 'edit', innerText: TEXT_CUT, onclick: async () => pathAction([ '' ], 'move', relativePath, await withPromptModal('Move To', relativePath)) }),
-      cE('button', { className: 'edit', innerText: TEXT_COPY, onclick: async () => pathAction([ '' ], 'copy', relativePath, await withPromptModal('Copy To', relativePath)) }),
-      cE('button', { className: 'edit', innerText: TEXT_DELETE, onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && pathAction([ '' ], 'delete', relativePath) })
+    const renderCommonEditList = (relativePath) => (IS_READ_ONLY || (window.innerWidth <= 480)) ? [] : [
+      cE('button', { className: 'edit', innerText: TEXT_CUT, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_MOVE, relativePath, await withPromptModal('Move To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: TEXT_COPY, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal('Copy To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: TEXT_DELETE, onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && pathAction([ '' ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
     ]
 
     parentElement.innerHTML = ''
@@ -141,25 +145,25 @@ const initPathContent = (
       relativePath !== PATH_ROOT && cE('div', { className: 'directory' }, [
         cE('button', { className: 'name', innerText: '🔙|..', onclick: () => loadPath(pathPop(relativePath)) })
       ]),
-      !isReadOnly && cE('div', { className: 'select' }),
+      !IS_READ_ONLY && cE('div', { className: 'select' }),
       ...directoryList
         .sort((nameA, nameB) => SORT_FUNC[ pathSortType ]([ nameA ], [ nameB ]))
         .map((name) => cE('div', { className: 'directory' }, [
-          !isReadOnly && renderSelectButton(name),
+          !IS_READ_ONLY && renderSelectButton(name),
           cE('button', { className: 'name', innerText: `📁|${name}/`, onclick: () => loadPath(pathPush(relativePath, name)) }),
           ...renderCommonEditList(pathPush(relativePath, name))
         ])),
       ...fileList
         .sort(SORT_FUNC[ pathSortType ])
         .map(([ name, size, mtimeMs ]) => cE('div', { className: 'file' }, [
-          !isReadOnly && renderSelectButton(name),
+          !IS_READ_ONLY && renderSelectButton(name),
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
           cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => downloadFile(relativePath, name) }),
           ...renderCommonEditList(pathPush(relativePath, name))
         ]))
     ])
 
-    !isReadOnly && updateSelectStatus()
+    !IS_READ_ONLY && updateSelectStatus()
   }
 
   return {

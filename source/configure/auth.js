@@ -6,14 +6,32 @@ import {
 } from 'dr-js/module/common/module/TimedLookup'
 import { createCacheMap } from 'dr-js/module/common/data/CacheMap'
 
-import { readFileAsync, writeFileAsync, createPathPrefixLock } from 'dr-js/module/node/file/function'
+import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
+import { readFileAsync, writeFileAsync, createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
 const DEFAULT_AUTH_KEY = 'auth-check-code'
 
 const saveLookupFile = (pathFile, LookupData) => writeFileAsync(pathFile, Buffer.from(packDataArrayBuffer(LookupData)))
 const loadLookupFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await readFileAsync(pathFile)))
+
+const authFetchTimedLookup = async (
+  url,
+  config = {},
+  timedLookupData,
+  authKey = DEFAULT_AUTH_KEY
+) => {
+  const response = await fetchLikeRequest(url, {
+    ...config,
+    headers: {
+      [ authKey ]: generateCheckCode(timedLookupData),
+      ...config.headers
+    }
+  })
+  if (!response.ok) throw new Error(`[Error][AuthFetch] status: ${response.status}`)
+  return response
+}
 
 const configureAuthTimedLookup = async ({
   fileAuth,
@@ -27,7 +45,7 @@ const configureAuthTimedLookup = async ({
 }) => {
   const timedLookupData = await loadLookupFile(fileAuth).catch(async (error) => {
     if (!shouldAuthGen) {
-      console.error('missing auth lookup file', error)
+      logger.add('missing auth lookup file', error)
       throw error
     }
     logger.add('generate new auth lookup file')
@@ -44,14 +62,15 @@ const configureAuthTimedLookup = async ({
 
   const generateAuth = () => generateCheckCode(timedLookupData)
 
+  const authFetch = (url, config) => authFetchTimedLookup(url, config, timedLookupData, authKey)
+
   return {
     createResponderCheckAuth: ({
       responderNext,
       responderDeny
     }) => createResponderCheckRateLimit({
       checkFunc: (store) => {
-        const { url: { searchParams } } = store.getState()
-        const authCheckCode = searchParams.get(authKey) || store.request.headers[ authKey ]
+        const authCheckCode = store.request.headers[ authKey ] || store.getState().url.searchParams.get(authKey)
         verifyCheckCode(timedLookupData, authCheckCode)
         store.setState({ timedLookupData })
         return true // pass check
@@ -63,7 +82,8 @@ const configureAuthTimedLookup = async ({
       store.response.setHeader(authKey, generateAuth())
       return responder(store)
     },
-    generateAuth
+    generateAuth,
+    authFetch
   }
 }
 
@@ -103,14 +123,15 @@ const configureAuthTimedLookupGroup = async ({
 
   const generateAuthForTag = async (tag) => generateCheckCode(checkValidAuthData(await getTimedLookupData(tag)))
 
+  const authFetchForTag = async (url, config, tag) => authFetchTimedLookup(url, config, checkValidAuthData(await getTimedLookupData(tag)), authKey)
+
   return {
     createResponderCheckAuth: ({
       responderNext,
       responderDeny
     }) => createResponderCheckRateLimit({
       checkFunc: async (store) => {
-        const { url: { searchParams } } = store.getState()
-        const authCheckCode = searchParams.get(authKey) || store.request.headers[ authKey ]
+        const authCheckCode = store.request.headers[ authKey ] || store.getState().url.searchParams.get(authKey)
         const parsedCheckCode = parseCheckCode(authCheckCode)
         const tag = parsedCheckCode[ 0 ]
         verifyRequestTag && await verifyRequestTag(store, tag) // pre tag check
@@ -126,13 +147,16 @@ const configureAuthTimedLookupGroup = async ({
       store.response.setHeader(authKey, await generateAuthForTag(tag))
       return responder(store)
     },
-    generateAuthForTag
+    generateAuthForTag,
+    authFetchForTag
   }
 }
 
 export {
+  DEFAULT_AUTH_KEY,
   saveLookupFile,
   loadLookupFile,
+  authFetchTimedLookup,
   configureAuthTimedLookup,
   configureAuthTimedLookupGroup
 }

@@ -5,11 +5,12 @@ const SERVER_TAG = 'status-report'
 
 const main = async () => {
   const { option, start, featureStatusReport } = await createServer({
-    port: 8001,
+    port: 8003,
 
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
     fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
     shouldAuthGen: true,
+    permissionType: 'allow',
 
     statusReportProcessTag: SERVER_TAG
   })

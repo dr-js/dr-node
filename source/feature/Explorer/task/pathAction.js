@@ -6,8 +6,34 @@ import { createDirectory } from 'dr-js/module/node/file/File'
 import { getDirectorySubInfoList, getDirectoryInfoTree, walkDirectoryInfoTree } from 'dr-js/module/node/file/Directory'
 import { modify } from 'dr-js/module/node/file/Modify'
 
-const pathReadActionMap = {
-  'path-content': async (absolutePath) => { // single level, both file & directory
+const PATH_STAT = 'stat'
+const PATH_COPY = 'copy'
+const PATH_MOVE = 'move'
+const PATH_DELETE = 'delete'
+
+const DIRECTORY_CREATE = 'create-directory'
+const DIRECTORY_CONTENT = 'path-content'
+const DIRECTORY_ALL_FILE_LIST = 'list-file-recursive'
+
+const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
+  PATH_STAT,
+  PATH_COPY,
+  PATH_MOVE,
+  PATH_DELETE,
+
+  DIRECTORY_CREATE,
+  DIRECTORY_CONTENT,
+  DIRECTORY_ALL_FILE_LIST
+}
+
+const PATH_ACTION_MAP = {
+  [ PATH_STAT ]: (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
+  [ PATH_COPY ]: modify.copy,
+  [ PATH_MOVE ]: modify.move,
+  [ PATH_DELETE ]: modify.delete,
+
+  [ DIRECTORY_CREATE ]: (absolutePath) => createDirectory(absolutePath),
+  [ DIRECTORY_CONTENT ]: async (absolutePath) => { // single level, both file & directory
     const { result: subInfoList, error } = await catchAsync(getDirectorySubInfoList, absolutePath)
     __DEV__ && error && console.warn('[path-content] error:', error)
     const directoryList = [] // name only
@@ -18,7 +44,7 @@ const pathReadActionMap = {
     )
     return { directoryList, fileList }
   },
-  'list-file-recursive': async (absolutePath) => { // recursive, file only
+  [ DIRECTORY_ALL_FILE_LIST ]: async (absolutePath) => { // recursive, file only
     const fileList = [] // [ name, size, mtimeMs ]
     const { error } = await catchAsync(async () => walkDirectoryInfoTree(
       await getDirectoryInfoTree(absolutePath),
@@ -30,28 +56,19 @@ const pathReadActionMap = {
   }
 }
 
-const pathEditActionMap = {
-  ...modify,
-  'create-directory': (absolutePath) => createDirectory(absolutePath),
-  'stat': (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs }))
-}
-
-// relativePath should be under rootPath
-const createGetPathAction = (rootPath, isReadOnly) => {
-  __DEV__ && console.log('[PathAction]', { rootPath, isReadOnly })
+const createGetPathAction = (rootPath) => {
   const getPath = createPathPrefixLock(rootPath)
+  __DEV__ && console.log('[PathAction]', { rootPath }, Object.keys(PATH_ACTION_MAP))
 
-  const pathActionMap = {
-    ...pathReadActionMap,
-    ...(isReadOnly ? {} : pathEditActionMap)
-  }
-
-  return async (actionType, relativeFrom, relativeTo) => {
+  return async (actionType, relativeFrom, relativeTo) => { // relativeFrom/relativeTo should be under rootPath
     __DEV__ && console.log('[PathAction]', actionType, relativeFrom, relativeTo)
     const absolutePathFrom = getPath(relativeFrom)
     const absolutePathTo = relativeTo && getPath(relativeTo)
-    return pathActionMap[ actionType ](absolutePathFrom, absolutePathTo)
+    return PATH_ACTION_MAP[ actionType ](absolutePathFrom, absolutePathTo)
   }
 }
 
-export { createGetPathAction }
+export {
+  PATH_ACTION_TYPE,
+  createGetPathAction
+}

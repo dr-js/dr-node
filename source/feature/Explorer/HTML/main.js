@@ -9,13 +9,14 @@ import { pathContentStyle, initPathContent } from './pathContent'
 import { initFileUpload, initUploader } from './uploader'
 
 const getHTML = ({
-  IS_SKIP_AUTH = false,
-  IS_READ_ONLY = false,
   URL_AUTH_CHECK,
   URL_PATH_ACTION,
   URL_FILE_SERVE,
   URL_FILE_UPLOAD,
-  URL_STORAGE_STATUS
+  URL_STORAGE_STATUS,
+  IS_SKIP_AUTH = false,
+  IS_READ_ONLY = false,
+  PATH_ACTION_TYPE
 }) => COMMON_LAYOUT([
   `<title>Explorer</title>`,
   COMMON_STYLE(),
@@ -25,13 +26,14 @@ const getHTML = ({
   `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
   COMMON_SCRIPT({
-    IS_SKIP_AUTH,
-    IS_READ_ONLY,
     URL_AUTH_CHECK,
     URL_PATH_ACTION,
     URL_FILE_SERVE,
     URL_FILE_UPLOAD,
     URL_STORAGE_STATUS,
+    IS_SKIP_AUTH,
+    IS_READ_ONLY,
+    PATH_ACTION_TYPE,
     initModal,
     initLoadingMask,
     initAuthMask,
@@ -52,8 +54,8 @@ const onLoadFunc = () => {
     URL, location,
     qS, cE, aCL,
 
-    IS_SKIP_AUTH, IS_READ_ONLY,
     URL_AUTH_CHECK, URL_PATH_ACTION, URL_FILE_SERVE, URL_FILE_UPLOAD, URL_STORAGE_STATUS,
+    IS_SKIP_AUTH, IS_READ_ONLY, PATH_ACTION_TYPE,
     initModal, initLoadingMask, initAuthMask, initPathContent, initFileUpload, initUploader,
 
     Dr: {
@@ -66,11 +68,22 @@ const onLoadFunc = () => {
   } = window
 
   const initExplorer = async ({ authRevoke, authFetch, authDownload }) => {
-    const { uploadFileByChunk } = IS_READ_ONLY ? {} : initFileUpload(URL_FILE_UPLOAD, authFetch)
     const { withAlertModal, withConfirmModal, withPromptModal } = initModal()
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
-    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getPathActionAsync, getDownloadFileAsync, renderPathContent } = initPathContent(URL_PATH_ACTION, URL_FILE_SERVE, authFetch, withConfirmModal, withPromptModal, IS_READ_ONLY)
-    const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = IS_READ_ONLY ? {} : initUploader(uploadFileByChunk)
+    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getPathActionAsync, getDownloadFileAsync, renderPathContent } = initPathContent(
+      URL_PATH_ACTION,
+      URL_FILE_SERVE,
+      IS_READ_ONLY,
+      PATH_ACTION_TYPE,
+      authFetch,
+      withConfirmModal,
+      withPromptModal
+    )
+    const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = IS_READ_ONLY ? {} : initUploader(
+      IS_READ_ONLY
+        ? () => { throw new Error(`deny file upload, read only`) }
+        : initFileUpload(URL_FILE_UPLOAD, authFetch).uploadFileByChunk
+    )
 
     const loadingMaskStore = createStateStore(initialLoadingMaskState)
     const pathContentStore = createStateStore(initialPathContentState)
@@ -92,7 +105,7 @@ const onLoadFunc = () => {
     }))
     const createNewDirectory = async () => pathAction(
       [ await withPromptModal('Directory Name', `new-directory-${Date.now().toString(36)}`) ],
-      'create-directory',
+      PATH_ACTION_TYPE.DIRECTORY_CREATE,
       pathContentStore.getState().pathContent.relativePath
     )
     const updateSort = () => { qS('#button-sort').innerText = `Sort: ${pathContentStore.getState().pathSortType}` }
@@ -123,7 +136,7 @@ const onLoadFunc = () => {
       !IS_READ_ONLY && cE('span', { innerText: '|' }),
       !IS_READ_ONLY && cE('button', { innerText: 'Toggle Upload', onclick: () => uploaderStore.setState({ isActive: !uploaderStore.getState().isActive }) }),
       !IS_READ_ONLY && cE('button', { innerText: 'Storage Status', onclick: () => showStorageStatus() }),
-      cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })
+      !IS_SKIP_AUTH && cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })
     ])
 
     !IS_READ_ONLY && applyDragFileListListener(document.body, (fileList) => appendUploadFileList(fileList))
@@ -134,9 +147,9 @@ const onLoadFunc = () => {
   }
 
   initAuthMask({
+    isSkipAuth: IS_SKIP_AUTH,
     urlAuthCheck: URL_AUTH_CHECK,
-    onAuthPass: initExplorer,
-    isSkipAuth: IS_SKIP_AUTH
+    onAuthPass: initExplorer
   })
 }
 

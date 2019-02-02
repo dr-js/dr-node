@@ -19,7 +19,10 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
   const authRevoke = () => catchAsync(clearTimedLookupData)
 
   const getAuthFetch = (timedLookupData) => async (url, option = {}) => {
-    const response = await fetch(url, isSkipAuth ? option : { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } })
+    const response = await fetch(url, isSkipAuth
+      ? option
+      : { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } }
+    )
     if (!response.ok) throw new Error(`[authFetch] error status: ${response.status}, url: ${url}`)
     return response
   }

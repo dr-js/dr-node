@@ -8,8 +8,8 @@ const prefixLoggerTime = ({ add, ...logger }) => ({
   add: (...args) => add(new Date().toISOString(), ...args)
 })
 
-const configureLogger = async ({ pathLogDirectory, logFilePrefix }) => {
-  __DEV__ && !pathLogDirectory && console.log('[Logger] output with console.log()')
+const configureLog = async ({ pathLogDirectory, logFilePrefix }) => {
+  __DEV__ && !pathLogDirectory && console.log('[Log] output with console.log()')
 
   const logger = prefixLoggerTime(pathLogDirectory
     ? await createLogger({
@@ -35,4 +35,4 @@ const configureLogger = async ({ pathLogDirectory, logFilePrefix }) => {
   return logger
 }
 
-export { configureLogger }
+export { configureLog }

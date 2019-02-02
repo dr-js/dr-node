@@ -2,110 +2,95 @@
 
 import { describeServer } from 'dr-js/bin/function'
 
-import { createServer as createSampleServer } from 'dr-server/sample/server'
+import { createServer } from 'dr-server/sample/server'
 import { fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
+import {
+  getLogOption,
+  getPidOption,
+  getAuthOption,
+  getAuthGroupOption,
+  getPermissionOption
+  // getTokenCacheOption,
+} from 'dr-server/module/configure/option'
+import {
+  getServerOption,
+  getExplorerOption,
+  getStatusCollectOption,
+  getStatusReportOption,
+  getTaskRunnerOption
+} from 'dr-server/module/feature/option'
+import { getNodeExplorerOption } from 'dr-server/module/featureNode/option'
 
-import { MODE_FORMAT_LIST, parseOption, formatUsage } from './option'
+import { parseOption, formatUsage } from './option'
 import { name as packageName, version as packageVersion } from '../package.json'
 
-const runMode = async (modeFormat, { optionMap, getOption, getOptionOptional, getSingleOption, getSingleOptionOptional }) => {
-  const startServer = async (createServer, extraConfig) => {
-    const { start, option, logger } = await createServer({ ...getServerConfig(), ...extraConfig })
-    await start()
-    logger.add(describeServer(
-      option,
-      modeFormat.name,
-      Object.entries(extraConfig)
-        .map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
-        .filter(Boolean)
-    ))
-  }
-
-  const getServerConfig = () => ({
-    filePid: getSingleOptionOptional('pid-file'),
-    shouldIgnoreExistPid: Boolean(getOptionOptional('pid-ignore-exist')),
-
-    hostname: getSingleOptionOptional('hostname'),
-    port: getSingleOptionOptional('port'),
-    protocol: getOptionOptional('https') ? 'https:' : 'http:',
-    fileSSLKey: getSingleOptionOptional('file-SSL-key'),
-    fileSSLCert: getSingleOptionOptional('file-SSL-cert'),
-    fileSSLChain: getSingleOptionOptional('file-SSL-chain'),
-    fileSSLDHParam: getSingleOptionOptional('file-SSL-dhparam'),
-
-    pathLogDirectory: getSingleOptionOptional('log-path'),
-    logFilePrefix: getSingleOptionOptional('log-file-prefix'),
-
-    fileAuth: getSingleOptionOptional('auth-file'),
-    shouldAuthGen: Boolean(getOptionOptional('auth-gen')),
-    authGenTag: getSingleOptionOptional('auth-gen-tag'),
-    authGenSize: getSingleOptionOptional('auth-gen-size'),
-    authGenTokenSize: getSingleOptionOptional('auth-gen-token-size'),
-    authGenTimeGap: getSingleOptionOptional('auth-gen-time-gap'),
-
-    pathAuthGroup: getSingleOptionOptional('auth-group-path'),
-    authGroupDefaultTag: getSingleOptionOptional('auth-group-default-tag'),
-    authGroupKeySuffix: getSingleOptionOptional('auth-group-key-suffix'),
-    authGroupVerifyRequestTag: getSingleOptionOptional('auth-group-verify-request-tag')
-  })
-
-  switch (modeFormat.name) {
-    case 'server':
-      return startServer(createSampleServer, {
-        explorerRootPath: getSingleOptionOptional('explorer-root-path'),
-        explorerUploadMergePath: getSingleOptionOptional('explorer-upload-merge-path'),
-
-        statusCollectPath: getSingleOptionOptional('status-collect-path'),
-        statusCollectUrl: getSingleOptionOptional('status-collect-url'),
-        statusCollectInterval: getSingleOptionOptional('status-collect-interval'),
-
-        statusReportProcessTag: getSingleOptionOptional('status-report-process-tag'),
-
-        taskRunnerRootPath: getSingleOptionOptional('task-runner-root-path')
-      })
-    case 'node-file-upload':
-      return fileUpload({
-        fileInputPath: getSingleOption('file-upload-path'),
-        filePath: getSingleOption('file-upload-key'),
-        urlFileUpload: getSingleOption('file-upload-server-url'),
-        fileAuth: getSingleOption('auth-file'),
-        authKey: getSingleOptionOptional('node-auth-key')
-      })
-    case 'node-file-download':
-      return fileDownload({
-        fileOutputPath: getSingleOption('file-download-path'),
-        filePath: getSingleOption('file-download-key'),
-        urlFileDownload: getSingleOption('file-download-server-url'),
-        fileAuth: getSingleOption('auth-file'),
-        authKey: getSingleOptionOptional('node-auth-key')
-      })
-    case 'node-path-action':
-      return logJSON(await pathAction({
-        nameList: getOptionOptional('path-action-name-list'),
-        actionType: getSingleOption('path-action-type'),
-        key: getSingleOptionOptional('path-action-key'),
-        keyTo: getSingleOptionOptional('path-action-key-to'),
-        urlPathAction: getSingleOption('path-action-server-url'),
-        fileAuth: getSingleOption('auth-file'),
-        authKey: getSingleOptionOptional('node-auth-key')
-      }))
-  }
-}
+const MODE_LIST = [
+  'host', // server
+  'node-path-action',
+  'node-file-upload',
+  'node-file-download'
+]
 
 const logJSON = (object) => console.log(JSON.stringify(object, null, 2))
 
+const startServer = async (optionData) => {
+  const extraConfig = {
+    ...getExplorerOption(optionData),
+    ...getStatusCollectOption(optionData),
+    ...getStatusReportOption(optionData),
+    ...getTaskRunnerOption(optionData)
+  }
+  const { start, option, logger } = await createServer({
+    ...getServerOption(optionData),
+    ...getLogOption(optionData),
+    ...getPidOption(optionData),
+    ...getAuthOption(optionData),
+    ...getAuthGroupOption(optionData),
+    ...getPermissionOption(optionData),
+    // ...getTokenCacheOption(optionData),
+    ...extraConfig
+  })
+  await start()
+  logger.add(describeServer(
+    option,
+    'sample-server',
+    Object.entries(extraConfig)
+      .map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
+      .filter(Boolean)
+  ))
+}
+
+const runMode = async (mode, optionData) => {
+  if (mode === 'host') return startServer(optionData)
+
+  const nodeOption = {
+    ...getNodeExplorerOption(optionData),
+    log: optionData.tryGet('quiet')
+      ? () => {}
+      : console.log
+  }
+  switch (mode) {
+    case 'node-path-action':
+      return logJSON(await pathAction(nodeOption))
+    case 'node-file-upload':
+      return fileUpload(nodeOption)
+    case 'node-file-download':
+      return fileDownload(nodeOption)
+  }
+}
+
 const main = async () => {
   const optionData = await parseOption()
-  const modeFormat = MODE_FORMAT_LIST.find(({ name }) => optionData.getOptionOptional(name))
+  const mode = MODE_LIST.find((name) => optionData.tryGet(name))
 
-  if (!modeFormat) {
-    return optionData.getOptionOptional('version')
+  if (!mode) {
+    return optionData.tryGet('version')
       ? logJSON({ packageName, packageVersion })
-      : console.log(formatUsage(null, optionData.getOptionOptional('help') ? null : 'simple'))
+      : console.log(formatUsage(null, optionData.tryGet('help') ? null : 'simple'))
   }
 
-  await runMode(modeFormat, optionData).catch((error) => {
-    console.warn(`[Error] in mode: ${modeFormat.name}:`, error.stack || error)
+  await runMode(mode, optionData).catch((error) => {
+    console.warn(`[Error] in mode: ${mode}:`, error.stack || error)
     process.exit(2)
   })
 }

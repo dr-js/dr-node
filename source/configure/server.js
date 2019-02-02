@@ -4,7 +4,7 @@ import { readFileAsync } from 'dr-js/module/node/file/function'
 
 const loadFile = (filePath) => filePath ? readFileAsync(filePath) : null
 
-const configureServerBase = async ({
+const configureServer = async ({
   protocol = 'http:',
   hostname = 'localhost',
   port,
@@ -43,7 +43,7 @@ const getServerSNIOption = async (
   }
   const defaultSecureContext = Object.keys(secureContextMap)[ 0 ] // NOTE: use the first as default
   return {
-    ...defaultSecureContext, // for skipping duplicate config for SSL in configureServerBase
+    ...defaultSecureContext, // for skipping duplicate config for SSL in configureServer
     SNICallback: (hostname, callback) => callback(
       null,
       createSecureContext(secureContextMap[ hostname ] || defaultSecureContext)
@@ -52,6 +52,6 @@ const getServerSNIOption = async (
 }
 
 export {
-  configureServerBase,
+  configureServer,
   getServerSNIOption
 }

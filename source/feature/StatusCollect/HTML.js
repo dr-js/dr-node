@@ -2,14 +2,24 @@ import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/se
 import { DR_BROWSER_SCRIPT } from 'source/HTML/function'
 import { initAuthMask } from 'source/HTML/AuthMask'
 
-const getHTML = (envObject) => COMMON_LAYOUT([
+const getHTML = ({
+  URL_AUTH_CHECK,
+  URL_STATUS_STATE,
+  CONFIG_RENDER_PRESET
+}) => COMMON_LAYOUT([
   `<title>Status Visualize</title>`,
   COMMON_STYLE(),
   mainStyle
 ], [
   `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="chart-panel" style="overflow: auto; flex: 1; min-height: 0;"></div>`,
-  COMMON_SCRIPT({ ...envObject, initAuthMask, onload: onLoadFunc }),
+  COMMON_SCRIPT({
+    URL_AUTH_CHECK,
+    URL_STATUS_STATE,
+    CONFIG_RENDER_PRESET,
+    initAuthMask,
+    onload: onLoadFunc
+  }),
   DR_BROWSER_SCRIPT()
 ])
 
@@ -37,7 +47,8 @@ const onLoadFunc = () => {
   const {
     alert, location,
     qS, cE,
-    URL_STATUS_STATE, URL_AUTH_CHECK, CONFIG_RENDER_PRESET,
+    URL_STATUS_STATE, URL_AUTH_CHECK,
+    CONFIG_RENDER_PRESET,
     initAuthMask,
     Dr: {
       Common: {

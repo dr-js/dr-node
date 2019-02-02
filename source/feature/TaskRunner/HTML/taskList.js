@@ -11,6 +11,7 @@ h2, h6 { margin: 0.5em 4px; }
 
 const initTaskList = (
   URL_PATH_ACTION,
+  TASK_ACTION_TYPE,
   authFetch,
   withAlertModal,
   withConfirmModal,
@@ -45,7 +46,7 @@ const initTaskList = (
   }
 
   const getLoadTaskListAsync = async (taskListStore) => {
-    const { configList } = await authFetchTaskActionJSON('list-task')
+    const { configList } = await authFetchTaskActionJSON(TASK_ACTION_TYPE.TASK_LIST)
     taskListStore.setState({ configList })
   }
 
@@ -74,7 +75,7 @@ const initTaskList = (
       taskResetLog,
       infoNote
     ] = resultList
-    return taskAction('set-task-config', {
+    return taskAction(TASK_ACTION_TYPE.TASK_CONFIG_SET, {
       key: config.key,
       task: {
         command: taskCommand,
@@ -115,10 +116,10 @@ const initTaskList = (
             cE('span', { className: 'name button', innerText: `📄|${info.note ? `[Note] ${info.note} ` : ``}[Command] ${task.command}` }),
             cE('button', { className: 'edit', innerText: TEXT_DETAIL, onclick: async () => withAlertModal(JSON.stringify(config, null, 2)) }),
             cE('button', { className: 'edit', innerText: TEXT_EDIT, disabled: isRunning, onclick: () => setTaskConfigAsync(config) }),
-            cE('button', { className: 'edit', innerText: isRunning ? TEXT_STOP : TEXT_START, onclick: async () => (await withConfirmModal(`${isRunning ? 'Stop' : 'Start'} task: ${key}?`)) && taskAction(isRunning ? 'stop-task' : 'start-task', config) }),
-            cE('button', { className: 'edit', innerText: TEXT_LOG, onclick: async () => withAlertModal((await authFetchTaskActionText((await withConfirmModal(`Get tail instead of full log for task: ${config.key}?`, 'Tail log', 'Full log')) ? 'get-task-log-tail' : 'get-task-log', config)) || '[no log]') }),
-            cE('button', { className: 'edit', innerText: TEXT_LOG_RESET, onclick: async () => (await withConfirmModal(`Reset log of task: ${key}?`)) && taskAction('reset-task-log', config) }),
-            cE('button', { className: 'edit', innerText: TEXT_DELETE, disabled: isRunning, onclick: async () => (await withConfirmModal(`Delete task: ${key}?`)) && taskAction('delete-task', config) })
+            cE('button', { className: 'edit', innerText: isRunning ? TEXT_STOP : TEXT_START, onclick: async () => (await withConfirmModal(`${isRunning ? 'Stop' : 'Start'} task: ${key}?`)) && taskAction(isRunning ? TASK_ACTION_TYPE.TASK_STOP : TASK_ACTION_TYPE.TASK_START, config) }),
+            cE('button', { className: 'edit', innerText: TEXT_LOG, onclick: async () => withAlertModal((await authFetchTaskActionText((await withConfirmModal(`Get tail instead of full log for task: ${config.key}?`, 'Tail log', 'Full log')) ? TASK_ACTION_TYPE.TASK_LOG_GET_TAIL : TASK_ACTION_TYPE.TASK_LOG_GET, config)) || '[no log]') }),
+            cE('button', { className: 'edit', innerText: TEXT_LOG_RESET, onclick: async () => (await withConfirmModal(`Reset log of task: ${key}?`)) && taskAction(TASK_ACTION_TYPE.TASK_LOG_RESET, config) }),
+            cE('button', { className: 'edit', innerText: TEXT_DELETE, disabled: isRunning, onclick: async () => (await withConfirmModal(`Delete task: ${key}?`)) && taskAction(TASK_ACTION_TYPE.TASK_DELETE, config) })
           ])
         })
     ])

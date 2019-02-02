@@ -8,9 +8,10 @@ import { initLoadingMask } from 'source/HTML/LoadingMask'
 import { taskListStyle, initTaskList } from './taskList'
 
 const getHTML = ({
-  IS_SKIP_AUTH = false,
   URL_AUTH_CHECK,
-  URL_TASK_ACTION
+  URL_TASK_ACTION,
+  IS_SKIP_AUTH = false,
+  TASK_ACTION_TYPE
 }) => COMMON_LAYOUT([
   `<title>Task Runner</title>`,
   COMMON_STYLE(),
@@ -20,9 +21,10 @@ const getHTML = ({
   `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
   COMMON_SCRIPT({
-    IS_SKIP_AUTH,
     URL_AUTH_CHECK,
     URL_TASK_ACTION,
+    IS_SKIP_AUTH,
+    TASK_ACTION_TYPE,
     initModal,
     initLoadingMask,
     initAuthMask,
@@ -41,8 +43,8 @@ const onLoadFunc = () => {
     location,
     qS, cE, aCL,
 
-    IS_SKIP_AUTH,
     URL_AUTH_CHECK, URL_TASK_ACTION,
+    IS_SKIP_AUTH, TASK_ACTION_TYPE,
     initModal, initLoadingMask, initAuthMask, initTaskList,
 
     Dr: {
@@ -55,7 +57,15 @@ const onLoadFunc = () => {
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
     const {
       initialTaskListState, cycleTaskSortType, authFetchTaskActionJSON, getLoadTaskListAsync, getTaskActionAsync, getSetTaskConfigAsync, renderTaskList
-    } = initTaskList(URL_TASK_ACTION, authFetch, withAlertModal, withConfirmModal, withPromptModal, withPromptExtModal)
+    } = initTaskList(
+      URL_TASK_ACTION,
+      TASK_ACTION_TYPE,
+      authFetch,
+      withAlertModal,
+      withConfirmModal,
+      withPromptModal,
+      withPromptExtModal
+    )
 
     const loadingMaskStore = createStateStore(initialLoadingMaskState)
     const taskListStore = createStateStore(initialTaskListState)
@@ -65,7 +75,7 @@ const onLoadFunc = () => {
     const setTaskConfigAsync = getSetTaskConfigAsync(taskAction)
 
     const showProcessStatus = wrapLossyLoading(loadingMaskStore, async () => {
-      const { processStatus } = await authFetchTaskActionJSON('process-status')
+      const { processStatus } = await authFetchTaskActionJSON(TASK_ACTION_TYPE.PROCESS_STATUS)
       await withAlertModal(processStatus)
     })
 
