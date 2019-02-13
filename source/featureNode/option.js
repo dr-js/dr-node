@@ -1,14 +1,14 @@
-import { parseCompactFormat as parse } from 'dr-js/module/node/module/Option/preset'
+import { Preset } from 'dr-js/module/node/module/Option/preset'
 
-const parseList = (...args) => args.map(parse)
+const { parseCompact, parseCompactList } = Preset
 
 const NodeExplorerFormatConfig = {
-  ...parse('node-auth-file/SP,O'),
+  ...parseCompact('node-auth-file/SP,O'),
   extendFormatList: [
-    parse('node-auth-key/SS,O'),
+    parseCompact('node-auth-key/SS,O'),
     {
-      ...parse('node-path-action,npa/T'),
-      extendFormatList: parseList(
+      ...parseCompact('node-path-action,npa/T'),
+      extendFormatList: parseCompactList(
         'path-action-server-url/SS',
         'path-action-type/SS',
         'path-action-key/SS,O',
@@ -17,16 +17,16 @@ const NodeExplorerFormatConfig = {
       )
     },
     {
-      ...parse('node-file-upload,nfu/T'),
-      extendFormatList: parseList(
+      ...parseCompact('node-file-upload,nfu/T'),
+      extendFormatList: parseCompactList(
         'file-upload-server-url/SS',
         'file-upload-key/SS',
         'file-upload-path/SP'
       )
     },
     {
-      ...parse('node-file-download,nfd/T'),
-      extendFormatList: parseList(
+      ...parseCompact('node-file-download,nfd/T'),
+      extendFormatList: parseCompactList(
         'file-download-server-url/SS',
         'file-download-key/SS',
         'file-download-path/SP'

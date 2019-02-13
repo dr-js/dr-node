@@ -1,13 +1,11 @@
-import { ConfigPreset, parseCompactFormat as parse } from 'dr-js/module/node/module/Option/preset'
+import { Preset } from 'dr-js/module/node/module/Option/preset'
 
-const { OneOfString } = ConfigPreset
-
-const parseList = (...args) => args.map(parse)
+const { parseCompact, parseCompactList, pickOneOf } = Preset
 
 // pathLogDirectory, logFilePrefix
 const LogFormatConfig = {
-  ...parse('log-path/SP,O'),
-  extendFormatList: parseList('log-file-prefix/SS,O')
+  ...parseCompact('log-path/SP,O'),
+  extendFormatList: parseCompactList('log-file-prefix/SS,O')
 }
 const getLogOption = ({ tryGetFirst }) => ({
   pathLogDirectory: tryGetFirst('log-path'),
@@ -16,8 +14,8 @@ const getLogOption = ({ tryGetFirst }) => ({
 
 // filePid, shouldIgnoreExistPid
 const PidFormatConfig = {
-  ...parse('pid-file/SP,O'),
-  extendFormatList: parseList('pid-ignore-exist/T')
+  ...parseCompact('pid-file/SP,O'),
+  extendFormatList: parseCompactList('pid-ignore-exist/T')
 }
 const getPidOption = ({ tryGet, tryGetFirst }) => ({
   filePid: tryGetFirst('pid-file'),
@@ -26,10 +24,10 @@ const getPidOption = ({ tryGet, tryGetFirst }) => ({
 
 // fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap
 const AuthFormatConfig = {
-  ...parse('auth-file/SP,O'),
+  ...parseCompact('auth-file/SP,O'),
   extendFormatList: [ {
-    ...parse('auth-gen/T'),
-    extendFormatList: parseList(
+    ...parseCompact('auth-gen/T'),
+    extendFormatList: parseCompactList(
       'auth-gen-tag/SS,O',
       'auth-gen-size/SI,O',
       'auth-gen-token-size/SI,O',
@@ -48,8 +46,8 @@ const getAuthOption = ({ tryGet, tryGetFirst }) => ({
 
 // pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix, authGroupVerifyRequestTag
 const AuthGroupFormatConfig = { // TODO: can add more option
-  ...parse('auth-group-path/SP,O'),
-  extendFormatList: parseList(
+  ...parseCompact('auth-group-path/SP,O'),
+  extendFormatList: parseCompactList(
     'auth-group-default-tag/SS',
     'auth-group-key-suffix/SS,O',
     'auth-group-verify-request-tag/SF,O'
@@ -64,9 +62,9 @@ const getAuthGroupOption = ({ tryGetFirst }) => ({
 
 // permissionType, permissionFunc, permissionFile
 const PermissionFormatConfig = {
-  ...OneOfString([ 'allow', 'deny', 'func', 'file' ]),
+  ...pickOneOf([ 'allow', 'deny', 'func', 'file' ]),
   name: 'permission-type',
-  extendFormatList: parseList(
+  extendFormatList: parseCompactList(
     'permission-func/SF,O',
     'permission-file/SP,O'
   )
@@ -79,8 +77,8 @@ const getPermissionOption = ({ tryGetFirst }) => ({
 
 // fileTokenCache, tokenSize, tokenExpireTime
 const TokenCacheFormatConfig = {
-  ...parse('token-cache-file/SP,O'),
-  extendFormatList: parseList(
+  ...parseCompact('token-cache-file/SP,O'),
+  extendFormatList: parseCompactList(
     'token-cache-expire-time/SI,O',
     'token-cache-token-size/SI,O',
     'token-cache-size/SI,O'

@@ -2,15 +2,12 @@ import { resolve } from 'path'
 
 import { argvFlag, runMain } from 'dr-dev/module/main'
 import { getLogger } from 'dr-dev/module/logger'
+import { withRunBackground } from 'dr-dev/module/exec'
 
-import { catchAsync } from 'dr-js/module/common/error'
 import { stringifyEqual } from 'dr-js/module/common/verify'
-import { setTimeoutAsync } from 'dr-js/module/common/time'
 import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
-import { modify } from 'dr-js/module/node/file/Modify'
+import { modify, withTempDirectory } from 'dr-js/module/node/file/Modify'
 import { run, runQuiet } from 'dr-js/module/node/system/Run'
-import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, checkProcessExist, tryKillProcessTreeNode } from 'dr-js/module/node/system/ProcessStatus'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_TEMP = resolve(__dirname, '../.temp-gitignore/test-server')
@@ -81,10 +78,11 @@ const TEXT_NODE_FILE_DOWNLOAD_CONFIG = JSON.stringify({
 const FILE_TEST = fromTemp('test-file')
 
 runMain(async ({ padLog, stepLog }) => {
+  padLog(`create test directory`)
   await modify.delete(PATH_TEMP).catch(() => {})
-  await createDirectory(PATH_TEMP)
+  await withTempDirectory(PATH_TEMP, async () => {
+    stepLog('create test directory done')
 
-  const { error } = await catchAsync(async () => {
     padLog(`create config`)
     await writeFileAsync(FILE_SERVER_PERMISSION_CONFIG, TEXT_SERVER_PERMISSION_CONFIG)
     await writeFileAsync(FILE_SERVER_CONFIG, TEXT_SERVER_CONFIG)
@@ -93,22 +91,14 @@ runMain(async ({ padLog, stepLog }) => {
     await writeFileAsync(FILE_NODE_FILE_DOWNLOAD_CONFIG, TEXT_NODE_FILE_DOWNLOAD_CONFIG)
     await writeFileAsync(FILE_TEST, await readFileAsync(fromRoot('package-lock.json')))
 
-    padLog(`start server`)
-    const { subProcess, promise } = run({
+    padLog(`start server`) // TODO: extract to `dr-dev`
+    await withRunBackground({
       command: 'node',
       argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ],
       option: execOptionTemp
-    })
-    const exitPromise = promise.catch((error) => __DEV__ && console.log(`server exit: ${error}`))
-    await setTimeoutAsync(500) // wait for a bit
-    if (!await checkProcessExist({ pid: subProcess.pid })) throw new Error('failed to start server')
-    const processList = await getProcessList()
-    const subProcessInfo = (await getProcessPidMap(processList))[ subProcess.pid ]
-    const { pid, command, subTree } = await findProcessTreeNode(subProcessInfo, await getProcessTree(processList)) // drops ppid since sub tree may get chopped
-    __DEV__ && console.log({ pid, command, subTree })
-    stepLog('start server done')
+    }, async () => {
+      stepLog('start server done')
 
-    const { error } = await catchAsync(async () => {
       const getPathContentJSON = async () => JSON.parse(await runQuiet({
         command: 'node',
         argList: [ fromOutput('bin/index.js'), '-c', FILE_NODE_PATH_ACTION_CONFIG ],
@@ -146,16 +136,9 @@ runMain(async ({ padLog, stepLog }) => {
       stringifyEqual(pathContentPost.resultList[ 0 ].directoryList, [])
       stringifyEqual(pathContentPost.resultList[ 0 ].fileList.map(([ name ]) => name).sort(), [ 'test-file.download', 'test-file.upload' ])
       stepLog('test node path action done')
+
+      padLog('stop server')
     })
-
-    padLog('stop server')
-    await tryKillProcessTreeNode({ pid, command, subTree })
-    await exitPromise
     stepLog('stop server done')
-
-    if (error) throw error
   })
-
-  await modify.delete(PATH_TEMP)
-  if (error) throw error
 }, getLogger('test-server', argvFlag('quiet')))

@@ -83,9 +83,9 @@
 📄 [source-bin/option.js](source-bin/option.js)
 > ```
 > CLI Usage:
->   --config -c [OPTIONAL] [ARGUMENT=1]
->       from ENV: set to 'env'
->       from JS/JSON file: set to 'path/to/config.js|json'
+>   --config --c -c [OPTIONAL] [ARGUMENT=1]
+>       from ENV: set to "env"
+>       from JS/JSON file: set to "path/to/config.js|json"
 >   --help --h -h [OPTIONAL] [ARGUMENT=0+]
 >       show full help
 >   --quiet --q -q [OPTIONAL] [ARGUMENT=0+]

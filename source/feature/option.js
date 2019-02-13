@@ -1,14 +1,14 @@
-import { parseCompactFormat as parse } from 'dr-js/module/node/module/Option/preset'
+import { Preset } from 'dr-js/module/node/module/Option/preset'
 
-const parseList = (...args) => args.map(parse)
+const { parseCompact, parseCompactList } = Preset
 
 // protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
 const getServerFormatConfig = (extendFormatList = []) => ({
-  ...parse('host,H/SS,O|set "hostname:port"'),
+  ...parseCompact('host,H/SS,O|set "hostname:port"'),
   extendFormatList: [
     {
-      ...parse('https,S/T'),
-      extendFormatList: parseList(
+      ...parseCompact('https,S/T'),
+      extendFormatList: parseCompactList(
         'file-SSL-key/SS',
         'file-SSL-cert/SS',
         'file-SSL-chain/SS',
@@ -34,8 +34,8 @@ const getServerOption = ({ tryGet, tryGetFirst }) => {
 
 // uploadRootPath, uploadMergePath
 const ExplorerFormatConfig = {
-  ...parse('explorer-root-path/SP,O'),
-  extendFormatList: parseList('explorer-upload-merge-path/SP')
+  ...parseCompact('explorer-root-path/SP,O'),
+  extendFormatList: parseCompactList('explorer-upload-merge-path/SP')
 }
 const getExplorerOption = ({ tryGetFirst }) => ({
   explorerRootPath: tryGetFirst('explorer-root-path'),
@@ -44,8 +44,8 @@ const getExplorerOption = ({ tryGetFirst }) => ({
 
 // statusCollectPath, statusCollectUrl, statusCollectInterval
 const StatusCollectFormatConfig = {
-  ...parse('status-collect-path/SP,O'),
-  extendFormatList: parseList(
+  ...parseCompact('status-collect-path/SP,O'),
+  extendFormatList: parseCompactList(
     'status-collect-url/SS,O',
     'status-collect-interval/SI,O'
   )
@@ -57,12 +57,12 @@ const getStatusCollectOption = ({ tryGetFirst }) => ({
 })
 
 // statusReportProcessTag
-const StatusReportFormatConfig = parse('status-report-process-tag/SS,O')
+const StatusReportFormatConfig = parseCompact('status-report-process-tag/SS,O')
 const getStatusReportOption = ({ tryGetFirst }) => ({
   statusReportProcessTag: tryGetFirst('status-report-process-tag')
 })
 
-const TaskRunnerFormatConfig = parse('task-runner-root-path/SP,O')
+const TaskRunnerFormatConfig = parseCompact('task-runner-root-path/SP,O')
 const getTaskRunnerOption = ({ tryGetFirst }) => ({
   taskRunnerRootPath: tryGetFirst('task-runner-root-path')
 })

@@ -1,10 +1,10 @@
-import { ConfigPreset, prepareOption, parseCompactFormat as parse } from 'dr-js/module/node/module/Option/preset'
+import { Preset, prepareOption } from 'dr-js/module/node/module/Option/preset'
 import {
   LogFormatConfig,
   PidFormatConfig,
   AuthFormatConfig,
   AuthGroupFormatConfig,
-  PermissionFormatConfig,
+  PermissionFormatConfig
   // TokenCacheFormatConfig,
 } from 'dr-server/module/configure/option'
 import {
@@ -18,13 +18,15 @@ import {
   NodeExplorerFormatConfig
 } from 'dr-server/module/featureNode/option'
 
+const { Config, parseCompact } = Preset
+
 const OPTION_CONFIG = {
   prefixENV: 'dr-server',
   formatList: [
-    ConfigPreset.Config,
-    parse('help,h/T|show full help'),
-    parse('quiet,q/T|less log'),
-    parse('version,v/T|show version'),
+    Config,
+    parseCompact('help,h/T|show full help'),
+    parseCompact('quiet,q/T|less log'),
+    parseCompact('version,v/T|show version'),
     getServerFormatConfig([
       LogFormatConfig,
       PidFormatConfig,
