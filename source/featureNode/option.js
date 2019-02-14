@@ -2,38 +2,26 @@ import { Preset } from 'dr-js/module/node/module/Option/preset'
 
 const { parseCompact, parseCompactList } = Preset
 
-const NodeExplorerFormatConfig = {
-  ...parseCompact('node-auth-file/SP,O'),
-  extendFormatList: [
-    parseCompact('node-auth-key/SS,O'),
-    {
-      ...parseCompact('node-path-action,npa/T'),
-      extendFormatList: parseCompactList(
-        'path-action-server-url/SS',
-        'path-action-type/SS',
-        'path-action-key/SS,O',
-        'path-action-key-to/SS,O',
-        'path-action-name-list/AS,O'
-      )
-    },
-    {
-      ...parseCompact('node-file-upload,nfu/T'),
-      extendFormatList: parseCompactList(
-        'file-upload-server-url/SS',
-        'file-upload-key/SS',
-        'file-upload-path/SP'
-      )
-    },
-    {
-      ...parseCompact('node-file-download,nfd/T'),
-      extendFormatList: parseCompactList(
-        'file-download-server-url/SS',
-        'file-download-key/SS',
-        'file-download-path/SP'
-      )
-    }
-  ]
-}
+const NodeExplorerFormatConfig = parseCompact('node-auth-file/SP,O', parseCompactList(
+  'node-auth-key/SS,O',
+  [ 'node-path-action,npa/T', parseCompactList(
+    'path-action-server-url/SS',
+    'path-action-type/SS',
+    'path-action-key/SS,O',
+    'path-action-key-to/SS,O',
+    'path-action-name-list/AS,O'
+  ) ],
+  [ 'node-file-upload,nfu/T', parseCompactList(
+    'file-upload-server-url/SS',
+    'file-upload-key/SS',
+    'file-upload-path/SP'
+  ) ],
+  [ 'node-file-download,nfd/T', parseCompactList(
+    'file-download-server-url/SS',
+    'file-download-key/SS',
+    'file-download-path/SP'
+  ) ]
+))
 const getNodeExplorerOption = ({ tryGet, getFirst, tryGetFirst }) => ({
   ...(tryGet('node-path-action') ? ({
     nameList: tryGet('path-action-name-list'),

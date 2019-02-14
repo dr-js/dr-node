@@ -3,38 +3,32 @@ import { Preset } from 'dr-js/module/node/module/Option/preset'
 const { parseCompact, parseCompactList, pickOneOf } = Preset
 
 // pathLogDirectory, logFilePrefix
-const LogFormatConfig = {
-  ...parseCompact('log-path/SP,O'),
-  extendFormatList: parseCompactList('log-file-prefix/SS,O')
-}
+const LogFormatConfig = parseCompact('log-path/SP,O', parseCompactList(
+  'log-file-prefix/SS,O'
+))
 const getLogOption = ({ tryGetFirst }) => ({
   pathLogDirectory: tryGetFirst('log-path'),
   logFilePrefix: tryGetFirst('log-file-prefix')
 })
 
 // filePid, shouldIgnoreExistPid
-const PidFormatConfig = {
-  ...parseCompact('pid-file/SP,O'),
-  extendFormatList: parseCompactList('pid-ignore-exist/T')
-}
+const PidFormatConfig = parseCompact('pid-file/SP,O', parseCompactList(
+  'pid-ignore-exist/T'
+))
 const getPidOption = ({ tryGet, tryGetFirst }) => ({
   filePid: tryGetFirst('pid-file'),
   shouldIgnoreExistPid: Boolean(tryGet('pid-ignore-exist'))
 })
 
 // fileAuth, shouldAuthGen, authGenTag, authGenSize, authGenTokenSize, authGenTimeGap
-const AuthFormatConfig = {
-  ...parseCompact('auth-file/SP,O'),
-  extendFormatList: [ {
-    ...parseCompact('auth-gen/T'),
-    extendFormatList: parseCompactList(
-      'auth-gen-tag/SS,O',
-      'auth-gen-size/SI,O',
-      'auth-gen-token-size/SI,O',
-      'auth-gen-time-gap/SI,O'
-    )
-  } ]
-}
+const AuthFormatConfig = parseCompact('auth-file/SP,O', parseCompactList(
+  [ 'auth-gen/T', parseCompactList(
+    'auth-gen-tag/SS,O',
+    'auth-gen-size/SI,O',
+    'auth-gen-token-size/SI,O',
+    'auth-gen-time-gap/SI,O'
+  ) ]
+))
 const getAuthOption = ({ tryGet, tryGetFirst }) => ({
   fileAuth: tryGetFirst('auth-file'),
   shouldAuthGen: Boolean(tryGet('auth-gen')),
@@ -45,14 +39,12 @@ const getAuthOption = ({ tryGet, tryGetFirst }) => ({
 })
 
 // pathAuthGroup, authGroupDefaultTag, authGroupKeySuffix, authGroupVerifyRequestTag
-const AuthGroupFormatConfig = { // TODO: can add more option
-  ...parseCompact('auth-group-path/SP,O'),
-  extendFormatList: parseCompactList(
-    'auth-group-default-tag/SS',
-    'auth-group-key-suffix/SS,O',
-    'auth-group-verify-request-tag/SF,O'
-  )
-}
+const AuthGroupFormatConfig = parseCompact('auth-group-path/SP,O', parseCompactList(
+  'auth-group-default-tag/SS',
+  'auth-group-key-suffix/SS,O',
+  'auth-group-verify-request-tag/SF,O'
+  // TODO: can add more option
+))
 const getAuthGroupOption = ({ tryGetFirst }) => ({
   pathAuthGroup: tryGetFirst('auth-group-path'),
   authGroupDefaultTag: tryGetFirst('auth-group-default-tag'),
@@ -76,14 +68,11 @@ const getPermissionOption = ({ tryGetFirst }) => ({
 })
 
 // fileTokenCache, tokenSize, tokenExpireTime
-const TokenCacheFormatConfig = {
-  ...parseCompact('token-cache-file/SP,O'),
-  extendFormatList: parseCompactList(
-    'token-cache-expire-time/SI,O',
-    'token-cache-token-size/SI,O',
-    'token-cache-size/SI,O'
-  )
-}
+const TokenCacheFormatConfig = parseCompact('token-cache-file/SP,O', parseCompactList(
+  'token-cache-expire-time/SI,O',
+  'token-cache-token-size/SI,O',
+  'token-cache-size/SI,O'
+))
 const getTokenCacheOption = ({ tryGet, tryGetFirst }) => ({
   fileTokenCache: tryGetFirst('token-cache-file'),
   tokenCacheExpireTime: Boolean(tryGet('token-cache-expire-time')),

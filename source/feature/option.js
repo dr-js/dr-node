@@ -3,21 +3,15 @@ import { Preset } from 'dr-js/module/node/module/Option/preset'
 const { parseCompact, parseCompactList } = Preset
 
 // protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
-const getServerFormatConfig = (extendFormatList = []) => ({
-  ...parseCompact('host,H/SS,O|set "hostname:port"'),
-  extendFormatList: [
-    {
-      ...parseCompact('https,S/T'),
-      extendFormatList: parseCompactList(
-        'file-SSL-key/SS',
-        'file-SSL-cert/SS',
-        'file-SSL-chain/SS',
-        'file-SSL-dhparam/SS'
-      )
-    },
-    ...extendFormatList
-  ]
-})
+const getServerFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
+  parseCompact('https,S/T', parseCompactList(
+    'file-SSL-key/SS',
+    'file-SSL-cert/SS',
+    'file-SSL-chain/SS',
+    'file-SSL-dhparam/SS'
+  )),
+  ...extraList
+])
 const getServerOption = ({ tryGet, tryGetFirst }) => {
   const host = tryGetFirst('host') || ''
   const [ hostname, port ] = host.split(':')
@@ -33,23 +27,19 @@ const getServerOption = ({ tryGet, tryGetFirst }) => {
 }
 
 // uploadRootPath, uploadMergePath
-const ExplorerFormatConfig = {
-  ...parseCompact('explorer-root-path/SP,O'),
-  extendFormatList: parseCompactList('explorer-upload-merge-path/SP')
-}
+const ExplorerFormatConfig = parseCompact('explorer-root-path/SP,O', parseCompactList(
+  'explorer-upload-merge-path/SP'
+))
 const getExplorerOption = ({ tryGetFirst }) => ({
   explorerRootPath: tryGetFirst('explorer-root-path'),
   explorerUploadMergePath: tryGetFirst('explorer-upload-merge-path')
 })
 
 // statusCollectPath, statusCollectUrl, statusCollectInterval
-const StatusCollectFormatConfig = {
-  ...parseCompact('status-collect-path/SP,O'),
-  extendFormatList: parseCompactList(
-    'status-collect-url/SS,O',
-    'status-collect-interval/SI,O'
-  )
-}
+const StatusCollectFormatConfig = parseCompact('status-collect-path/SP,O', parseCompactList(
+  'status-collect-url/SS,O',
+  'status-collect-interval/SI,O'
+))
 const getStatusCollectOption = ({ tryGetFirst }) => ({
   statusCollectPath: tryGetFirst('status-collect-path'),
   statusCollectUrl: tryGetFirst('status-collect-url'),

@@ -18,15 +18,17 @@ import {
   NodeExplorerFormatConfig
 } from 'dr-server/module/featureNode/option'
 
-const { Config, parseCompact } = Preset
+const { Config, parseCompactList } = Preset
 
 const OPTION_CONFIG = {
   prefixENV: 'dr-server',
   formatList: [
     Config,
-    parseCompact('help,h/T|show full help'),
-    parseCompact('quiet,q/T|less log'),
-    parseCompact('version,v/T|show version'),
+    ...parseCompactList(
+      'help,h/T|show full help',
+      'quiet,q/T|less log',
+      'version,v/T|show version'
+    ),
     getServerFormatConfig([
       LogFormatConfig,
       PidFormatConfig,

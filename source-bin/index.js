@@ -24,13 +24,6 @@ import { getNodeExplorerOption } from 'dr-server/module/featureNode/option'
 import { parseOption, formatUsage } from './option'
 import { name as packageName, version as packageVersion } from '../package.json'
 
-const MODE_LIST = [
-  'host', // server
-  'node-path-action',
-  'node-file-upload',
-  'node-file-download'
-]
-
 const logJSON = (object) => console.log(JSON.stringify(object, null, 2))
 
 const startServer = async (optionData) => {
@@ -53,15 +46,22 @@ const startServer = async (optionData) => {
   await start()
   logger.add(describeServer(
     option,
-    'sample-server',
+    'server',
     Object.entries(extraConfig)
       .map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
       .filter(Boolean)
   ))
 }
 
-const runMode = async (mode, optionData) => {
-  if (mode === 'host') return startServer(optionData)
+const MODE_NAME_LIST = [
+  'host', // server
+  'node-path-action',
+  'node-file-upload',
+  'node-file-download'
+]
+
+const runMode = async (modeName, optionData) => {
+  if (modeName === 'host') return startServer(optionData)
 
   const nodeOption = {
     ...getNodeExplorerOption(optionData),
@@ -69,7 +69,8 @@ const runMode = async (mode, optionData) => {
       ? () => {}
       : console.log
   }
-  switch (mode) {
+
+  switch (modeName) {
     case 'node-path-action':
       return logJSON(await pathAction(nodeOption))
     case 'node-file-upload':
@@ -81,16 +82,16 @@ const runMode = async (mode, optionData) => {
 
 const main = async () => {
   const optionData = await parseOption()
-  const mode = MODE_LIST.find((name) => optionData.tryGet(name))
+  const modeName = MODE_NAME_LIST.find((name) => optionData.tryGet(name))
 
-  if (!mode) {
+  if (!modeName) {
     return optionData.tryGet('version')
       ? logJSON({ packageName, packageVersion })
       : console.log(formatUsage(null, optionData.tryGet('help') ? null : 'simple'))
   }
 
-  await runMode(mode, optionData).catch((error) => {
-    console.warn(`[Error] in mode: ${mode}:`, error.stack || error)
+  await runMode(modeName, optionData).catch((error) => {
+    console.warn(`[Error] in mode: ${modeName}:`, error.stack || error)
     process.exit(2)
   })
 }
