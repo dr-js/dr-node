@@ -62,7 +62,7 @@ const configureAuthTimedLookup = async ({
 
   const generateAuth = () => generateCheckCode(timedLookupData)
 
-  const authFetch = (url, config) => authFetchTimedLookup(url, config, timedLookupData, authKey)
+  const authFetch = (url, option) => authFetchTimedLookup(url, option, timedLookupData, authKey)
 
   return {
     createResponderCheckAuth: ({
@@ -123,7 +123,7 @@ const configureAuthTimedLookupGroup = async ({
 
   const generateAuthForTag = async (tag) => generateCheckCode(checkValidAuthData(await getTimedLookupData(tag)))
 
-  const authFetchForTag = async (url, config, tag) => authFetchTimedLookup(url, config, checkValidAuthData(await getTimedLookupData(tag)), authKey)
+  const authFetchForTag = async (url, option, tag) => authFetchTimedLookup(url, option, checkValidAuthData(await getTimedLookupData(tag)), authKey)
 
   return {
     createResponderCheckAuth: ({

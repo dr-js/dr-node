@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
+import { time } from 'dr-js/module/common/format'
+import { createStepper } from 'dr-js/module/common/time'
 import { describeServer } from 'dr-js/bin/function'
 
 import { createServer } from 'dr-server/sample/server'
-import { fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
+import { getAuthFetch, fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
 import {
   getLogOption,
   getPidOption,
@@ -63,11 +65,11 @@ const MODE_NAME_LIST = [
 const runMode = async (modeName, optionData) => {
   if (modeName === 'host') return startServer(optionData)
 
-  const nodeOption = {
-    ...getNodeExplorerOption(optionData),
-    log: optionData.tryGet('quiet')
-      ? () => {}
-      : console.log
+  const nodeOption = getNodeExplorerOption(optionData)
+  nodeOption.authFetch = await getAuthFetch(nodeOption)
+  if (!optionData.tryGet('quiet')) {
+    const stepper = createStepper()
+    nodeOption.log = (...args) => console.log(...args, `(+${time(stepper())})`)
   }
 
   switch (modeName) {

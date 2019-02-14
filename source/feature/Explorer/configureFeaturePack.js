@@ -34,7 +34,7 @@ const configureFeaturePack = async ({
   const URL_STORAGE_STATUS = `${routePrefix}/storage-status`
 
   const IS_SKIP_AUTH = !urlAuthCheck
-  const IS_READ_ONLY = !mergePath
+  const IS_READ_ONLY = !mergePath // TODO: should be decided by user permission
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
     URL_AUTH_CHECK: urlAuthCheck,

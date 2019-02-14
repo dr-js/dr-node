@@ -2,9 +2,7 @@ import { dirname } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 
 import { withRetryAsync } from 'dr-js/module/common/function'
-import { percent, binary, time } from 'dr-js/module/common/format'
-import { createStepper } from 'dr-js/module/common/time'
-
+import { percent, binary } from 'dr-js/module/common/format'
 import { createDirectory } from 'dr-js/module/node/file/File'
 
 import { loadLookupFile, authFetchTimedLookup } from 'source/configure/auth'
@@ -12,32 +10,32 @@ import { uploadFileByChunk } from 'source/feature/Explorer/task/fileChunkUpload'
 
 // for node client file chunk upload
 
-const getAuthFetch = async (fileAuth, authKey) => {
+const DEFAULT_TIMEOUT = 30 * 1000
+
+const getAuthFetch = async ({ fileAuth, authKey }) => {
   const timedLookupData = await loadLookupFile(fileAuth)
-  return async (url, config) => authFetchTimedLookup(url, config, timedLookupData, authKey)
+  return async (url, option) => authFetchTimedLookup(url, option, timedLookupData, authKey)
 }
 
 const fileUpload = async ({
   fileInputPath,
   fileBuffer = readFileSync(fileInputPath),
   filePath,
+
   urlFileUpload,
-  fileAuth,
-  authKey,
-  timeout = 30 * 1000,
+  timeout = DEFAULT_TIMEOUT,
   maxRetry = 3,
   wait = 1000,
-  log = console.log
-}) => {
-  const stepper = createStepper()
-  const authFetch = await getAuthFetch(fileAuth, authKey)
 
+  authFetch,
+  log
+}) => {
   log && log(`[Upload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
 
   await uploadFileByChunk({
     fileBuffer,
     filePath,
-    onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)} (+${time(stepper())})`),
+    onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)}`),
     uploadFileChunkBuffer: async (chainBufferPacket, { chunkIndex }) => withRetryAsync(
       async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket, timeout }).catch((error) => {
         const message = `[ERROR][Upload] upload chunk ${chunkIndex} of ${filePath}`
@@ -49,59 +47,64 @@ const fileUpload = async ({
     )
   })
 
-  log && log(`[Upload] done: ${filePath} (+${time(stepper())})`)
+  log && log(`[Upload] done: ${filePath}`)
 }
 
 const fileDownload = async ({
   fileOutputPath,
   filePath,
-  urlFileDownload,
-  fileAuth,
-  authKey,
-  timeout = 30 * 1000,
-  log = console.log
-}) => {
-  const stepper = createStepper()
-  const authFetch = await getAuthFetch(fileAuth, authKey)
 
+  urlFileDownload,
+  timeout = DEFAULT_TIMEOUT,
+
+  authFetch,
+  log
+}) => {
   log && log(`[Download] file: ${filePath}`)
 
-  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, { method: 'GET', timeout })).buffer()
-  log && log(`[Download] get: ${binary(fileBuffer.length)}B (+${time(stepper())})`)
+  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, {
+    method: 'GET',
+    timeout
+  })).buffer()
+  log && log(`[Download] get: ${binary(fileBuffer.length)}B`)
 
   if (fileOutputPath) {
     await createDirectory(dirname(fileOutputPath))
     writeFileSync(fileOutputPath, fileBuffer)
-    log && log(`[Download] done: ${fileOutputPath} (+${time(stepper())})`)
+    log && log(`[Download] done: ${fileOutputPath}`)
   }
 
   return fileBuffer
 }
 
 const pathAction = async ({
-  nameList = [ '' ],
   actionType,
-  key: relativeFrom = '',
-  keyTo: relativeTo,
+  key = '',
+  keyTo,
+  nameList = [ '' ],
+
   urlPathAction,
-  fileAuth,
-  authKey,
-  timeout = 30 * 1000,
-  log = console.log
+  timeout = DEFAULT_TIMEOUT,
+
+  authFetch,
+  log
 }) => {
-  const stepper = createStepper()
-  const authFetch = await getAuthFetch(fileAuth, authKey)
+  log && log(`[Action|${actionType}] key: ${key}, keyTo: ${keyTo}, nameList: [${nameList}]`)
 
-  log && log(`[Action|${actionType}] key: ${relativeFrom}, keyTo: ${relativeTo}, nameList: [${nameList}]`)
+  const result = await (await authFetch(urlPathAction, {
+    method: 'POST',
+    body: JSON.stringify({ nameList, actionType, relativeFrom: key, relativeTo: keyTo }),
+    timeout
+  })).json()
 
-  const result = await (await authFetch(urlPathAction, { method: 'POST', body: JSON.stringify({ nameList, actionType, relativeFrom, relativeTo }), timeout })).json()
-
-  log && log(`[Action|${actionType}] done (+${time(stepper())})`)
+  log && log(`[Action|${actionType}] done`)
 
   return result // should check errorList
 }
 
 export {
+  getAuthFetch,
+
   fileUpload,
   fileDownload,
   pathAction

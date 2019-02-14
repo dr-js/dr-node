@@ -67,7 +67,7 @@
 + 📄 [source/feature/TaskRunner/task/taskAction.js](source/feature/TaskRunner/task/taskAction.js)
   - `TASK_ACTION_TYPE`, `createTaskAction`
 + 📄 [source/featureNode/explorer.js](source/featureNode/explorer.js)
-  - `fileDownload`, `fileUpload`, `pathAction`
+  - `fileDownload`, `fileUpload`, `getAuthFetch`, `pathAction`
 + 📄 [source/featureNode/option.js](source/featureNode/option.js)
   - `NodeExplorerFormatConfig`, `getNodeExplorerOption`
 + 📄 [source/HTML/AuthMask.js](source/HTML/AuthMask.js)
