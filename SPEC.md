@@ -134,6 +134,9 @@
 >         set to enable
 >       --path-action-server-url [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --path-action-type [OPTIONAL-CHECK] [ARGUMENT=1]
+>           one of:
+>             path:visible path:stat path:copy path:move
+>             path:delete directory:create directory:content directory:all-file-list
 >       --path-action-key [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --path-action-key-to [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --path-action-name-list [OPTIONAL-CHECK] [ARGUMENT=1+]

@@ -11,17 +11,17 @@ import { modify } from 'dr-js/module/node/file/Modify'
 import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, checkProcessExist, tryKillProcessTreeNode } from 'dr-js/module/node/system/ProcessStatus'
 import { collectAllProcessStatus } from 'dr-js/bin/function'
 
-const TASK_CONFIG_SET = 'set-task-config'
-const TASK_CONFIG_GET = 'get-task-config'
+const TASK_CONFIG_SET = 'task-config:set'
+const TASK_CONFIG_GET = 'task-config:get'
 
-const TASK_START = 'start-task'
-const TASK_STOP = 'stop-task'
-const TASK_DELETE = 'delete-task'
-const TASK_LIST = 'list-task'
+const TASK_START = 'task:start'
+const TASK_STOP = 'task:stop'
+const TASK_DELETE = 'task:delete'
+const TASK_LIST = 'task:list'
 
-const TASK_LOG_GET = 'get-task-log'
-const TASK_LOG_GET_TAIL = 'get-task-log-tail'
-const TASK_LOG_RESET = 'reset-task-log'
+const TASK_LOG_GET = 'task-log:get'
+const TASK_LOG_GET_TAIL = 'task-log:get-tail'
+const TASK_LOG_RESET = 'task-log:reset'
 
 const PROCESS_STATUS = 'process-status'
 

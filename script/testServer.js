@@ -9,6 +9,8 @@ import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
 import { modify, withTempDirectory } from 'dr-js/module/node/file/Modify'
 import { run, runQuiet } from 'dr-js/module/node/system/Run'
 
+import { PATH_ACTION_TYPE } from 'source/feature/Explorer/task/pathAction'
+
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_TEMP = resolve(__dirname, '../.temp-gitignore/test-server')
 const PATH_OUTPUT = resolve(__dirname, '../output-gitignore')
@@ -52,7 +54,7 @@ const TEXT_NODE_PATH_ACTION_CONFIG = JSON.stringify({
   quiet: true,
   nodePathAction: true,
   pathActionServerUrl: 'http://localhost:8000/path-action',
-  pathActionType: 'path-content',
+  pathActionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT,
   pathActionKey: '',
   nodeAuthFile: './server-test.auth'
 })
@@ -108,7 +110,7 @@ runMain(async ({ padLog, stepLog }) => {
       padLog('test node path action')
       const pathContentPre = await getPathContentJSON()
       console.log(JSON.stringify(pathContentPre))
-      stringifyEqual(pathContentPre.resultList[ 0 ].actionType, 'path-content')
+      stringifyEqual(pathContentPre.resultList[ 0 ].actionType, PATH_ACTION_TYPE.DIRECTORY_CONTENT)
       stringifyEqual(pathContentPre.resultList[ 0 ].directoryList, [])
       stringifyEqual(pathContentPre.resultList[ 0 ].fileList, [])
       stepLog('test node path action done')
@@ -132,7 +134,7 @@ runMain(async ({ padLog, stepLog }) => {
       padLog('test node path action')
       const pathContentPost = await getPathContentJSON()
       console.log(JSON.stringify(pathContentPost))
-      stringifyEqual(pathContentPost.resultList[ 0 ].actionType, 'path-content')
+      stringifyEqual(pathContentPost.resultList[ 0 ].actionType, PATH_ACTION_TYPE.DIRECTORY_CONTENT)
       stringifyEqual(pathContentPost.resultList[ 0 ].directoryList, [])
       stringifyEqual(pathContentPost.resultList[ 0 ].fileList.map(([ name ]) => name).sort(), [ 'test-file.download', 'test-file.upload' ])
       stepLog('test node path action done')

@@ -1,12 +1,13 @@
 import { Preset } from 'dr-js/module/node/module/Option/preset'
+import { PATH_ACTION_TYPE } from 'source/feature/Explorer/task/pathAction'
 
-const { parseCompact, parseCompactList } = Preset
+const { pickOneOf, parseCompact, parseCompactList } = Preset
 
 const NodeExplorerFormatConfig = parseCompact('node-auth-file/SP,O', parseCompactList(
   'node-auth-key/SS,O',
   [ 'node-path-action,npa/T', parseCompactList(
     'path-action-server-url/SS',
-    'path-action-type/SS',
+    [ 'path-action-type', pickOneOf(Object.values(PATH_ACTION_TYPE)) ],
     'path-action-key/SS,O',
     'path-action-key-to/SS,O',
     'path-action-name-list/AS,O'
