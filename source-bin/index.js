@@ -48,7 +48,7 @@ const startServer = async (optionData) => {
   await start()
   logger.add(describeServer(
     option,
-    'server',
+    `${packageName}@${packageVersion}`,
     Object.entries(extraConfig)
       .map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
       .filter(Boolean)
