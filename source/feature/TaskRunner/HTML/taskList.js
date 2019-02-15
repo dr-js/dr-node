@@ -20,12 +20,12 @@ const initTaskList = (
 ) => {
   const {
     cE, aCL,
-    Dr: { Common: { Compare: { compareString }, Math: { getRandomId } } }
+    Dr: { Common: { Compare: { compareString, compareStringWithNumber }, Math: { getRandomId } } }
   } = window
 
   const KEY = (a, b) => compareString(a.key, b.key)
-  const COMMAND = (a, b) => compareString(a.task.command, b.task.command) || KEY(a, b)
-  const NOTE = (a, b) => compareString(a.info.note, b.info.note) || COMMAND(a, b)
+  const COMMAND = (a, b) => compareStringWithNumber(a.task.command, b.task.command) || KEY(a, b)
+  const NOTE = (a, b) => compareStringWithNumber(a.info.note, b.info.note) || COMMAND(a, b)
   const TIME_CREATE = (a, b) => b.info.timeCreate - a.info.timeCreate || COMMAND(a, b) // newer first
   const TIME_UPDATE = (a, b) => b.info.timeUpdate - a.info.timeUpdate || COMMAND(a, b) // newer first
 

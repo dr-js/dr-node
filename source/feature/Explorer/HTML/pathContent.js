@@ -20,11 +20,11 @@ const initPathContent = (
 ) => {
   const {
     qS, cE, aCL,
-    Dr: { Common: { Format, Compare: { compareString } } }
+    Dr: { Common: { Format, Compare: { compareStringWithNumber } } }
   } = window
 
   const SORT_FUNC = { // ([ nameA, sizeA, mtimeMsA ], [ nameB, sizeB, mtimeMsB ]) => 0,
-    NAME: ([ nameA ], [ nameB ]) => compareString(nameA, nameB),
+    NAME: ([ nameA ], [ nameB ]) => compareStringWithNumber(nameA, nameB),
     TIME: ([ , , mtimeMsA = 0 ], [ , , mtimeMsB = 0 ]) => mtimeMsB - mtimeMsA, // newer first
     SIZE: ([ , sizeA ], [ , sizeB ]) => sizeB - sizeA // bigger first
   }
