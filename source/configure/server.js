@@ -11,7 +11,7 @@ const configureServer = async ({
   fileSSLKey,
   fileSSLCert,
   fileSSLChain,
-  fileSSLDHParam, // Diffie-Hellman Key Exchange
+  fileSSLDHParam, // Diffie-Hellman Key Exchange // NOTE: generate with `openssl dhparam -dsaparam -out output/path/dhparam.4096.pem 4096`
   ...extraOption
 }) => {
   const isHttps = protocol === 'https:'

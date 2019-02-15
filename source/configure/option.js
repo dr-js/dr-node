@@ -2,6 +2,30 @@ import { Preset } from 'dr-js/module/node/module/Option/preset'
 
 const { parseCompact, parseCompactList, pickOneOf } = Preset
 
+// protocol, hostname, port, fileSSLKey, fileSSLCert, fileSSLChain, fileSSLDHParam
+const getServerFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
+  parseCompact('https,S/T', parseCompactList(
+    'file-SSL-key/SP',
+    'file-SSL-cert/SP',
+    'file-SSL-chain/SP',
+    'file-SSL-dhparam/SP'
+  )),
+  ...extraList
+])
+const getServerOption = ({ tryGet, tryGetFirst }) => {
+  const host = tryGetFirst('host') || ''
+  const [ hostname, port ] = host.split(':')
+  return {
+    protocol: tryGet('https') ? 'https:' : 'http:',
+    hostname: hostname || undefined,
+    port: Number(port) || undefined,
+    fileSSLKey: tryGetFirst('file-SSL-key'),
+    fileSSLCert: tryGetFirst('file-SSL-cert'),
+    fileSSLChain: tryGetFirst('file-SSL-chain'),
+    fileSSLDHParam: tryGetFirst('file-SSL-dhparam')
+  }
+}
+
 // pathLogDirectory, logFilePrefix
 const LogFormatConfig = parseCompact('log-path/SP,O', parseCompactList(
   'log-file-prefix/SS,O'
@@ -81,6 +105,8 @@ const getTokenCacheOption = ({ tryGet, tryGetFirst }) => ({
 })
 
 export {
+  getServerFormatConfig, getServerOption,
+
   LogFormatConfig, getLogOption,
   PidFormatConfig, getPidOption,
   AuthFormatConfig, getAuthOption,

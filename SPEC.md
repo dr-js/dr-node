@@ -11,7 +11,7 @@
 + 📄 [source/configure/log.js](source/configure/log.js)
   - `configureLog`
 + 📄 [source/configure/option.js](source/configure/option.js)
-  - `AuthFormatConfig`, `AuthGroupFormatConfig`, `LogFormatConfig`, `PermissionFormatConfig`, `PidFormatConfig`, `TokenCacheFormatConfig`, `getAuthGroupOption`, `getAuthOption`, `getLogOption`, `getPermissionOption`, `getPidOption`, `getTokenCacheOption`
+  - `AuthFormatConfig`, `AuthGroupFormatConfig`, `LogFormatConfig`, `PermissionFormatConfig`, `PidFormatConfig`, `TokenCacheFormatConfig`, `getAuthGroupOption`, `getAuthOption`, `getLogOption`, `getPermissionOption`, `getPidOption`, `getServerFormatConfig`, `getServerOption`, `getTokenCacheOption`
 + 📄 [source/configure/permission.js](source/configure/permission.js)
   - `configurePermission`
 + 📄 [source/configure/pid.js](source/configure/pid.js)
@@ -21,7 +21,7 @@
 + 📄 [source/configure/tokenCache.js](source/configure/tokenCache.js)
   - `configureTokenCache`
 + 📄 [source/feature/option.js](source/feature/option.js)
-  - `ExplorerFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TaskRunnerFormatConfig`, `getExplorerOption`, `getServerFormatConfig`, `getServerOption`, `getStatusCollectOption`, `getStatusReportOption`, `getTaskRunnerOption`
+  - `ExplorerFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TaskRunnerFormatConfig`, `getExplorerOption`, `getStatusCollectOption`, `getStatusReportOption`, `getTaskRunnerOption`
 + 📄 [source/feature/Explorer/configureFeaturePack.js](source/feature/Explorer/configureFeaturePack.js)
   - `configureFeaturePack`
 + 📄 [source/feature/Explorer/permission.js](source/feature/Explorer/permission.js)

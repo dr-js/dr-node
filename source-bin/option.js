@@ -1,5 +1,6 @@
 import { Preset, prepareOption } from 'dr-js/module/node/module/Option/preset'
 import {
+  getServerFormatConfig,
   LogFormatConfig,
   PidFormatConfig,
   AuthFormatConfig,
@@ -8,7 +9,6 @@ import {
   // TokenCacheFormatConfig,
 } from 'dr-server/module/configure/option'
 import {
-  getServerFormatConfig,
   ExplorerFormatConfig,
   StatusCollectFormatConfig,
   StatusReportFormatConfig,

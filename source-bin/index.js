@@ -7,6 +7,7 @@ import { describeServer } from 'dr-js/bin/function'
 import { createServer } from 'dr-server/sample/server'
 import { getAuthFetch, fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
 import {
+  getServerOption,
   getLogOption,
   getPidOption,
   getAuthOption,
@@ -15,7 +16,6 @@ import {
   // getTokenCacheOption,
 } from 'dr-server/module/configure/option'
 import {
-  getServerOption,
   getExplorerOption,
   getStatusCollectOption,
   getStatusReportOption,
