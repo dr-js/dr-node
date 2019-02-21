@@ -27,18 +27,20 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
     return response
   }
 
-  const getAuthDownload = (timedLookupData) => (url, filename) => {
-    const urlObject = new URL(url, location.origin)
-    !isSkipAuth && urlObject.searchParams.set(authKey, generateCheckCode(timedLookupData))
-    createDownload(filename, urlObject.toString())
+  const authPass = (timedLookupData) => {
+    const authUrl = (url) => {
+      const urlObject = new URL(url, location.origin)
+      !isSkipAuth && urlObject.searchParams.set(authKey, generateCheckCode(timedLookupData))
+      return urlObject.toString()
+    }
+    return onAuthPass({
+      isSkipAuth,
+      authRevoke, // should reload after
+      authUrl,
+      authFetch: getAuthFetch(timedLookupData),
+      authDownload: (url, filename) => createDownload(filename, authUrl(url))
+    })
   }
-
-  const authPass = (timedLookupData) => onAuthPass({
-    isSkipAuth,
-    authRevoke, // should reload after
-    authFetch: getAuthFetch(timedLookupData),
-    authDownload: getAuthDownload(timedLookupData)
-  })
 
   if (isSkipAuth) return authPass(null) // skipped auth, but keep auth method usable
 

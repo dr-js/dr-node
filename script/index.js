@@ -63,6 +63,8 @@ runMain(async (logger) => {
   await processOutput({ packageJSON, logger })
 
   if (argvFlag('test', 'publish', 'publish-dev')) {
+    await processOutput({ packageJSON, logger }) // once more
+
     logger.padLog(`test test-server`)
     execSync(`npm run test-server`, execOptionRoot)
   }

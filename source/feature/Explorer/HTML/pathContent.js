@@ -19,6 +19,7 @@ const initPathContent = (
   withPromptModal
 ) => {
   const {
+    open,
     qS, cE, aCL,
     Dr: { Common: { Format, Compare: { compareStringWithNumber } } }
   } = window
@@ -67,12 +68,15 @@ const initPathContent = (
     await authFetchPathAction({ nameList, actionType, relativeFrom, relativeTo })
     await doLoadPath(pathContentStore)
   }
-  const getDownloadFileAsync = (pathContentStore, authDownload) => async (relativePath, fileName) => authDownload(
+  const getPreviewFile = (pathContentStore, authUrl) => async (relativePath, fileName) => open(authUrl(
+    `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`,
+  ))
+  const getDownloadFile = (pathContentStore, authDownload) => async (relativePath, fileName) => authDownload(
     `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`,
     fileName
   )
 
-  const renderPathContent = (pathContentStore, parentElement, loadPath, pathAction, downloadFile) => {
+  const renderPathContent = (pathContentStore, parentElement, loadPath, pathAction, previewFile, downloadFile) => {
     const { pathSortType, pathContent: { relativePath, directoryList, fileList } } = pathContentStore.getState()
 
     const selectToggleMap = {}
@@ -159,6 +163,7 @@ const initPathContent = (
           !IS_READ_ONLY && renderSelectButton(name),
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
           cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => downloadFile(relativePath, name) }),
+          cE('button', { className: 'edit', innerText: `🔍`, onclick: () => previewFile(relativePath, name) }),
           ...renderCommonEditList(pathPush(relativePath, name))
         ]))
     ])
@@ -171,7 +176,8 @@ const initPathContent = (
     cyclePathSortType,
     getLoadPathAsync,
     getPathActionAsync,
-    getDownloadFileAsync,
+    getPreviewFile,
+    getDownloadFile,
     renderPathContent
   }
 }

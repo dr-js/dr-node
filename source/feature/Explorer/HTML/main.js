@@ -67,10 +67,10 @@ const onLoadFunc = () => {
     }
   } = window
 
-  const initExplorer = async ({ authRevoke, authFetch, authDownload }) => {
+  const initExplorer = async ({ authRevoke, authUrl, authFetch, authDownload }) => {
     const { withAlertModal, withConfirmModal, withPromptModal } = initModal()
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
-    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getPathActionAsync, getDownloadFileAsync, renderPathContent } = initPathContent(
+    const { initialPathContentState, cyclePathSortType, getLoadPathAsync, getPathActionAsync, getPreviewFile, getDownloadFile, renderPathContent } = initPathContent(
       URL_PATH_ACTION,
       URL_FILE_SERVE,
       IS_READ_ONLY,
@@ -93,7 +93,8 @@ const onLoadFunc = () => {
 
     const loadPath = wrapLossyLoading(loadingMaskStore, loadPathAsync)
     const pathAction = wrapLossyLoading(loadingMaskStore, getPathActionAsync(pathContentStore))
-    const downloadFile = wrapLossyLoading(loadingMaskStore, getDownloadFileAsync(pathContentStore, authDownload))
+    const previewFile = getPreviewFile(pathContentStore, authUrl)
+    const downloadFile = getDownloadFile(pathContentStore, authDownload)
     const uploadFile = !IS_READ_ONLY && wrapLossyLoading(loadingMaskStore, getUploadFileAsync(uploaderStore, loadPathAsync))
     const showStorageStatus = !IS_READ_ONLY && wrapLossyLoading(loadingMaskStore, async () => {
       const { storageStatusText } = await (await authFetch(URL_STORAGE_STATUS)).json()
@@ -124,7 +125,7 @@ const onLoadFunc = () => {
     }
 
     loadingMaskStore.subscribe(() => renderLoadingMask(loadingMaskStore))
-    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPathWithHistoryState, pathAction, downloadFile))
+    pathContentStore.subscribe(() => renderPathContent(pathContentStore, qS('#main-panel'), loadPathWithHistoryState, pathAction, previewFile, downloadFile))
     !IS_READ_ONLY && uploaderStore.subscribe(() => renderUploader(uploaderStore, uploadFile, appendUploadFileList))
 
     aCL(qS('#control-panel'), [
