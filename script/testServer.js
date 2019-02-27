@@ -1,8 +1,7 @@
 import { resolve } from 'path'
 
-import { argvFlag, runMain } from 'dr-dev/module/main'
-import { getLogger } from 'dr-dev/module/logger'
-import { withRunBackground } from 'dr-dev/module/exec'
+import { withRunBackground } from 'dr-dev/module/node/run'
+import { runMain, argvFlag } from 'dr-dev/module/main'
 
 import { stringifyEqual } from 'dr-js/module/common/verify'
 import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
@@ -143,4 +142,4 @@ runMain(async ({ padLog, stepLog }) => {
     })
     stepLog('stop server done')
   })
-}, getLogger('test-server', argvFlag('quiet')))
+}, 'test-server')

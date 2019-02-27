@@ -3,11 +3,10 @@ import { writeFileSync } from 'fs'
 
 import { indentLine } from 'dr-js/module/common/string'
 
-import { argvFlag, runMain } from 'dr-dev/module/main'
-import { getLogger } from 'dr-dev/module/logger'
-import { collectSourceRouteMap } from 'dr-dev/module/ExportIndex/parseExport'
-import { generateExportInfo } from 'dr-dev/module/ExportIndex/generateInfo'
-import { autoAppendMarkdownHeaderLink, renderMarkdownFileLink, renderMarkdownExportPath } from 'dr-dev/module/ExportIndex/renderMarkdown'
+import { collectSourceRouteMap } from 'dr-dev/module/node/export/parse'
+import { generateExportInfo } from 'dr-dev/module/node/export/generate'
+import { autoAppendMarkdownHeaderLink, renderMarkdownFileLink, renderMarkdownExportPath } from 'dr-dev/module/node/export/renderMarkdown'
+import { runMain } from 'dr-dev/module/main'
 
 import { formatUsage } from 'source-bin/option'
 
@@ -41,4 +40,4 @@ runMain(async (logger) => {
     ),
     ''
   ].join('\n'))
-}, getLogger('generate-spec', argvFlag('quiet')))
+}, 'generate-spec')
