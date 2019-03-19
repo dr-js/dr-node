@@ -34,31 +34,34 @@ const authFetchTimedLookup = async (
 }
 
 const configureAuthTimedLookup = async ({
-  fileAuth,
-  shouldAuthGen = false,
-  authGenTag,
-  authGenSize,
-  authGenTokenSize,
-  authGenTimeGap,
+  timedLookupData, // directly pass
+
+  fileAuth, // load from file
+
+  shouldAuthGen = false, // generate new one to file
+  authGenTag, authGenSize, authGenTokenSize, authGenTimeGap,
+
   authKey = DEFAULT_AUTH_KEY,
   logger
 }) => {
-  const timedLookupData = await loadLookupFile(fileAuth).catch(async (error) => {
-    if (!shouldAuthGen) {
-      logger.add('missing auth lookup file', error)
-      throw error
-    }
-    logger.add('generate new auth lookup file')
-    const timedLookupData = await generateLookupData({
-      tag: authGenTag,
-      size: authGenSize,
-      tokenSize: authGenTokenSize,
-      timeGap: authGenTimeGap
+  if (!timedLookupData) {
+    timedLookupData = await loadLookupFile(fileAuth).catch(async (error) => {
+      if (!shouldAuthGen) {
+        logger.add('missing auth lookup file', error)
+        throw error
+      }
+      logger.add('generate new auth lookup file')
+      const timedLookupData = await generateLookupData({
+        tag: authGenTag,
+        size: authGenSize,
+        tokenSize: authGenTokenSize,
+        timeGap: authGenTimeGap
+      })
+      await saveLookupFile(fileAuth, timedLookupData)
+      return timedLookupData
     })
-    await saveLookupFile(fileAuth, timedLookupData)
-    return timedLookupData
-  })
-  logger.add('loaded auth lookup file')
+    logger.add('loaded auth lookup file')
+  }
 
   const generateAuth = () => generateCheckCode(timedLookupData)
 
