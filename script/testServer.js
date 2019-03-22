@@ -92,7 +92,7 @@ runMain(async ({ padLog, stepLog }) => {
     await writeFileAsync(FILE_NODE_FILE_DOWNLOAD_CONFIG, TEXT_NODE_FILE_DOWNLOAD_CONFIG)
     await writeFileAsync(FILE_TEST, await readFileAsync(fromRoot('package-lock.json')))
 
-    padLog(`start server`) // TODO: extract to `dr-dev`
+    padLog(`start server`)
     await withRunBackground({
       command: 'node',
       argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ],

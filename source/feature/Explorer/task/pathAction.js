@@ -59,14 +59,6 @@ const PATH_ACTION_MAP = {
   }
 }
 
-PATH_ACTION_MAP[ 'stat' ] = PATH_ACTION_MAP[ PATH_STAT ] // TODO: legacy string, remove after 2019/03/31 ?
-PATH_ACTION_MAP[ 'copy' ] = PATH_ACTION_MAP[ PATH_COPY ] // TODO: legacy string, remove after 2019/03/31 ?
-PATH_ACTION_MAP[ 'move' ] = PATH_ACTION_MAP[ PATH_MOVE ] // TODO: legacy string, remove after 2019/03/31 ?
-PATH_ACTION_MAP[ 'delete' ] = PATH_ACTION_MAP[ PATH_DELETE ] // TODO: legacy string, remove after 2019/03/31 ?
-PATH_ACTION_MAP[ 'create-directory' ] = PATH_ACTION_MAP[ DIRECTORY_CREATE ] // TODO: legacy string, remove after 2019/03/31 ?
-PATH_ACTION_MAP[ 'path-content' ] = PATH_ACTION_MAP[ DIRECTORY_CONTENT ] // TODO: legacy string, remove after 2019/03/31 ?
-PATH_ACTION_MAP[ 'list-file-recursive' ] = PATH_ACTION_MAP[ DIRECTORY_ALL_FILE_LIST ] // TODO: legacy string, remove after 2019/03/31 ?
-
 const createGetPathAction = (rootPath) => {
   const getPath = createPathPrefixLock(rootPath)
   __DEV__ && console.log('[PathAction]', { rootPath }, Object.keys(PATH_ACTION_MAP))

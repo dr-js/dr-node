@@ -12,16 +12,14 @@ module.exports = {
     [ 'minify-replace', { replacements: [ { identifierName: '__DEV__', replacement: { type: 'booleanLiteral', value: isDev } } ] } ],
     [ 'module-resolver', {
       root: [ './' ],
-      alias: isModule ? undefined : {
-        '^dr-dev/module/(.+)': 'dr-dev/library/\\1',
-        '^dr-js/module/(.+)': 'dr-js/library/\\1',
+      alias: isModule ? undefined : [ {
         '^dr-server/sample/(.+)': isUseSource
           ? './source-sample/\\1' // when direct use/test with `babel-node`
           : './sample/\\1', // when build to output
         '^dr-server/module/(.+)': isUseSource
           ? './source/\\1' // when direct use/test with `babel-node`
           : './library/\\1' // when build to output
-      }
+      }, { '^dr-([\\w-]+)/module/(.+)': 'dr-\\1/library/\\2' } ]
     } ]
   ].filter(Boolean),
   comments: false
