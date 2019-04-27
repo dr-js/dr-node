@@ -110,7 +110,7 @@ const startDetachedProcess = async ({ command, argList, cwd, env, shell = true }
     const subProcessInfo = (await getProcessPidMap(processList))[ subProcess.pid ]
     if (!subProcessInfo || subProcessInfo.ppid !== process.pid) {
       // if (subProcessInfo) subProcess.kill() // TODO: good to send signal?
-      throw new Error(`[startDetachedProcess] sub process info not found, expect pid: ${subProcess.pid}, ppid: ${process.pid}`)
+      throw new Error(`sub process info not found, expect pid: ${subProcess.pid}, ppid: ${process.pid}`)
     }
     const { pid, command, subTree } = await findProcessTreeNode(subProcessInfo, await getProcessTree(processList)) // drops ppid since sub tree may get chopped
     __DEV__ && console.log('[startDetachedProcess] processInfo:', { pid, command, subTree })

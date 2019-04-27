@@ -76,6 +76,8 @@
   - `initLoadingMask`
 + 📄 [source/HTML/Modal.js](source/HTML/Modal.js)
   - `initModal`
++ 📄 [source/HTML/ServerFetch.js](source/HTML/ServerFetch.js)
+  - `initServerFetch`, `responderServerFetch`
 + 📄 [source/HTML/function.js](source/HTML/function.js)
   - `DR_BROWSER_SCRIPT`
 

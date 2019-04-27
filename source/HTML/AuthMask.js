@@ -23,7 +23,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
       ? option
       : { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } }
     )
-    if (!response.ok) throw new Error(`[authFetch] error status: ${response.status}, url: ${url}`)
+    if (!response.ok) throw new Error(`[authFetch] status: ${response.status}, url: ${url}`)
     return response
   }
 
@@ -52,8 +52,8 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
 
   const authCheck = async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
-    const { ok } = await fetch(urlAuthCheck, { headers: { [ authKey ]: checkCode } })
-    if (!ok) throw new Error('[authCheck] failed for timedLookupData')
+    const { ok, status } = await fetch(urlAuthCheck, { headers: { [ authKey ]: checkCode } })
+    if (!ok) throw new Error(`[authCheck] status: ${status}`)
     return timedLookupData
   }
 

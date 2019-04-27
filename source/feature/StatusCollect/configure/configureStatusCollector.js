@@ -31,8 +31,7 @@ const configureStatusCollector = async ({
     await withRetryAsync(async (retryCount) => {
       __DEV__ && retryCount && console.log(`[fetch] retryCount: ${retryCount}`)
       const timeFetchStart = clock()
-      const { ok, json } = await authFetch(collectUrl)
-      if (!ok) throw new Error('[collectStatus] fetch not ok')
+      const { json } = await authFetch(collectUrl)
       const timeOk = roundFloat(clock() - timeFetchStart)
       const status = await json()
       const timeDownload = roundFloat(clock() - timeFetchStart - timeOk)

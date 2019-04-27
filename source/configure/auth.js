@@ -29,7 +29,7 @@ const authFetchTimedLookup = async (
       ...config.headers
     }
   })
-  if (!response.ok) throw new Error(`[Error][AuthFetch] status: ${response.status}`)
+  if (!response.ok) throw new Error(`[authFetch] status: ${response.status}`)
   return response
 }
 
