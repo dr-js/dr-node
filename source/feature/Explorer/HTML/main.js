@@ -1,6 +1,6 @@
 import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/server/commonHTML'
+import { DR_BROWSER_SCRIPT_TAG } from 'dr-js/module/node/resource'
 
-import { DR_BROWSER_SCRIPT } from 'source/HTML/function'
 import { initModal } from 'source/HTML/Modal'
 import { initAuthMask } from 'source/HTML/AuthMask'
 import { initLoadingMask } from 'source/HTML/LoadingMask'
@@ -42,7 +42,7 @@ const getHTML = ({
     initUploader,
     onload: onLoadFunc
   }),
-  DR_BROWSER_SCRIPT()
+  DR_BROWSER_SCRIPT_TAG()
 ])
 
 const mainStyle = `<style>

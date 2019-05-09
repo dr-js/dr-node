@@ -78,8 +78,6 @@
   - `initModal`
 + 📄 [source/HTML/ServerFetch.js](source/HTML/ServerFetch.js)
   - `initServerFetch`, `responderServerFetch`
-+ 📄 [source/HTML/function.js](source/HTML/function.js)
-  - `DR_BROWSER_SCRIPT`
 
 #### Bin Option Format
 📄 [source-bin/option.js](source-bin/option.js)

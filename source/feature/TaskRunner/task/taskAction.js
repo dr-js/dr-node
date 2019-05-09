@@ -8,8 +8,7 @@ import { statAsync, openAsync, truncateAsync, readFileAsync, writeFileAsync, cre
 import { createDirectory } from 'dr-js/module/node/file/File'
 import { getDirectorySubInfoList } from 'dr-js/module/node/file/Directory'
 import { modify } from 'dr-js/module/node/file/Modify'
-import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, checkProcessExist, tryKillProcessTreeNode } from 'dr-js/module/node/system/ProcessStatus'
-import { collectAllProcessStatus } from 'dr-js/bin/function'
+import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, checkProcessExist, tryKillProcessTreeNode, collectAllProcessStatus } from 'dr-js/module/node/system/ProcessStatus'
 
 const TASK_CONFIG_SET = 'task-config:set'
 const TASK_CONFIG_GET = 'task-config:get'
