@@ -1,7 +1,7 @@
 import { getTimestamp, createStepper } from 'dr-js/module/common/time'
 import { binary } from 'dr-js/module/common/format'
 import { roundFloat } from 'dr-js/module/common/math/base'
-import { getSystemProcessor, getSystemStatus, getProcessStatus } from 'dr-js/module/node/system/Status'
+import { getSystemProcessor, getSystemStatus, getCurrentProcessStatus } from 'dr-js/module/node/system/Status'
 
 const getSystemTag = ({ platform, processor, memory, network } = getSystemStatus()) => [
   platform.platform,
@@ -36,11 +36,11 @@ const getProcessCpuUsageDelta = ({ user, system } = process.cpuUsage(), prevValu
 const createGetStatusReport = (processTag = getSystemTag()) => {
   const stepper = createStepper()
   let prevSystemStatus = getSystemStatus()
-  let prevProcessStatus = getProcessStatus()
+  let prevProcessStatus = getCurrentProcessStatus()
 
   return () => {
     const systemStatus = getSystemStatus()
-    const processStatus = getProcessStatus()
+    const processStatus = getCurrentProcessStatus()
 
     const statusReport = {
       timestamp: getTimestamp(),

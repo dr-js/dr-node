@@ -6,7 +6,6 @@ import { runMain, argvFlag } from 'dr-dev/module/main'
 import { initOutput, verifyOutputBinVersion, verifyNoGitignore, packOutput, publishOutput } from 'dr-dev/module/output'
 import { processFileList, fileProcessorBabel } from 'dr-dev/module/fileProcessor'
 import { getTerserOption, minifyFileListWithTerser } from 'dr-dev/module/minify'
-import { writeLicenseFile } from 'dr-dev/module/license'
 
 import { binary as formatBinary } from 'dr-js/module/common/format'
 
@@ -30,7 +29,7 @@ const buildOutput = async ({ logger: { padLog } }) => {
   execSync('npm run build-sample', execOptionRoot)
 }
 
-const processOutput = async ({ packageJSON, logger }) => {
+const processOutput = async ({ logger }) => {
   const fileListLibraryBin = await getScriptFileListFromPathList([ 'library', 'bin' ], fromOutput)
   const fileListModuleSample = await getScriptFileListFromPathList([ 'module', 'sample' ], fromOutput)
   const fileListAll = [ ...fileListLibraryBin, ...fileListModuleSample ]
@@ -51,7 +50,6 @@ runMain(async (logger) => {
   await verifyNoGitignore({ path: fromRoot('source-sample'), logger })
 
   const packageJSON = await initOutput({ fromRoot, fromOutput, logger })
-  writeLicenseFile(fromRoot('LICENSE'), packageJSON.license, packageJSON.author)
 
   logger.padLog(`generate spec`)
   execSync('npm run script-generate-spec', execOptionRoot)
@@ -59,10 +57,10 @@ runMain(async (logger) => {
   if (!argvFlag('pack')) return
 
   await buildOutput({ logger })
-  await processOutput({ packageJSON, logger })
+  await processOutput({ logger })
 
   if (argvFlag('test', 'publish', 'publish-dev')) {
-    await processOutput({ packageJSON, logger }) // once more
+    await processOutput({ logger }) // once more
 
     logger.padLog(`test test-server`)
     execSync(`npm run test-server`, execOptionRoot)

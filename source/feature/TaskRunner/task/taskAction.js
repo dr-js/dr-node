@@ -8,7 +8,14 @@ import { statAsync, openAsync, truncateAsync, readFileAsync, writeFileAsync, cre
 import { createDirectory } from 'dr-js/module/node/file/File'
 import { getDirectorySubInfoList } from 'dr-js/module/node/file/Directory'
 import { modify } from 'dr-js/module/node/file/Modify'
-import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, checkProcessExist, tryKillProcessTreeNode, collectAllProcessStatus } from 'dr-js/module/node/system/ProcessStatus'
+import {
+  getProcessListAsync,
+  toProcessPidMap, findProcessPidMapInfo,
+  toProcessTree, findProcessTreeInfo,
+  killProcessTreeInfoAsync,
+  getAllProcessStatusAsync, describeAllProcessStatusAsync,
+  isPidExist
+} from 'dr-js/module/node/system/ProcessStatus'
 
 const TASK_CONFIG_SET = 'task-config:set'
 const TASK_CONFIG_GET = 'task-config:get'
@@ -105,19 +112,21 @@ const startDetachedProcess = async ({ command, argList, cwd, env, shell = true }
   subProcess.unref()
 
   {
-    const processList = await getProcessList()
-    const subProcessInfo = (await getProcessPidMap(processList))[ subProcess.pid ]
+    const processList = await getProcessListAsync()
+    const subProcessInfo = toProcessPidMap(processList)[ subProcess.pid ]
     if (!subProcessInfo || subProcessInfo.ppid !== process.pid) {
       // if (subProcessInfo) subProcess.kill() // TODO: good to send signal?
       throw new Error(`sub process info not found, expect pid: ${subProcess.pid}, ppid: ${process.pid}`)
     }
-    const { pid, command, subTree } = await findProcessTreeNode(subProcessInfo, await getProcessTree(processList)) // drops ppid since sub tree may get chopped
+    const { pid, command, subTree } = findProcessTreeInfo(subProcessInfo, toProcessTree(processList)) // drops ppid since sub tree may get chopped
     __DEV__ && console.log('[startDetachedProcess] processInfo:', { pid, command, subTree })
     return { process: subProcess, processInfo: { pid, command, subTree } }
   }
 }
 
-const existTaskProcess = ({ status }, processPidMap) => status && status.processInfo && checkProcessExist(status.processInfo, processPidMap)
+const existTaskProcessAsync = async ({ status }) => status && status.processInfo &&
+  isPidExist(status.processInfo.pid) &&
+  findProcessPidMapInfo(status.processInfo, toProcessPidMap(await getProcessListAsync()))
 
 const onLoadConfigError = (error) => {
   __DEV__ && console.log('[loadConfig] error', error)
@@ -139,7 +148,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     [ TASK_CONFIG_SET ]: async (payload) => {
       let config = verifyAndFormatConfig(payload, getPath)
       const existConfig = await loadConfig(config.key).catch(onLoadConfigError)
-      if (existConfig && await existTaskProcess(existConfig)) throw new Error(`config task running`)
+      if (existConfig && await existTaskProcessAsync(existConfig)) throw new Error(`config task running`)
       if (existConfig) config = updateConfig(existConfig, config)
       await createDirectory(getPath(config.key))
       await saveConfig(config)
@@ -147,19 +156,19 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     [ TASK_CONFIG_GET ]: ({ key }) => loadConfig(key).catch(onLoadConfigError),
     [ TASK_START ]: async ({ key }) => {
       const config = await loadConfig(key)
-      if (await existTaskProcess(config)) throw new Error(`task exist`)
+      if (await existTaskProcessAsync(config)) throw new Error(`task exist`)
       config.task.resetLog && await TASK_ACTION_MAP[ TASK_LOG_RESET ]({ key })
       const { processInfo } = await startDetachedProcess(config.task, getLogPath(key))
       await saveConfig({ ...config, status: { processInfo, timeStart: getTimestamp() } })
     },
     [ TASK_STOP ]: async ({ key }) => {
       const config = await loadConfig(key)
-      config.status && config.status.processInfo && await tryKillProcessTreeNode(config.status.processInfo)
+      config.status && config.status.processInfo && await killProcessTreeInfoAsync(config.status.processInfo)
       await saveConfig({ ...config, status: null })
     },
     [ TASK_DELETE ]: async ({ key }) => {
       const config = await loadConfig(key)
-      if (await existTaskProcess(config)) throw new Error(`task process running at: ${config.status.processInfo.pid}`)
+      if (await existTaskProcessAsync(config)) throw new Error(`task process running at: ${config.status.processInfo.pid}`)
       await modify.delete(getPath(key))
     },
     [ TASK_LIST ]: async () => {
@@ -178,7 +187,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     },
     [ TASK_LOG_RESET ]: async ({ key }) => truncateAsync(getLogPath(key)),
     [ PROCESS_STATUS ]: async ({ outputMode = 'tree', isHumanReadableOutput = true }) => ({
-      processStatus: await collectAllProcessStatus(outputMode, isHumanReadableOutput)
+      processStatus: await (isHumanReadableOutput ? describeAllProcessStatusAsync : getAllProcessStatusAsync)(outputMode)
     })
   }
 
