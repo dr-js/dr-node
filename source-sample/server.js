@@ -1,13 +1,13 @@
 import { createRequestListener } from 'dr-js/module/node/server/Server'
 import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from 'dr-js/module/node/server/Responder/Common'
 import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
-import { createResponderRouter, createRouteMap, createResponderRouteList } from 'dr-js/module/node/server/Responder/Router'
+import { createResponderRouter, createRouteMap, createResponderRouteListHTML } from 'dr-js/module/node/server/Responder/Router'
 
 import { configureLog } from 'dr-server/module/configure/log'
 import { configurePid } from 'dr-server/module/configure/pid'
 import { configureAuthTimedLookup, configureAuthTimedLookupGroup } from 'dr-server/module/configure/auth'
 import { configurePermission } from 'dr-server/module/configure/permission'
-import { configureServer } from 'dr-server/module/configure/server'
+import { configureServer, responderCommonExtend } from 'dr-server/module/configure/server'
 import { configureFeaturePack as configureFeaturePackExplorer } from 'dr-server/module/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusCollect } from 'dr-server/module/feature/StatusCollect/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusReport } from 'dr-server/module/feature/StatusReport/configureFeaturePack'
@@ -111,7 +111,7 @@ const createServer = async ({
           : ''
   const routeMap = createRouteMap([
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ],
-    [ '/', 'GET', __DEV__ ? createResponderRouteList({ getRouteMap: () => routeMap })
+    [ '/', 'GET', __DEV__ ? createResponderRouteListHTML({ getRouteMap: () => routeMap })
       : redirectUrl ? (store) => responderEndWithRedirect(store, { redirectUrl })
         : (store) => responderEndWithStatusCode(store, { statusCode: 400 })
     ],
@@ -125,6 +125,7 @@ const createServer = async ({
   server.on('request', createRequestListener({
     responderList: [
       createResponderLog({ log: logger.add }),
+      responderCommonExtend,
       createResponderRouter({ routeMap, baseUrl: option.baseUrl })
     ],
     responderEnd: (store) => {

@@ -1,12 +1,11 @@
 import { binary } from 'dr-js/module/common/format'
 
 import { parseBufferPacket, packBufferPacket } from 'dr-js/module/node/data/BufferPacket'
-import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { responderSendBufferCompress } from 'dr-js/module/node/server/Responder/Send'
 import { fetchLikeRequest } from 'dr-js/module/node/net'
 
 const responderServerFetch = async (store) => {
-  const [ headerString, requestBodyBuffer ] = parseBufferPacket(await receiveBufferAsync(store.request))
+  const [ headerString, requestBodyBuffer ] = parseBufferPacket(await store.requestBuffer())
   const { url, option = {} } = JSON.parse(headerString)
   __DEV__ && console.log(`   - [ResponderServerFetch] url: ${url}, method: ${option.method}, request-body: ${binary(requestBodyBuffer.length)}B`)
 

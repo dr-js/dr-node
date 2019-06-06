@@ -69,7 +69,7 @@ const initPathContent = (
     await doLoadPath(pathContentStore)
   }
   const getPreviewFile = (pathContentStore, authUrl) => async (relativePath, fileName) => open(authUrl(
-    `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`,
+    `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`
   ))
   const getDownloadFile = (pathContentStore, authDownload) => async (relativePath, fileName) => authDownload(
     `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`,

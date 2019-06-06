@@ -1,5 +1,4 @@
 import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
-import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { responderSendBufferCompress, prepareBufferDataAsync } from 'dr-js/module/node/server/Responder/Send'
 import { getRouteParamAny } from 'dr-js/module/node/server/Responder/Router'
 
@@ -58,7 +57,7 @@ const configureFeaturePack = async ({
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
     [ URL_PATH_ACTION, 'POST', createResponderCheckAuth({
       responderNext: async (store) => {
-        const { nameList, actionType, relativeFrom, relativeTo } = JSON.parse(await receiveBufferAsync(store.request))
+        const { nameList, actionType, relativeFrom, relativeTo } = await store.requestJSON()
         if (IS_SKIP_AUTH || await checkPermission(PERMISSION_EXPLORER_PATH_ACTION, { store, actionType })) { // else ends with 400
           return responderPathAction(store, nameList, actionType, relativeFrom, relativeTo)
         }

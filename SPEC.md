@@ -17,7 +17,7 @@
 + 📄 [source/configure/pid.js](source/configure/pid.js)
   - `configurePid`
 + 📄 [source/configure/server.js](source/configure/server.js)
-  - `configureServer`, `getServerSNIOption`
+  - `configureServer`, `getServerSNIOption`, `responderCommonExtend`
 + 📄 [source/configure/tokenCache.js](source/configure/tokenCache.js)
   - `configureTokenCache`
 + 📄 [source/feature/option.js](source/feature/option.js)

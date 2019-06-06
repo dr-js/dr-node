@@ -1,5 +1,4 @@
 import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
-import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { responderSendBufferCompress, prepareBufferDataAsync } from 'dr-js/module/node/server/Responder/Send'
 
 import { TASK_ACTION_TYPE } from './task/taskAction'
@@ -35,7 +34,7 @@ const configureFeaturePack = async ({
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
     [ URL_TASK_ACTION, 'POST', createResponderCheckAuth({
       responderNext: async (store) => {
-        const { type, payload } = JSON.parse(await receiveBufferAsync(store.request))
+        const { type, payload } = await store.requestJSON()
         if (IS_SKIP_AUTH || await checkPermission(PERMISSION_TASK_RUNNER_TASK_ACTION, { store, actionType: type, actionPayload: payload })) { // else ends with 400
           return responderTaskAction(store, type, payload)
         }

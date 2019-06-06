@@ -2,7 +2,6 @@ import { posix } from 'path'
 import { catchAsync } from 'dr-js/module/common/error'
 import { indentLine } from 'dr-js/module/common/string'
 
-import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createPathPrefixLock } from 'dr-js/module/node/file/function'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
@@ -63,7 +62,7 @@ const createResponderFileChunkUpload = async ({
   })
   return async (store, extraFileUploadOption = {}) => {
     await fileChunkUpload({
-      bufferPacket: await receiveBufferAsync(store.request),
+      bufferPacket: await store.requestBuffer(),
       ...extraFileUploadOption
     })
     responderEndWithStatusCode(store, { statusCode: 200 })
