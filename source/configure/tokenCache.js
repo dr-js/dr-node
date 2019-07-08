@@ -15,12 +15,12 @@ import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responde
 const DEFAULT_TOKEN_KEY = 'auth-token'
 
 const loadTokenCache = async (tokenCacheMap, fileTokenCache) => {
-  tokenCacheMap.parseList(JSON.parse(await readFileAsync(fileTokenCache)))
+  tokenCacheMap.loadCacheList(JSON.parse(await readFileAsync(fileTokenCache)))
   __DEV__ && console.log('loaded token cache file', fileTokenCache)
 }
 
 const saveTokenCache = (tokenCacheMap, fileTokenCache) => {
-  const tokenPackString = JSON.stringify(tokenCacheMap.packList())
+  const tokenPackString = JSON.stringify(tokenCacheMap.saveCacheList())
   writeFileSync(fileTokenCache, tokenPackString)
 }
 
