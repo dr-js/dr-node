@@ -1,4 +1,9 @@
-const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', isSkipAuth = false }) => {
+const initAuthMask = ({
+  IS_SKIP_AUTH = false,
+  URL_AUTH_CHECK,
+  onAuthPass,
+  authKey = 'auth-check-code' // TODO: NOTE: should match 'DEFAULT_AUTH_KEY' from `./configure.js`
+}) => {
   const {
     fetch, location, URL,
     cE,
@@ -19,7 +24,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
   const authRevoke = () => catchAsync(clearTimedLookupData)
 
   const getAuthFetch = (timedLookupData) => async (url, option = {}) => {
-    const response = await fetch(url, isSkipAuth
+    const response = await fetch(url, IS_SKIP_AUTH
       ? option
       : { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } }
     )
@@ -30,11 +35,11 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
   const authPass = (timedLookupData) => {
     const authUrl = (url) => {
       const urlObject = new URL(url, location.origin)
-      !isSkipAuth && urlObject.searchParams.set(authKey, generateCheckCode(timedLookupData))
+      !IS_SKIP_AUTH && urlObject.searchParams.set(authKey, generateCheckCode(timedLookupData))
       return urlObject.toString()
     }
     return onAuthPass({
-      isSkipAuth,
+      IS_SKIP_AUTH,
       authRevoke, // should reload after
       authUrl,
       authFetch: getAuthFetch(timedLookupData),
@@ -42,7 +47,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
     })
   }
 
-  if (isSkipAuth) return authPass(null) // skipped auth, but keep auth method usable
+  if (IS_SKIP_AUTH) return authPass(null) // skipped auth, but keep auth method usable
 
   const CACHE_BUCKET = '@@cache'
   const CACHE_KEY = 'timedLookupData'
@@ -52,7 +57,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
 
   const authCheck = async (timedLookupData) => {
     const checkCode = generateCheckCode(timedLookupData)
-    const { ok, status } = await fetch(urlAuthCheck, { headers: { [ authKey ]: checkCode } })
+    const { ok, status } = await fetch(URL_AUTH_CHECK, { headers: { [ authKey ]: checkCode } })
     if (!ok) throw new Error(`[authCheck] status: ${status}`)
     return timedLookupData
   }
@@ -75,7 +80,7 @@ const initAuthMask = ({ urlAuthCheck, onAuthPass, authKey = 'auth-check-code', i
     if (!fileBlob) return
     const { result: timedLookupData, error } = await catchAsync(async () => {
       const timedLookupData = await parseDataArrayBuffer(await parseBlobAsArrayBuffer(fileBlob))
-      await getAuthFetch(timedLookupData)(urlAuthCheck)
+      await getAuthFetch(timedLookupData)(URL_AUTH_CHECK)
       return timedLookupData
     })
     if (error) authInfoDiv.innerText = `auth invalid for file: ${fileBlob.name}`

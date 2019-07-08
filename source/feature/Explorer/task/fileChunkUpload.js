@@ -18,14 +18,13 @@ import { modify } from 'dr-js/module/node/file/Modify'
 
 const CACHE_SIZE_SUM_MAX = 64 // chunk folder count
 const CACHE_EXPIRE_TIME = 10 * 60 * 1000 // in msec, 10min
-const GET_DEFAULT_CACHE_MAP = () => createCacheMap({ valueSizeSumMax: CACHE_SIZE_SUM_MAX })
 
 const createFileChunkUpload = async ({
   rootPath,
-  mergePath, // TODO: unsuccessful file chunk may stuck in mergePath
+  mergePath, // TODO: unfinished file chunk may be left here
   onError,
   expireTime = CACHE_EXPIRE_TIME,
-  chunkCacheMap = GET_DEFAULT_CACHE_MAP()
+  chunkCacheMap = createCacheMap({ valueSizeSumMax: CACHE_SIZE_SUM_MAX })
 }) => {
   await createDirectory(rootPath)
   await createDirectory(mergePath)
@@ -41,12 +40,12 @@ const createFileChunkUpload = async ({
   return async ({
     bufferPacket,
     cacheKeyPrefix = '', // should stay the same for the chunk upload process
-    onUploadStart, // before start to receive the initial chunk, good place to do extra check/auth
-    onUploadChunk, // after chunk saved
-    onUploadEnd // after merged file created
+    onUploadStart, // ({ tempPath, filePath, key, chunkTotal, chunkList }) => {} // before start to receive the initial chunk, good place to do extra check/auth
+    onUploadChunk, // (chunkData, chunkIndex) => {} // after chunk saved
+    onUploadEnd // (chunkData) => {} // after merged file created
   }) => {
     const [ headerArrayBuffer, chunkHashArrayBuffer, chunkArrayBuffer ] = parseChainArrayBufferPacket(toArrayBuffer(bufferPacket))
-    const { filePath: relativePath, chunkByteLength, chunkIndex, chunkTotal } = JSON.parse(arrayBufferToString(headerArrayBuffer))
+    const { key, chunkByteLength, chunkIndex, chunkTotal } = JSON.parse(arrayBufferToString(headerArrayBuffer))
     const chunkBuffer = Buffer.from(chunkArrayBuffer)
 
     if (chunkByteLength !== chunkBuffer.length) throw new Error(`chunk length mismatch, get: ${chunkBuffer.length}, expect ${chunkByteLength}`)
@@ -59,12 +58,12 @@ const createFileChunkUpload = async ({
       }
     }
 
-    const cacheKey = `${cacheKeyPrefix}-${relativePath}-${chunkTotal}`
+    const cacheKey = `${cacheKeyPrefix}-${key}-${chunkTotal}`
     let chunkData = chunkCacheMap.get(cacheKey)
     if (chunkData === undefined) {
-      const filePath = getPath(relativePath)
+      const filePath = getPath(key)
       const tempPath = resolve(mergePath, getRandomId(cacheKey).replace(/[^\w-.]/g, '_'))
-      chunkData = { tempPath, filePath, relativePath, chunkTotal, chunkList: [] }
+      chunkData = { tempPath, filePath, key, chunkTotal, chunkList: [] }
       onUploadStart && await onUploadStart(chunkData)
       await createDirectory(tempPath)
     }
@@ -119,10 +118,10 @@ const prepareFileChunkBufferList = (fileBuffer, chunkSizeMax = 1024 * 1024) => {
 const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
 const uploadFileByChunk = async ({
   fileBuffer,
-  filePath,
-  uploadFileChunkBuffer,
+  key,
+  chunkSizeMax = CHUNK_SIZE_MAX,
   onProgress, // (uploadedSize, totalSize) => {}
-  chunkSizeMax = CHUNK_SIZE_MAX
+  uploadFileChunkBuffer // (chainBufferPacket, { key, chunkByteLength, chunkIndex, chunkTotal }) => {}
 }) => {
   const fileSize = fileBuffer.length
   const chunkBufferList = prepareFileChunkBufferList(fileBuffer, chunkSizeMax)
@@ -131,7 +130,7 @@ const uploadFileByChunk = async ({
     const chunkArrayBuffer = toArrayBuffer(chunkBuffer)
     const chunkByteLength = chunkArrayBuffer.byteLength
     const verifyChunkHashBuffer = createHash('sha256').update(chunkBuffer).digest()
-    const chunkInfo = { filePath, chunkByteLength, chunkIndex, chunkTotal }
+    const chunkInfo = { key, chunkByteLength, chunkIndex, chunkTotal }
     await uploadFileChunkBuffer(Buffer.from(packChainArrayBufferPacket([
       fromString(JSON.stringify(chunkInfo)),
       toArrayBuffer(verifyChunkHashBuffer),

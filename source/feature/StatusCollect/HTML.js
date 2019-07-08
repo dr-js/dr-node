@@ -1,6 +1,6 @@
 import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/server/commonHTML'
 import { DR_BROWSER_SCRIPT_TAG } from 'dr-js/module/node/resource'
-import { initAuthMask } from 'source/HTML/AuthMask'
+import { initAuthMask } from 'source/feature/Auth/HTML'
 
 const getHTML = ({
   URL_AUTH_CHECK,
@@ -308,7 +308,7 @@ const onLoadFunc = () => {
   }
 
   initAuthMask({
-    urlAuthCheck: URL_AUTH_CHECK,
+    URL_AUTH_CHECK,
     onAuthPass: ({ authRevoke, authFetch }) => {
       qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatusState(authRevoke, authFetch) }))
       fetchStatusState(authRevoke, authFetch)

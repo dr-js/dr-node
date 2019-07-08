@@ -38,11 +38,10 @@ const FILE_SERVER_CONFIG = fromTemp('server.config.json')
 const TEXT_SERVER_CONFIG = JSON.stringify({
   host: 'localhost:8000',
   pidFile: './server-test.pid',
-  authFile: './server-test.auth',
-  authGen: true,
-  authGenTag: 'SERVER_TEST',
   permissionType: 'file',
   permissionFile: './server-permission.config.js',
+  authFile: './server-test.auth',
+  authFileGenTag: 'SERVER_TEST',
   explorerRootPath: './path-upload',
   explorerUploadMergePath: './path-upload.merge',
   taskRunnerRootPath: './task-runner'
@@ -51,29 +50,29 @@ const TEXT_SERVER_CONFIG = JSON.stringify({
 const FILE_NODE_PATH_ACTION_CONFIG = fromTemp('node-path-action.config.json')
 const TEXT_NODE_PATH_ACTION_CONFIG = JSON.stringify({
   quiet: true,
+  nodeAuthFile: './server-test.auth',
   nodePathAction: true,
   pathActionServerUrl: 'http://localhost:8000/path-action',
   pathActionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT,
-  pathActionKey: '',
-  nodeAuthFile: './server-test.auth'
+  pathActionKey: ''
 })
 
 const FILE_NODE_FILE_UPLOAD_CONFIG = fromTemp('node-file-upload.config.json')
 const TEXT_NODE_FILE_UPLOAD_CONFIG = JSON.stringify({
+  nodeAuthFile: './server-test.auth',
   nodeFileUpload: true,
   fileUploadServerUrl: 'http://localhost:8000/file-chunk-upload',
   fileUploadPath: './test-file',
-  fileUploadKey: 'test-file.upload',
-  nodeAuthFile: './server-test.auth'
+  fileUploadKey: 'test-file.upload'
 })
 
 const FILE_NODE_FILE_DOWNLOAD_CONFIG = fromTemp('node-file-download.config.json')
 const TEXT_NODE_FILE_DOWNLOAD_CONFIG = JSON.stringify({
+  nodeAuthFile: './server-test.auth',
   nodeFileDownload: true,
   fileDownloadServerUrl: 'http://localhost:8000/file-serve',
   fileDownloadPath: './path-upload/test-file.download',
-  fileDownloadKey: 'test-file.upload',
-  nodeAuthFile: './server-test.auth'
+  fileDownloadKey: 'test-file.upload'
 })
 
 const FILE_TEST = fromTemp('test-file')
@@ -100,11 +99,18 @@ runMain(async ({ padLog, stepLog }) => {
     }, async () => {
       stepLog('start server done')
 
-      const getPathContentJSON = async () => JSON.parse(await runQuiet({
-        command: 'node',
-        argList: [ fromOutput('bin/index.js'), '-c', FILE_NODE_PATH_ACTION_CONFIG ],
-        option: { cwd: fromTemp(), shell: true }
-      }).stdoutBufferPromise)
+      const getPathContentJSON = async () => {
+        const { promise, stdoutBufferPromise, stderrBufferPromise } = runQuiet({
+          command: 'node',
+          argList: [ fromOutput('bin/index.js'), '-c', FILE_NODE_PATH_ACTION_CONFIG ],
+          option: { cwd: fromTemp(), shell: true }
+        })
+        await promise.catch(async (error) => {
+          console.error('[error]', error)
+          console.error('[stderrString]', String(await stderrBufferPromise))
+        })
+        return JSON.parse(await stdoutBufferPromise)
+      }
 
       padLog('test node path action')
       const pathContentPre = await getPathContentJSON()

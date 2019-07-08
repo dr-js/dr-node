@@ -29,10 +29,10 @@ const createResponderPathAction = ({
     const resultList = []
     const errorList = []
     for (const name of nameList) {
-      const relativeFrom = posixNormalize(relativeRootFrom, name)
-      const relativeTo = relativeRootTo && posixNormalize(relativeRootTo, name)
-      const { result, error } = await catchAsync(getPathAction, actionType, relativeFrom, relativeTo)
-      const response = { actionType, relativeFrom, relativeTo, ...result }
+      const key = posixNormalize(relativeRootFrom, name)
+      const keyTo = relativeRootTo && posixNormalize(relativeRootTo, name)
+      const { result, error } = await catchAsync(getPathAction, actionType, key, keyTo)
+      const response = { actionType, key, keyTo, ...result }
       error ? errorList.push({ ...response, error: error.toString() }) : resultList.push(response)
     }
     return responderSendJSON(store, { object: { resultList, errorList } })

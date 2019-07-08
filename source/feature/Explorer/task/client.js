@@ -1,44 +1,36 @@
 import { dirname } from 'path'
-import { readFileSync, writeFileSync } from 'fs'
 
 import { withRetryAsync } from 'dr-js/module/common/function'
 import { percent, binary } from 'dr-js/module/common/format'
+import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
 import { createDirectory } from 'dr-js/module/node/file/File'
 
-import { loadLookupFile, authFetchTimedLookup } from 'source/configure/auth'
-import { uploadFileByChunk } from 'source/feature/Explorer/task/fileChunkUpload'
-
-// for node client file chunk upload
+import { uploadFileByChunk } from './fileChunkUpload'
 
 const DEFAULT_TIMEOUT = 30 * 1000
 
-const getAuthFetch = async ({ fileAuth, authKey }) => {
-  const timedLookupData = await loadLookupFile(fileAuth)
-  return async (url, option) => authFetchTimedLookup(url, option, timedLookupData, authKey)
-}
-
 const fileUpload = async ({
   fileInputPath,
-  fileBuffer = readFileSync(fileInputPath),
-  filePath,
+  fileBuffer, // OPTIONAL, will load from fileInputPath
+  key,
 
   urlFileUpload,
-  timeout = DEFAULT_TIMEOUT,
-  maxRetry = 3,
-  wait = 1000,
 
-  authFetch,
-  log
+  timeout = DEFAULT_TIMEOUT, maxRetry = 3, wait = 1000,
+  authFetch, // from `configureAuthFile`
+  logger, log = logger && logger.add
 }) => {
-  log && log(`[Upload] file: ${filePath}, size: ${binary(fileBuffer.length)}B`)
+  if (fileBuffer === undefined) fileBuffer = await readFileAsync(fileInputPath)
+
+  log && log(`[Upload] key: ${key}, size: ${binary(fileBuffer.length)}B`)
 
   await uploadFileByChunk({
     fileBuffer,
-    filePath,
+    key,
     onProgress: (uploadedSize, totalSize) => log && log(`[Upload] upload: ${percent(uploadedSize / totalSize)}`),
     uploadFileChunkBuffer: async (chainBufferPacket, { chunkIndex }) => withRetryAsync(
       async () => authFetch(urlFileUpload, { method: 'POST', body: chainBufferPacket, timeout }).catch((error) => {
-        const message = `[ERROR][Upload] upload chunk ${chunkIndex} of ${filePath}`
+        const message = `[ERROR][Upload] upload chunk ${chunkIndex} of ${key}`
         log && log(message, error)
         throw new Error(message)
       }),
@@ -47,22 +39,22 @@ const fileUpload = async ({
     )
   })
 
-  log && log(`[Upload] done: ${filePath}`)
+  log && log(`[Upload] done: ${key}`)
 }
 
 const fileDownload = async ({
-  fileOutputPath,
-  filePath,
+  fileOutputPath, // optional // TODO: confusing
+  key,
 
   urlFileDownload,
+
   timeout = DEFAULT_TIMEOUT,
-
-  authFetch,
-  log
+  authFetch, // from `configureAuthFile`
+  logger, log = logger && logger.add
 }) => {
-  log && log(`[Download] file: ${filePath}`)
+  log && log(`[Download] key: ${key}`)
 
-  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(filePath)}`, {
+  const fileBuffer = await (await authFetch(`${urlFileDownload}/${encodeURIComponent(key)}`, {
     method: 'GET',
     timeout
   })).buffer()
@@ -70,7 +62,7 @@ const fileDownload = async ({
 
   if (fileOutputPath) {
     await createDirectory(dirname(fileOutputPath))
-    writeFileSync(fileOutputPath, fileBuffer)
+    await writeFileAsync(fileOutputPath, fileBuffer)
     log && log(`[Download] done: ${fileOutputPath}`)
   }
 
@@ -78,22 +70,22 @@ const fileDownload = async ({
 }
 
 const pathAction = async ({
+  nameList = [ '' ],
   actionType,
   key = '',
   keyTo,
-  nameList = [ '' ],
 
   urlPathAction,
-  timeout = DEFAULT_TIMEOUT,
 
-  authFetch,
-  log
+  timeout = DEFAULT_TIMEOUT,
+  authFetch, // from `configureAuthFile`
+  logger, log = logger && logger.add
 }) => {
   log && log(`[Action|${actionType}] key: ${key}, keyTo: ${keyTo}, nameList: [${nameList}]`)
 
   const result = await (await authFetch(urlPathAction, {
     method: 'POST',
-    body: JSON.stringify({ nameList, actionType, relativeFrom: key, relativeTo: keyTo }),
+    body: JSON.stringify({ nameList, actionType, key, keyTo }),
     timeout
   })).json()
 
@@ -103,8 +95,6 @@ const pathAction = async ({
 }
 
 export {
-  getAuthFetch,
-
   fileUpload,
   fileDownload,
   pathAction

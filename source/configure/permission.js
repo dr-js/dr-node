@@ -43,6 +43,7 @@ const configurePermission = async ({
 
   const { result, error } = await catchAsync(configurePermissionFunc, { logger })
   if (error) throw error
+  if (!isBasicFunction(result.checkPermission)) throw new Error(`expect generated checkPermission function`)
 
   return result
 }

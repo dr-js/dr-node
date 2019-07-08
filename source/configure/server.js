@@ -1,5 +1,4 @@
 import { createSecureContext } from 'tls'
-import { receiveBufferAsync } from 'dr-js/module/node/data/Buffer'
 import { createServer } from 'dr-js/module/node/server/Server'
 import { readFileAsync } from 'dr-js/module/node/file/function'
 
@@ -52,17 +51,7 @@ const getServerSNIOption = async (
   }
 }
 
-const responderCommonExtend = (store) => { // TODO: this add functions to every request, so balance handiness & weight
-  const requestBuffer = () => receiveBufferAsync(store.request)
-  const requestJSON = async () => JSON.parse(await requestBuffer())
-
-  store.requestBuffer = requestBuffer
-  store.requestJSON = requestJSON
-}
-
 export {
   configureServer,
-  getServerSNIOption,
-
-  responderCommonExtend
+  getServerSNIOption
 }

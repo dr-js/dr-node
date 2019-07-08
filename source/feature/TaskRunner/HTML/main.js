@@ -2,8 +2,9 @@ import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/se
 import { DR_BROWSER_SCRIPT_TAG } from 'dr-js/module/node/resource'
 
 import { initModal } from 'source/HTML/Modal'
-import { initAuthMask } from 'source/HTML/AuthMask'
 import { initLoadingMask } from 'source/HTML/LoadingMask'
+
+import { initAuthMask } from 'source/feature/Auth/HTML'
 
 import { taskListStyle, initTaskList } from './taskList'
 
@@ -104,9 +105,9 @@ const onLoadFunc = () => {
   }
 
   initAuthMask({
-    urlAuthCheck: URL_AUTH_CHECK,
-    onAuthPass: initTaskRunner,
-    isSkipAuth: IS_SKIP_AUTH
+    IS_SKIP_AUTH,
+    URL_AUTH_CHECK,
+    onAuthPass: initTaskRunner
   })
 }
 

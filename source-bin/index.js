@@ -5,23 +5,23 @@ import { createStepper } from 'dr-js/module/common/time'
 import { describeServer } from 'dr-js/bin/function'
 
 import { createServer } from 'dr-server/sample/server'
-import { getAuthFetch, fileUpload, fileDownload, pathAction } from 'dr-server/module/featureNode/explorer'
+import { startClient } from 'dr-server/sample/client'
+
 import {
   getServerOption,
   getLogOption,
   getPidOption,
-  getAuthOption,
-  getAuthGroupOption,
   getPermissionOption
   // getTokenCacheOption,
 } from 'dr-server/module/configure/option'
-import {
-  getExplorerOption,
-  getStatusCollectOption,
-  getStatusReportOption,
-  getTaskRunnerOption
-} from 'dr-server/module/feature/option'
-import { getNodeExplorerOption } from 'dr-server/module/featureNode/option'
+
+import { getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption } from 'dr-server/module/feature/Auth/option'
+import { getExplorerOption } from 'dr-server/module/feature/Explorer/option'
+import { getStatusCollectOption } from 'dr-server/module/feature/StatusCollect/option'
+import { getStatusReportOption } from 'dr-server/module/feature/StatusReport/option'
+import { getTaskRunnerOption } from 'dr-server/module/feature/TaskRunner/option'
+
+import { getExplorerClientOption } from './optionExplorerClient'
 
 import { parseOption, formatUsage } from './option'
 import { name as packageName, version as packageVersion } from '../package.json'
@@ -39,8 +39,11 @@ const startServer = async (optionData) => {
     ...getServerOption(optionData),
     ...getLogOption(optionData),
     ...getPidOption(optionData),
-    ...getAuthOption(optionData),
-    ...getAuthGroupOption(optionData),
+
+    ...getAuthSkipOption(optionData),
+    ...getAuthFileOption(optionData),
+    ...getAuthFileGroupOption(optionData),
+
     ...getPermissionOption(optionData),
     // ...getTokenCacheOption(optionData),
     ...extraConfig
@@ -65,21 +68,19 @@ const MODE_NAME_LIST = [
 const runMode = async (modeName, optionData) => {
   if (modeName === 'host') return startServer(optionData)
 
-  const nodeOption = getNodeExplorerOption(optionData)
-  nodeOption.authFetch = await getAuthFetch(nodeOption)
+  let log
   if (!optionData.tryGet('quiet')) {
     const stepper = createStepper()
-    nodeOption.log = (...args) => console.log(...args, `(+${time(stepper())})`)
+    log = (...args) => console.log(...args, `(+${time(stepper())})`)
   }
 
-  switch (modeName) {
-    case 'node-path-action':
-      return logJSON(await pathAction(nodeOption))
-    case 'node-file-upload':
-      return fileUpload(nodeOption)
-    case 'node-file-download':
-      return fileDownload(nodeOption)
-  }
+  const result = await startClient({
+    modeName,
+    log,
+    ...getAuthFileOption(optionData),
+    ...getExplorerClientOption(optionData)
+  })
+  result && logJSON(result)
 }
 
 const main = async () => {

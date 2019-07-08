@@ -14,7 +14,7 @@ const initFileUpload = (
   } = window
 
   const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
-  const uploadFileByChunk = async (fileBlob, filePath, onProgress) => {
+  const uploadFileByChunk = async (fileBlob, key, onProgress) => {
     const fileSize = fileBlob.size
     let chunkIndex = 0
     const chunkTotal = Math.ceil(fileSize / CHUNK_SIZE_MAX) || 1
@@ -27,7 +27,7 @@ const initFileUpload = (
       const chunkArrayBuffer = await parseBlobAsArrayBuffer(fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize))
       const chunkByteLength = chunkArrayBuffer.byteLength
       const chainArrayBufferPacket = packChainArrayBufferPacket([
-        fromString(JSON.stringify({ filePath, chunkByteLength, chunkIndex, chunkTotal })),
+        fromString(JSON.stringify({ key, chunkByteLength, chunkIndex, chunkTotal })),
         isSecureContext ? await crypto.subtle.digest('SHA-256', chunkArrayBuffer) : new ArrayBuffer(0), // TODO: non-https site can not access window.crypto.subtle
         chunkArrayBuffer
       ])
@@ -62,8 +62,8 @@ const initUploader = (
 
   const initialUploaderState = {
     isActive: false,
-    uploadFileList: [ /* { filePath, fileBlob } */ ],
-    uploadProgress: { /* [filePath]: progress[0,1] */ },
+    uploadFileList: [ /* { key, fileBlob } */ ],
+    uploadProgress: { /* [key]: progress[0,1] */ },
     uploadStatus: ''
   }
 
@@ -72,19 +72,19 @@ const initUploader = (
     uploaderStore.setState({ uploadStatus: 'uploading' })
     const stepper = createStepper()
     const uploadStatusList = []
-    for (const { filePath, fileBlob } of fileList) {
+    for (const { key, fileBlob } of fileList) {
       const onProgress = (current, total) => uploaderStore.setState({
-        uploadProgress: objectSet(uploaderStore.getState().uploadProgress, filePath, total ? (current / total) : 1)
+        uploadProgress: objectSet(uploaderStore.getState().uploadProgress, key, total ? (current / total) : 1)
       })
-      const { error } = await catchAsync(uploadFileByChunk, fileBlob, filePath, onProgress)
-      error && uploadStatusList.push(`Error upload '${filePath}': ${error.stack || (error.target && error.target.error) || error}`)
+      const { error } = await catchAsync(uploadFileByChunk, fileBlob, key, onProgress)
+      error && uploadStatusList.push(`Error upload '${key}': ${error.stack || (error.target && error.target.error) || error}`)
     }
     uploadStatusList.push(`Done in ${Format.time(stepper())} for ${fileList.length} file`)
     {
       const { uploadFileList, uploadProgress } = uploaderStore.getState()
       uploaderStore.setState({
         uploadFileList: uploadFileList.filter((v) => !fileList.includes(v)),
-        uploadProgress: objectPickKey(uploadProgress, Object.keys(uploadProgress).filter((filePath) => !fileList.find((v) => v.filePath === filePath))),
+        uploadProgress: objectPickKey(uploadProgress, Object.keys(uploadProgress).filter((key) => !fileList.find((v) => v.key === key))),
         uploadStatus: uploadStatusList.join('\n')
       })
     }
@@ -98,11 +98,11 @@ const initUploader = (
     fileList = Array.from(fileList) // NOTE: convert FileList, for Edge support, do not use `...fileList`
     const dedupSet = new Set()
     const uploadFileList = [
-      ...fileList.map((fileBlob) => ({ filePath: `${relativePath}/${fileBlob.name}`, fileBlob })),
+      ...fileList.map((fileBlob) => ({ key: `${relativePath}/${fileBlob.name}`, fileBlob })),
       ...uploaderStore.getState().uploadFileList
-    ].filter(({ filePath }) => dedupSet.has(filePath) ? false : dedupSet.add(filePath))
+    ].filter(({ key }) => dedupSet.has(key) ? false : dedupSet.add(key))
     const uploadProgress = uploadFileList.reduce(
-      (uploadProgress, { filePath }) => objectDelete(uploadProgress, filePath),
+      (uploadProgress, { key }) => objectDelete(uploadProgress, key),
       uploaderStore.getState().uploadProgress
     )
     uploaderStore.setState({ isActive: true, uploadFileList, uploadProgress, uploadStatus: '' })
@@ -132,8 +132,8 @@ const initUploader = (
     }))
 
     uploadBlockDiv.querySelector('pre').innerText = [
-      ...uploadFileList.map(({ filePath, fileBlob: { size } }) =>
-        `[${Format.percent(uploadProgress[ filePath ] || 0).padStart(7, ' ')}] - ${filePath} (${Format.binary(size)}B)`
+      ...uploadFileList.map(({ key, fileBlob: { size } }) =>
+        `[${Format.percent(uploadProgress[ key ] || 0).padStart(7, ' ')}] - ${key} (${Format.binary(size)}B)`
       ),
       uploadStatus
     ].filter(Boolean).join('\n') || 'or drop file here'

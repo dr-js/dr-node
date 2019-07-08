@@ -1,21 +1,17 @@
 import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
-import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { responderSendBufferCompress, prepareBufferDataAsync } from 'dr-js/module/node/server/Responder/Send'
 
-import { configureStatusCollector } from './configure/configureStatusCollector'
+import { configureStatusCollector } from './configure'
 import { createResponderStatusState, createResponderStatusCollect } from './responder'
 import { getHTML } from './HTML'
 
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
+  featureAuth: { authPack: { authFetch }, createResponderCheckAuth, URL_AUTH_CHECK },
 
   statusCollectPath,
   statusCollectUrl,
-  statusCollectInterval,
-
-  urlAuthCheck = '',
-  createResponderCheckAuth = ({ responderNext }) => responderNext,
-  authFetch = fetchLikeRequest
+  statusCollectInterval
 }) => {
   const URL_HTML = `${routePrefix}/status-visualize`
   const URL_STATUS_STATE = `${routePrefix}/status-state`
@@ -29,7 +25,7 @@ const configureFeaturePack = async ({
   })
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
-    URL_AUTH_CHECK: urlAuthCheck,
+    URL_AUTH_CHECK,
     URL_STATUS_STATE,
     CONFIG_RENDER_PRESET: __DEV__
       ? {
@@ -57,13 +53,14 @@ const configureFeaturePack = async ({
   ]
 
   return {
+    factDatabase,
+    timer,
+    collectStatus,
+
     URL_HTML,
     URL_STATUS_STATE,
     URL_STATUS_COLLECT,
-    routeList,
-    factDatabase,
-    timer,
-    collectStatus
+    routeList
   }
 }
 

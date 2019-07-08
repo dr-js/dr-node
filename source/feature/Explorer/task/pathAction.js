@@ -63,11 +63,11 @@ const createGetPathAction = (rootPath) => {
   const getPath = createPathPrefixLock(rootPath)
   __DEV__ && console.log('[PathAction]', { rootPath }, Object.keys(PATH_ACTION_MAP))
 
-  return async (actionType, relativeFrom, relativeTo) => { // relativeFrom/relativeTo should be under rootPath
-    __DEV__ && console.log('[PathAction]', actionType, relativeFrom, relativeTo)
-    const absolutePathFrom = getPath(relativeFrom)
-    const absolutePathTo = relativeTo && getPath(relativeTo)
-    return PATH_ACTION_MAP[ actionType ](absolutePathFrom, absolutePathTo)
+  return async (actionType, key, keyTo) => { // key/keyTo must be under rootPath
+    __DEV__ && console.log('[PathAction]', actionType, key, keyTo)
+    const absolutePath = getPath(key)
+    const absolutePathTo = keyTo && getPath(keyTo)
+    return PATH_ACTION_MAP[ actionType ](absolutePath, absolutePathTo)
   }
 }
 

@@ -5,25 +5,31 @@
 
 #### Export Path
 + 📄 [source/function.js](source/function.js)
-  - `getCommonServerStatus`, `isPrivateAddress`
-+ 📄 [source/configure/auth.js](source/configure/auth.js)
-  - `DEFAULT_AUTH_KEY`, `authFetchTimedLookup`, `configureAuthTimedLookup`, `configureAuthTimedLookupGroup`, `loadLookupFile`, `saveLookupFile`
+  - `getCommonServerStatus`, `getParamFromRequest`, `isPrivateAddress`
 + 📄 [source/configure/log.js](source/configure/log.js)
   - `configureLog`
 + 📄 [source/configure/option.js](source/configure/option.js)
-  - `AuthFormatConfig`, `AuthGroupFormatConfig`, `LogFormatConfig`, `PermissionFormatConfig`, `PidFormatConfig`, `TokenCacheFormatConfig`, `getAuthGroupOption`, `getAuthOption`, `getLogOption`, `getPermissionOption`, `getPidOption`, `getServerFormatConfig`, `getServerOption`, `getTokenCacheOption`
+  - `LogFormatConfig`, `PermissionFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPermissionOption`, `getPidOption`, `getServerFormatConfig`, `getServerOption`
 + 📄 [source/configure/permission.js](source/configure/permission.js)
   - `configurePermission`
 + 📄 [source/configure/pid.js](source/configure/pid.js)
   - `configurePid`
 + 📄 [source/configure/server.js](source/configure/server.js)
-  - `configureServer`, `getServerSNIOption`, `responderCommonExtend`
-+ 📄 [source/configure/tokenCache.js](source/configure/tokenCache.js)
-  - `configureTokenCache`
-+ 📄 [source/feature/option.js](source/feature/option.js)
-  - `ExplorerFormatConfig`, `StatusCollectFormatConfig`, `StatusReportFormatConfig`, `TaskRunnerFormatConfig`, `getExplorerOption`, `getStatusCollectOption`, `getStatusReportOption`, `getTaskRunnerOption`
+  - `configureServer`, `getServerSNIOption`
++ 📄 [source/feature/Auth/HTML.js](source/feature/Auth/HTML.js)
+  - `initAuthMask`
++ 📄 [source/feature/Auth/configure.js](source/feature/Auth/configure.js)
+  - `AUTH_FILE`, `AUTH_FILE_GROUP`, `AUTH_SKIP`, `DEFAULT_AUTH_KEY`, `configureAuthFile`, `configureAuthFileGroup`, `configureAuthSkip`
++ 📄 [source/feature/Auth/configureFeaturePack.js](source/feature/Auth/configureFeaturePack.js)
+  - `configureFeaturePack`
++ 📄 [source/feature/Auth/option.js](source/feature/Auth/option.js)
+  - `AuthFileFormatConfig`, `AuthFileGroupFormatConfig`, `AuthSkipFormatConfig`, `getAuthFileGroupOption`, `getAuthFileOption`, `getAuthSkipOption`
++ 📄 [source/feature/Auth/responder.js](source/feature/Auth/responder.js)
+  - `createResponderCheckAuth`, `createResponderGrantAuthHeader`
 + 📄 [source/feature/Explorer/configureFeaturePack.js](source/feature/Explorer/configureFeaturePack.js)
   - `configureFeaturePack`
++ 📄 [source/feature/Explorer/option.js](source/feature/Explorer/option.js)
+  - `ExplorerFormatConfig`, `getExplorerOption`
 + 📄 [source/feature/Explorer/permission.js](source/feature/Explorer/permission.js)
   - `CREATE_PERMISSION_CHECK_MAP`, `PERMISSION_EXPLORER_FILE_UPLOAD_START`, `PERMISSION_EXPLORER_PATH_ACTION`, `PERMISSION_TYPE`
 + 📄 [source/feature/Explorer/responder.js](source/feature/Explorer/responder.js)
@@ -34,28 +40,40 @@
   - `initPathContent`, `pathContentStyle`
 + 📄 [source/feature/Explorer/HTML/uploader.js](source/feature/Explorer/HTML/uploader.js)
   - `initFileUpload`, `initUploader`
++ 📄 [source/feature/Explorer/task/client.js](source/feature/Explorer/task/client.js)
+  - `fileDownload`, `fileUpload`, `pathAction`
 + 📄 [source/feature/Explorer/task/fileChunkUpload.js](source/feature/Explorer/task/fileChunkUpload.js)
   - `createFileChunkUpload`, `uploadFileByChunk`
 + 📄 [source/feature/Explorer/task/pathAction.js](source/feature/Explorer/task/pathAction.js)
   - `PATH_ACTION_TYPE`, `createGetPathAction`
++ 📄 [source/feature/ServerFetch/HTML.js](source/feature/ServerFetch/HTML.js)
+  - `initServerFetch`
++ 📄 [source/feature/ServerFetch/responder.js](source/feature/ServerFetch/responder.js)
+  - `responderServerFetch`
 + 📄 [source/feature/StatusCollect/HTML.js](source/feature/StatusCollect/HTML.js)
   - `getHTML`
++ 📄 [source/feature/StatusCollect/configure.js](source/feature/StatusCollect/configure.js)
+  - `configureStatusCollector`
 + 📄 [source/feature/StatusCollect/configureFeaturePack.js](source/feature/StatusCollect/configureFeaturePack.js)
   - `configureFeaturePack`
++ 📄 [source/feature/StatusCollect/option.js](source/feature/StatusCollect/option.js)
+  - `StatusCollectFormatConfig`, `getStatusCollectOption`
 + 📄 [source/feature/StatusCollect/responder.js](source/feature/StatusCollect/responder.js)
   - `createResponderStatusCollect`, `createResponderStatusState`
-+ 📄 [source/feature/StatusCollect/configure/applyStatusFact.js](source/feature/StatusCollect/configure/applyStatusFact.js)
++ 📄 [source/feature/StatusCollect/module/applyStatusFact.js](source/feature/StatusCollect/module/applyStatusFact.js)
   - `applyStatusFact`
-+ 📄 [source/feature/StatusCollect/configure/combineStatus.js](source/feature/StatusCollect/configure/combineStatus.js)
++ 📄 [source/feature/StatusCollect/module/combineStatus.js](source/feature/StatusCollect/module/combineStatus.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
-+ 📄 [source/feature/StatusCollect/configure/configureStatusCollector.js](source/feature/StatusCollect/configure/configureStatusCollector.js)
-  - `configureStatusCollector`
 + 📄 [source/feature/StatusReport/configureFeaturePack.js](source/feature/StatusReport/configureFeaturePack.js)
   - `configureFeaturePack`
++ 📄 [source/feature/StatusReport/option.js](source/feature/StatusReport/option.js)
+  - `StatusReportFormatConfig`, `getStatusReportOption`
 + 📄 [source/feature/StatusReport/task/statusReport.js](source/feature/StatusReport/task/statusReport.js)
   - `createGetStatusReport`
 + 📄 [source/feature/TaskRunner/configureFeaturePack.js](source/feature/TaskRunner/configureFeaturePack.js)
   - `configureFeaturePack`
++ 📄 [source/feature/TaskRunner/option.js](source/feature/TaskRunner/option.js)
+  - `TaskRunnerFormatConfig`, `getTaskRunnerOption`
 + 📄 [source/feature/TaskRunner/permission.js](source/feature/TaskRunner/permission.js)
   - `CREATE_PERMISSION_CHECK_MAP`, `PERMISSION_TASK_RUNNER_TASK_ACTION`, `PERMISSION_TYPE`
 + 📄 [source/feature/TaskRunner/responder.js](source/feature/TaskRunner/responder.js)
@@ -66,18 +84,18 @@
   - `initTaskList`, `taskListStyle`
 + 📄 [source/feature/TaskRunner/task/taskAction.js](source/feature/TaskRunner/task/taskAction.js)
   - `TASK_ACTION_TYPE`, `createTaskAction`
-+ 📄 [source/featureNode/explorer.js](source/featureNode/explorer.js)
-  - `fileDownload`, `fileUpload`, `getAuthFetch`, `pathAction`
-+ 📄 [source/featureNode/option.js](source/featureNode/option.js)
-  - `NodeExplorerFormatConfig`, `getNodeExplorerOption`
-+ 📄 [source/HTML/AuthMask.js](source/HTML/AuthMask.js)
-  - `initAuthMask`
++ 📄 [source/feature/TokenCache/configure.js](source/feature/TokenCache/configure.js)
+  - `DEFAULT_TOKEN_KEY`, `configureTokenCache`
++ 📄 [source/feature/TokenCache/option.js](source/feature/TokenCache/option.js)
+  - `TokenCacheFormatConfig`, `getTokenCacheOption`
++ 📄 [source/feature/TokenCache/responder.js](source/feature/TokenCache/responder.js)
+  - `createResponderAssignTokenCookie`, `createResponderAssignTokenHeader`, `createResponderCheckToken`
 + 📄 [source/HTML/LoadingMask.js](source/HTML/LoadingMask.js)
   - `initLoadingMask`
 + 📄 [source/HTML/Modal.js](source/HTML/Modal.js)
   - `initModal`
-+ 📄 [source/HTML/ServerFetch.js](source/HTML/ServerFetch.js)
-  - `initServerFetch`, `responderServerFetch`
++ 📄 [source/responder/Common.js](source/responder/Common.js)
+  - `responderCommonExtend`
 
 #### Bin Option Format
 📄 [source-bin/option.js](source-bin/option.js)
@@ -105,22 +123,22 @@
 >     --pid-file [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --pid-ignore-exist [OPTIONAL-CHECK] [ARGUMENT=0+]
 >           set to enable
->     --auth-file [OPTIONAL-CHECK] [ARGUMENT=1]
->       --auth-gen [OPTIONAL-CHECK] [ARGUMENT=0+]
->           set to enable
->         --auth-gen-tag [OPTIONAL-CHECK] [ARGUMENT=1]
->         --auth-gen-size [OPTIONAL-CHECK] [ARGUMENT=1]
->         --auth-gen-token-size [OPTIONAL-CHECK] [ARGUMENT=1]
->         --auth-gen-time-gap [OPTIONAL-CHECK] [ARGUMENT=1]
->     --auth-group-path [OPTIONAL-CHECK] [ARGUMENT=1]
->       --auth-group-default-tag [OPTIONAL-CHECK] [ARGUMENT=1]
->       --auth-group-key-suffix [OPTIONAL-CHECK] [ARGUMENT=1]
->       --auth-group-verify-request-tag [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --permission-type [OPTIONAL-CHECK] [ARGUMENT=1]
 >         one of:
 >           allow deny func file
 >       --permission-func [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --permission-file [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --auth-skip [OPTIONAL-CHECK] [ARGUMENT=0+]
+>         set to enable
+>     --auth-file [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --auth-file-gen-tag [OPTIONAL-CHECK] [ARGUMENT=1]
+>           set to enable auto gen auth file
+>         --auth-file-gen-size [OPTIONAL-CHECK] [ARGUMENT=1]
+>         --auth-file-gen-token-size [OPTIONAL-CHECK] [ARGUMENT=1]
+>         --auth-file-gen-time-gap [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --auth-file-group-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --auth-file-group-default-tag [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --auth-file-group-key-suffix [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --explorer-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --explorer-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --status-collect-path [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -130,16 +148,6 @@
 >     --task-runner-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >   --node-auth-file [OPTIONAL] [ARGUMENT=1]
 >     --node-auth-key [OPTIONAL-CHECK] [ARGUMENT=1]
->     --node-path-action --npa [OPTIONAL-CHECK] [ARGUMENT=0+]
->         set to enable
->       --path-action-server-url [OPTIONAL-CHECK] [ARGUMENT=1]
->       --path-action-type [OPTIONAL-CHECK] [ARGUMENT=1]
->           one of:
->             path:visible path:stat path:copy path:move
->             path:delete directory:create directory:content directory:all-file-list
->       --path-action-key [OPTIONAL-CHECK] [ARGUMENT=1]
->       --path-action-key-to [OPTIONAL-CHECK] [ARGUMENT=1]
->       --path-action-name-list [OPTIONAL-CHECK] [ARGUMENT=1+]
 >     --node-file-upload --nfu [OPTIONAL-CHECK] [ARGUMENT=0+]
 >         set to enable
 >       --file-upload-server-url [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -150,6 +158,16 @@
 >       --file-download-server-url [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --file-download-key [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --file-download-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --node-path-action --npa [OPTIONAL-CHECK] [ARGUMENT=0+]
+>         set to enable
+>       --path-action-server-url [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --path-action-type [OPTIONAL-CHECK] [ARGUMENT=1]
+>           one of:
+>             path:visible path:stat path:copy path:move
+>             path:delete directory:create directory:content directory:all-file-list
+>       --path-action-key [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --path-action-key-to [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --path-action-name-list [OPTIONAL-CHECK] [ARGUMENT=1+]
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
@@ -167,19 +185,18 @@
 >     export DR_SERVER_LOG_FILE_PREFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PID_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PID_IGNORE_EXIST="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GEN="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_AUTH_GEN_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GEN_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GEN_TIME_GAP="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_GROUP_VERIFY_REQUEST_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PERMISSION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PERMISSION_FUNC="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PERMISSION_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_SKIP="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_SERVER_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GEN_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GEN_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GEN_TIME_GAP="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_AUTH_FILE_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -189,12 +206,6 @@
 >     export DR_SERVER_TASK_RUNNER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_NODE_AUTH_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_SERVER_NODE_AUTH_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_NODE_PATH_ACTION="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_PATH_ACTION_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_KEY_TO="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_NAME_LIST="[OPTIONAL-CHECK] [ARGUMENT=1+]"
 >     export DR_SERVER_NODE_FILE_UPLOAD="[OPTIONAL-CHECK] [ARGUMENT=0+]"
 >     export DR_SERVER_FILE_UPLOAD_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_FILE_UPLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -203,6 +214,12 @@
 >     export DR_SERVER_FILE_DOWNLOAD_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_FILE_DOWNLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_FILE_DOWNLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_NODE_PATH_ACTION="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_SERVER_PATH_ACTION_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PATH_ACTION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PATH_ACTION_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PATH_ACTION_KEY_TO="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PATH_ACTION_NAME_LIST="[OPTIONAL-CHECK] [ARGUMENT=1+]"
 >   "
 > CONFIG Usage:
 >   {
@@ -220,19 +237,18 @@
 >     "logFilePrefix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pidFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pidIgnoreExist": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "authFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGen": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "authGenTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGenTokenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGenTimeGap": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGroupPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGroupDefaultTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGroupKeySuffix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGroupVerifyRequestTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "permissionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "permissionFunc": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "permissionFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authSkip": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
+>     "authFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGenTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGenTokenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGenTimeGap": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGroupPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGroupDefaultTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authFileGroupKeySuffix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "statusCollectPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
@@ -242,12 +258,6 @@
 >     "taskRunnerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "nodeAuthFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "nodeAuthKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "nodePathAction": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "pathActionServerUrl": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionKeyTo": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionNameList": [ "[OPTIONAL-CHECK] [ARGUMENT=1+]" ],
 >     "nodeFileUpload": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
 >     "fileUploadServerUrl": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "fileUploadKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
@@ -256,5 +266,11 @@
 >     "fileDownloadServerUrl": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "fileDownloadKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "fileDownloadPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "nodePathAction": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
+>     "pathActionServerUrl": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "pathActionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "pathActionKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "pathActionKeyTo": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "pathActionNameList": [ "[OPTIONAL-CHECK] [ARGUMENT=1+]" ],
 >   }
 > ```

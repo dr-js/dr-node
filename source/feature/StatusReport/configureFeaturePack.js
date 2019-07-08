@@ -1,15 +1,12 @@
-import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 
 import { createGetStatusReport } from './task/statusReport'
 
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
+  featureAuth: { authPack: { authFetch }, createResponderCheckAuth },
 
-  statusReportProcessTag,
-
-  createResponderCheckAuth = ({ responderNext }) => responderNext,
-  authFetch = fetchLikeRequest
+  statusReportProcessTag
 }) => {
   const URL_STATUS_REPORT = `${routePrefix}/status-report`
 

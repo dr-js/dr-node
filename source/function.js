@@ -1,6 +1,16 @@
 import { binary } from 'dr-js/module/common/format'
+import { parseCookieString } from 'dr-js/module/node/server/function'
 import { runQuiet } from 'dr-js/module/node/system/Run'
 import { describeSystemStatus } from 'dr-js/module/node/system/Status'
+
+const getParamFromRequest = (store, key) => {
+  const { headers } = store.request
+  return (
+    headers[ key ] ||
+    store.getState().url.searchParams.get(key) ||
+    (headers[ 'cookie' ] && decodeURIComponent(parseCookieString(headers[ 'cookie' ])[ key ]))
+  )
+}
 
 // only common address, not all is checked, check: https://en.wikipedia.org/wiki/Private_network
 const isPrivateAddress = (address) => (
@@ -52,6 +62,7 @@ const getCommonServerStatus = async (rootPath) => {
 }
 
 export {
+  getParamFromRequest,
   isPrivateAddress,
   getCommonServerStatus
 }

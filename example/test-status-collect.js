@@ -8,9 +8,10 @@ const main = async () => {
     port: 8002,
 
     filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`,
-    fileAuth: `${__dirname}/.timed-lookup-gitignore.key`,
-    shouldAuthGen: true,
     permissionType: 'allow',
+
+    authFile: `${__dirname}/.timed-lookup-gitignore.key`,
+    authFileGenTag: 'DEV_TAG',
 
     statusCollectPath: `${__dirname}/fact-${SERVER_TAG}-gitignore`,
     statusCollectUrl: `http://localhost:8003/status-report`

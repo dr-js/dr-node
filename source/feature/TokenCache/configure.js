@@ -9,8 +9,6 @@ import { readFileAsync } from 'dr-js/module/node/file/function'
 import { createDirectory } from 'dr-js/module/node/file/File'
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
 import { getRandomBufferAsync } from 'dr-js/module/node/data/function'
-import { parseCookieString } from 'dr-js/module/node/server/function'
-import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
 const DEFAULT_TOKEN_KEY = 'auth-token'
 
@@ -26,17 +24,17 @@ const saveTokenCache = (tokenCacheMap, fileTokenCache) => {
 
 const TOKEN_SIZE = 128 // in byte, big to prevent conflict, and safer for auth token
 const TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000 // in msec, 30day
-const TOKEN_SIZE_SUM_MAX = 4 * 1024 // token count, old token will be dropped
+const TOKEN_SIZE_SUM_MAX = 4 * 1024 // token count, old token will be dropped, with default setting should use 128*4*1024 = 512KiB memory
 
 // TODO: not used in sample yet
 
 const configureTokenCache = async ({
   fileTokenCache,
+  tokenKey = DEFAULT_TOKEN_KEY,
   tokenSize = TOKEN_SIZE, // in bytes
   tokenExpireTime = TOKEN_EXPIRE_TIME,
   tokenSizeSumMax = TOKEN_SIZE_SUM_MAX,
-  tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1, eventHub: null }),
-  tokenKey = DEFAULT_TOKEN_KEY
+  tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1, eventHub: null })
 }) => {
   await createDirectory(dirname(fileTokenCache))
   await catchAsync(loadTokenCache, tokenCacheMap, fileTokenCache)
@@ -56,47 +54,16 @@ const configureTokenCache = async ({
   }
 
   return {
+    tokenKey,
+    tokenExpireTime,
+
     tryGetToken,
-    generateToken,
-    createResponderCheckToken: ({
-      responderNext,
-      responderDeny
-    }) => createResponderCheckRateLimit({
-      checkFunc: (store) => {
-        const tokenObject = tryGetToken(store.request.headers[ tokenKey ])
-        tokenObject && store.setState({ tokenObject })
-        return Boolean(tokenObject)
-      },
-      responderNext,
-      responderDeny
-    }),
-    createResponderAssignToken: ({
-      responder
-    }) => async (store, tokenObject = {}) => {
-      store.response.setHeader(tokenKey, await generateToken(tokenObject))
-      return responder(store)
-    },
-    createResponderCheckTokenCookie: ({
-      responderNext,
-      responderDeny
-    }) => createResponderCheckRateLimit({
-      checkFunc: (store) => {
-        const tokenObject = tryGetToken(decodeURIComponent(parseCookieString(store.request.headers[ 'cookie' ] || '')[ tokenKey ]))
-        tokenObject && store.setState({ tokenObject })
-        return Boolean(tokenObject)
-      },
-      responderNext,
-      responderDeny
-    }),
-    createResponderAssignTokenCookie: ({
-      responder,
-      extra = 'path=/; HttpOnly'
-    }) => async (store, tokenObject = {}) => {
-      const baseCookie = `${tokenKey}=${encodeURIComponent(await generateToken(tokenObject))}; expires=${(new Date(Date.now() + tokenExpireTime)).toISOString()}`
-      store.response.setHeader('set-cookie', extra ? `${baseCookie}; ${extra}` : baseCookie)
-      return responder(store)
-    }
+    generateToken
   }
 }
 
-export { configureTokenCache }
+export {
+  DEFAULT_TOKEN_KEY,
+
+  configureTokenCache
+}

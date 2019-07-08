@@ -53,19 +53,19 @@ const initPathContent = (
   }
 
   const doLoadPath = async (pathContentStore, relativePath = pathContentStore.getState().pathContent.relativePath) => {
-    const { resultList: [ { relativeFrom: nextRelativePath, directoryList, fileList } ] } = await authFetchPathAction({
-      nameList: [ '' ], actionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT, relativeFrom: relativePath || PATH_ROOT
+    const { resultList: [ { key: nextRelativePath, directoryList, fileList } ] } = await authFetchPathAction({
+      nameList: [ '' ], actionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT, key: relativePath || PATH_ROOT
     })
     pathContentStore.setState({ pathContent: { relativePath: nextRelativePath || PATH_ROOT, directoryList, fileList } })
   }
 
   const getLoadPathAsync = (pathContentStore) => async (relativePath) => doLoadPath(pathContentStore, relativePath)
-  const getPathActionAsync = (pathContentStore) => async (nameList, actionType, relativeFrom, relativeTo) => {
+  const getPathActionAsync = (pathContentStore) => async (nameList, actionType, key, keyTo) => {
     if (
       (actionType === PATH_ACTION_TYPE.PATH_MOVE || actionType === PATH_ACTION_TYPE.PATH_COPY) &&
-      (!relativeTo || relativeTo === relativeFrom)
+      (!keyTo || keyTo === key)
     ) return
-    await authFetchPathAction({ nameList, actionType, relativeFrom, relativeTo })
+    await authFetchPathAction({ nameList, actionType, key, keyTo })
     await doLoadPath(pathContentStore)
   }
   const getPreviewFile = (pathContentStore, authUrl) => async (relativePath, fileName) => open(authUrl(

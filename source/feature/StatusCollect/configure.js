@@ -3,7 +3,8 @@ import { withRetryAsync, lossyAsync } from 'dr-js/module/common/function'
 import { roundFloat } from 'dr-js/module/common/math/base'
 import { createFactDatabase, tryDeleteExtraCache } from 'dr-js/module/node/module/FactDatabase'
 import { addExitListenerAsync, addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
-import { applyStatusFact } from './applyStatusFact'
+
+import { applyStatusFact } from './module/applyStatusFact'
 
 const STATUS_COLLECT_INTERVAL = __DEV__ ? 1000 : 5 * 60 * 1000
 const FETCH_RETRY_COUNT = 3

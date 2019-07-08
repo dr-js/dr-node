@@ -2,8 +2,9 @@ import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/se
 import { DR_BROWSER_SCRIPT_TAG } from 'dr-js/module/node/resource'
 
 import { initModal } from 'source/HTML/Modal'
-import { initAuthMask } from 'source/HTML/AuthMask'
 import { initLoadingMask } from 'source/HTML/LoadingMask'
+
+import { initAuthMask } from 'source/feature/Auth/HTML'
 
 import { pathContentStyle, initPathContent } from './pathContent'
 import { initFileUpload, initUploader } from './uploader'
@@ -148,8 +149,8 @@ const onLoadFunc = () => {
   }
 
   initAuthMask({
-    isSkipAuth: IS_SKIP_AUTH,
-    urlAuthCheck: URL_AUTH_CHECK,
+    IS_SKIP_AUTH,
+    URL_AUTH_CHECK,
     onAuthPass: initExplorer
   })
 }

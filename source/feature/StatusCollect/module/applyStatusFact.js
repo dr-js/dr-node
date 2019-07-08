@@ -122,7 +122,7 @@ const applyStatusFact = (state, fact) => {
       if (timestamp >= merge1Timestamp) {
         const [ clippedInputList, outputList ] = splitChunk(merge1List, SPLIT_TIME_2, merge1Timestamp - MERGE_TIME_2, getMergeStatusTimeFunc, combineStatus)
         merge1List = clippedInputList
-        let merge2List = [ ...outputList, ...state.merge2List ]
+        const merge2List = [ ...outputList, ...state.merge2List ]
         if (merge2List.length > MERGE_2_MAX_COUNT) merge2List.length = MERGE_2_MAX_COUNT
 
         state = { ...state, merge2List, merge1Timestamp: floorTimestampByDay(timestamp) + MERGE_TIME_2 }
