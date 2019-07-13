@@ -45,7 +45,10 @@ const createFileChunkUpload = async ({
     onUploadEnd // (chunkData) => {} // after merged file created
   }) => {
     const [ headerArrayBuffer, chunkHashArrayBuffer, chunkArrayBuffer ] = parseChainArrayBufferPacket(toArrayBuffer(bufferPacket))
-    const { key, chunkByteLength, chunkIndex, chunkTotal } = JSON.parse(arrayBufferToString(headerArrayBuffer))
+    const {
+      filePath, // TODO: DEPRECATED back support code, drop at 20190930?
+      key = filePath, chunkByteLength, chunkIndex, chunkTotal
+    } = JSON.parse(arrayBufferToString(headerArrayBuffer))
     const chunkBuffer = Buffer.from(chunkArrayBuffer)
 
     if (chunkByteLength !== chunkBuffer.length) throw new Error(`chunk length mismatch, get: ${chunkBuffer.length}, expect ${chunkByteLength}`)
@@ -64,6 +67,7 @@ const createFileChunkUpload = async ({
       const filePath = getPath(key)
       const tempPath = resolve(mergePath, getRandomId(cacheKey).replace(/[^\w-.]/g, '_'))
       chunkData = { tempPath, filePath, key, chunkTotal, chunkList: [] }
+      chunkData.relativePath = key // TODO: DEPRECATED back support code, drop at 20190930?
       onUploadStart && await onUploadStart(chunkData)
       await createDirectory(tempPath)
     }

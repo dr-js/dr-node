@@ -33,6 +33,8 @@ const createResponderPathAction = ({
       const keyTo = relativeRootTo && posixNormalize(relativeRootTo, name)
       const { result, error } = await catchAsync(getPathAction, actionType, key, keyTo)
       const response = { actionType, key, keyTo, ...result }
+      response.relativeFrom = key // TODO: DEPRECATED back support code, drop at 20190930?
+      response.relativeTo = keyTo // TODO: DEPRECATED back support code, drop at 20190930?
       error ? errorList.push({ ...response, error: error.toString() }) : resultList.push(response)
     }
     return responderSendJSON(store, { object: { resultList, errorList } })

@@ -57,7 +57,10 @@ const configureFeaturePack = async ({
     [ URL_HTML, 'GET', (store) => responderSendBufferCompress(store, HTMLBufferData) ],
     [ URL_PATH_ACTION, 'POST', createResponderCheckAuth({
       responderNext: async (store) => {
-        const { nameList, actionType, key, keyTo } = await store.requestJSON()
+        const {
+          relativeFrom, relativeTo, // TODO: DEPRECATED back support code, drop at 20190930?
+          nameList, actionType, key = relativeFrom, keyTo = relativeTo
+        } = await store.requestJSON()
         if (IS_SKIP_AUTH || await checkPermission(PERMISSION_EXPLORER_PATH_ACTION, { store, actionType })) { // else ends with 400
           return responderPathAction(store, nameList, actionType, key, keyTo)
         }
@@ -68,7 +71,10 @@ const configureFeaturePack = async ({
     }) ],
     [ URL_FILE_UPLOAD, 'POST', createResponderCheckAuth({
       responderNext: (store) => responderFileChunkUpload(store, {
-        onUploadStart: async ({ filePath, key }) => {
+        onUploadStart: async ({
+          relativePath, // TODO: DEPRECATED back support code, drop at 20190930?
+          filePath, key = relativePath
+        }) => {
           if (IS_SKIP_AUTH || await checkPermission(PERMISSION_EXPLORER_FILE_UPLOAD_START, { store, filePath, key, IS_READ_ONLY })) return // pass
           throw new Error(`deny file upload: ${key}`) // ends with 500
         }
