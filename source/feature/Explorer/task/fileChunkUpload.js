@@ -10,9 +10,10 @@ import { createAsyncTaskQueue } from 'dr-js/module/common/module/AsyncTaskQueue'
 
 import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
 import { pipeStreamAsync } from 'dr-js/module/node/data/Stream'
-import { createPathPrefixLock, writeFileAsync } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
-import { modify } from 'dr-js/module/node/file/Modify'
+import { writeFileAsync } from 'dr-js/module/node/file/function'
+import { createPathPrefixLock } from 'dr-js/module/node/file/Path'
+import { createDirectory } from 'dr-js/module/node/file/Directory'
+import { modifyDelete, modifyDeleteForce } from 'dr-js/module/node/file/Modify'
 
 // TODO: add `fileSocketUpload`
 
@@ -34,7 +35,7 @@ const createFileChunkUpload = async ({
   chunkCacheMap.subscribe(({ type, key, payload }) => {
     if (type !== 'delete') return
     const { tempPath } = payload
-    pushTask(() => modify.delete(tempPath).catch(() => {}))
+    pushTask(() => modifyDeleteForce(tempPath))
   })
 
   return async ({
@@ -89,7 +90,7 @@ const createFileChunkUpload = async ({
           createReadStream(chunkPath)
         )
       }
-      await modify.delete(chunkData.tempPath)
+      await modifyDelete(chunkData.tempPath)
       chunkCacheMap.delete(cacheKey)
       __DEV__ && console.log(`##[done]`, chunkCacheMap.size, cacheKey)
       onUploadEnd && await onUploadEnd(chunkData)

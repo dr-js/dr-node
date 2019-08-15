@@ -1,7 +1,8 @@
 import { getTimestamp, createStepper } from 'dr-js/module/common/time'
+import { tryCall } from 'dr-js/module/common/error'
 import { binary } from 'dr-js/module/common/format'
 import { roundFloat } from 'dr-js/module/common/math/base'
-import { getSystemProcessor, getSystemStatus, getCurrentProcessStatus } from 'dr-js/module/node/system/Status'
+import { getSystemProcessor, getSystemStatus } from 'dr-js/module/node/system/Status'
 
 const getSystemTag = ({ platform, processor, memory, network } = getSystemStatus()) => [
   platform.platform,
@@ -60,5 +61,34 @@ const createGetStatusReport = (processTag = getSystemTag()) => {
     return statusReport
   }
 }
+
+const getCurrentProcessStatus = () => ({ // status for current node process // TODO: use `process.resourceUsage()` from `node@12.6.0`
+  title: process.title,
+  pid: process.pid,
+  ppid: process.ppid,
+
+  uid: tryCall(process, 'getuid'),
+  gid: tryCall(process, 'getgid'),
+  groups: tryCall(process, 'getgroups') || [],
+  euid: tryCall(process, 'geteuid'),
+  egid: tryCall(process, 'getegid'),
+
+  stdio: {
+    stdin: getStdio('stdin'),
+    stdout: getStdio('stdout'),
+    stderr: getStdio('stderr')
+  },
+  isConnectedIPC: Boolean(process.connected),
+
+  execPath: process.execPath,
+  execArgv: process.execArgv, // []
+  argv: process.argv, // []
+  cwd: process.cwd(),
+  uptime: process.uptime() * 1000,
+  cpuUsage: process.cpuUsage(), // { user, system } // in µsec(micro-sec), not msec(mili-sec)
+  memoryUsage: process.memoryUsage() // {}
+})
+
+const getStdio = (name) => ({ isTTY: Boolean(process[ name ].isTTY) })
 
 export { createGetStatusReport }

@@ -10,7 +10,7 @@ const configureFeaturePack = async ({
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
   URL_AUTH_CHECK = `${routePrefix}/auth`
 }) => {
-  const authPack = authSkip ? configureAuthSkip({ logger })
+  const authPack = authSkip ? await configureAuthSkip({ logger })
     : authFile ? await configureAuthFile({ authFile, authFileGenTag, authFileGenSize, authFileGenTokenSize, authFileGenTimeGap, logger })
       : await configureAuthFileGroup({ authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix, logger })
 

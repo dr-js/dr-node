@@ -1,10 +1,10 @@
 import { relative } from 'path'
 
 import { catchAsync } from 'dr-js/module/common/error'
-import { visibleAsync, statAsync, createPathPrefixLock, toPosixPath } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
-import { getDirectorySubInfoList, getDirectoryInfoTree, walkDirectoryInfoTree } from 'dr-js/module/node/file/Directory'
-import { modify } from 'dr-js/module/node/file/Modify'
+import { visibleAsync, statAsync } from 'dr-js/module/node/file/function'
+import { createPathPrefixLock, toPosixPath } from 'dr-js/module/node/file/Path'
+import { getDirectorySubInfoList, getDirectoryInfoTree, walkDirectoryInfoTree, createDirectory } from 'dr-js/module/node/file/Directory'
+import { modifyMove, modifyCopy, modifyDelete } from 'dr-js/module/node/file/Modify'
 
 const PATH_VISIBLE = 'path:visible'
 const PATH_STAT = 'path:stat'
@@ -31,9 +31,9 @@ const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
 const PATH_ACTION_MAP = {
   [ PATH_VISIBLE ]: (absolutePath) => visibleAsync(absolutePath).then((isVisible) => ({ isVisible })),
   [ PATH_STAT ]: (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
-  [ PATH_COPY ]: modify.copy,
-  [ PATH_MOVE ]: modify.move,
-  [ PATH_DELETE ]: modify.delete,
+  [ PATH_COPY ]: modifyCopy,
+  [ PATH_MOVE ]: modifyMove,
+  [ PATH_DELETE ]: modifyDelete,
 
   [ DIRECTORY_CREATE ]: (absolutePath) => createDirectory(absolutePath),
   [ DIRECTORY_CONTENT ]: async (absolutePath) => { // single level, both file & directory

@@ -1,10 +1,9 @@
-import { unlinkSync, readFileSync } from 'fs'
+import { unlinkSync, readFileSync, writeFileSync } from 'fs'
 import { dirname } from 'path'
 import { catchSync } from 'dr-js/module/common/error'
-import { writeFileAsync } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
+import { createDirectory } from 'dr-js/module/node/file/Directory'
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
-import { isPidExist } from 'dr-js/module/node/system/ProcessStatus'
+import { isPidExist } from 'dr-js/module/node/system/Process'
 
 const configurePid = async ({
   filePid,
@@ -22,7 +21,7 @@ const configurePid = async ({
 
   __DEV__ && console.log('create pid file', filePid)
   await createDirectory(dirname(filePid))
-  await writeFileAsync(filePid, `${process.pid}`)
+  writeFileSync(filePid, `${process.pid}`)
 
   addExitListenerSync((exitState) => {
     __DEV__ && console.log('delete pid file', filePid, exitState)

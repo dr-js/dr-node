@@ -3,7 +3,7 @@ import { dirname } from 'path'
 import { withRetryAsync } from 'dr-js/module/common/function'
 import { percent, binary } from 'dr-js/module/common/format'
 import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
+import { createDirectory } from 'dr-js/module/node/file/Directory'
 
 import { uploadFileByChunk } from './fileChunkUpload'
 

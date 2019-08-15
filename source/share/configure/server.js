@@ -6,7 +6,7 @@ const loadFile = (filePath) => filePath ? readFileAsync(filePath) : null
 
 const configureServer = async ({
   protocol = 'http:',
-  hostname = 'localhost',
+  hostname = '127.0.0.1',
   port,
   fileSSLKey,
   fileSSLCert,

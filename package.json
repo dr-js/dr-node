@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "dr-server",
-  "version": "0.2.0",
+  "version": "0.3.0-dev.0",
   "description": "A collection of strange functions, for server",
   "author": "dr-js",
   "license": "MIT",
@@ -9,11 +9,11 @@
   "bin": "bin/index.js",
   "scripts": {
     "// script ======================": "",
-    "script-pack": "babel-node ./script quiet pack",
-    "script-pack-test": "babel-node ./script verbose pack test",
-    "script-publish": "babel-node ./script pack publish",
-    "script-publish-dev": "babel-node ./script pack publish-dev",
-    "script-generate-spec": "cross-env BABEL_ENV=use-source babel-node ./script/generateSpec",
+    "script-pack": "node -r @babel/register ./script quiet pack",
+    "script-pack-test": "node -r @babel/register ./script verbose pack test",
+    "script-publish": "node -r @babel/register ./script pack publish",
+    "script-publish-dev": "node -r @babel/register ./script pack publish-dev",
+    "script-generate-spec": "cross-env BABEL_ENV=use-source node -r @babel/register ./script/generateSpec",
     "// build =======================": "",
     "build-bin": "babel ./source-bin --out-dir ./output-gitignore/bin",
     "build-library": "babel ./source --out-dir ./output-gitignore/library",
@@ -22,7 +22,7 @@
     "build-sample": "babel ./source-sample --out-dir ./output-gitignore/sample",
     "build-sample-dev": "cross-env BABEL_ENV=dev npm run build-sample -- --watch",
     "// test ========================": "",
-    "test-server": "babel-node ./script/testServer",
+    "test-server": "node -r @babel/register ./script/testServer",
     "// =============================": "",
     "lint": "eslint ./source/ ./source-bin/ ./source-sample/ ./script/",
     "test": "npm run script-pack-test",
@@ -33,10 +33,10 @@
     "npm": ">=6.10"
   },
   "dependencies": {
-    "dr-js": "^0.22.3 || ^0.22.4-dev.0"
+    "dr-js": "^0.23.0 || ^0.23.0-dev.2"
   },
   "devDependencies": {
-    "dr-dev": "0.0.7-dev.0",
-    "dr-dev-babel": "0.0.7-dev.0"
+    "dr-dev": "0.0.7-dev.1",
+    "dr-dev-babel": "0.0.7-dev.1"
   }
 }

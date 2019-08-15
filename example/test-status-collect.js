@@ -14,7 +14,7 @@ const main = async () => {
     authFileGenTag: 'DEV_TAG',
 
     statusCollectPath: `${__dirname}/fact-${SERVER_TAG}-gitignore`,
-    statusCollectUrl: `http://localhost:8003/status-report`
+    statusCollectUrl: `http://127.0.0.1:8003/status-report`
     // statusCollectInterval: 2 * 1000,
   })
 

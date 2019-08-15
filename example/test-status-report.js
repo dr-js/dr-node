@@ -20,7 +20,7 @@ const main = async () => {
   console.log(describeServer(option, SERVER_TAG))
 
   // push status
-  setInterval(() => featureStatusReport.reportStatus('http://localhost:8002/status-collect'), 5000)
+  setInterval(() => featureStatusReport.reportStatus('http://127.0.0.1:8002/status-collect'), 5000)
 }
 
 main().catch(console.error)

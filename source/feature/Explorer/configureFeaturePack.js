@@ -20,11 +20,10 @@ import {
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
   featureAuth: { authPack: { authMode }, createResponderCheckAuth, URL_AUTH_CHECK },
+  featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
 
   explorerRootPath: rootPath,
-  explorerUploadMergePath: mergePath,
-
-  checkPermission = (type, payload) => true // async (type, { store, ... }) => true/false
+  explorerUploadMergePath: mergePath
 }) => {
   const URL_HTML = `${routePrefix}/explorer`
   const URL_PATH_ACTION = `${routePrefix}/path-action`

@@ -8,7 +8,8 @@ import { createCacheMap } from 'dr-js/module/common/data/CacheMap'
 
 import { fetchLikeRequest } from 'dr-js/module/node/net'
 import { toArrayBuffer } from 'dr-js/module/node/data/Buffer'
-import { readFileAsync, writeFileAsync, createPathPrefixLock } from 'dr-js/module/node/file/function'
+import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
+import { createPathPrefixLock } from 'dr-js/module/node/file/Path'
 
 const DEFAULT_AUTH_KEY = 'auth-check-code' // TODO: NOTE: should match 'DEFAULT_AUTH_KEY' from `./html.js`
 

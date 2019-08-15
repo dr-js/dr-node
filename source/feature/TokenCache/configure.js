@@ -6,7 +6,7 @@ import { getTimestamp } from 'dr-js/module/common/time'
 import { createCacheMap } from 'dr-js/module/common/data/CacheMap'
 
 import { readFileAsync } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
+import { createDirectory } from 'dr-js/module/node/file/Directory'
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
 import { getRandomBufferAsync } from 'dr-js/module/node/data/function'
 

@@ -1,11 +1,12 @@
 import { resolve } from 'path'
 
 import { withRunBackground } from 'dr-dev/module/node/run'
+import { withTempDirectory } from 'dr-dev/module/node/file'
 import { runMain, argvFlag } from 'dr-dev/module/main'
 
 import { stringifyEqual } from 'dr-js/module/common/verify'
 import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
-import { modify, withTempDirectory } from 'dr-js/module/node/file/Modify'
+import { modifyDeleteForce } from 'dr-js/module/node/file/Modify'
 import { run, runQuiet } from 'dr-js/module/node/system/Run'
 
 import { PATH_ACTION_TYPE } from 'source/feature/Explorer/task/pathAction'
@@ -36,7 +37,7 @@ module.exports = {
 
 const FILE_SERVER_CONFIG = fromTemp('server.config.json')
 const TEXT_SERVER_CONFIG = JSON.stringify({
-  host: 'localhost:8000',
+  host: '127.0.0.1:8000',
   pidFile: './server-test.pid',
   permissionType: 'file',
   permissionFile: './server-permission.config.js',
@@ -52,7 +53,7 @@ const TEXT_NODE_PATH_ACTION_CONFIG = JSON.stringify({
   quiet: true,
   nodeAuthFile: './server-test.auth',
   nodePathAction: true,
-  pathActionServerUrl: 'http://localhost:8000/path-action',
+  pathActionServerUrl: 'http://127.0.0.1:8000/path-action',
   pathActionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT,
   pathActionKey: ''
 })
@@ -61,7 +62,7 @@ const FILE_NODE_FILE_UPLOAD_CONFIG = fromTemp('node-file-upload.config.json')
 const TEXT_NODE_FILE_UPLOAD_CONFIG = JSON.stringify({
   nodeAuthFile: './server-test.auth',
   nodeFileUpload: true,
-  fileUploadServerUrl: 'http://localhost:8000/file-chunk-upload',
+  fileUploadServerUrl: 'http://127.0.0.1:8000/file-chunk-upload',
   fileUploadPath: './test-file',
   fileUploadKey: 'test-file.upload'
 })
@@ -70,7 +71,7 @@ const FILE_NODE_FILE_DOWNLOAD_CONFIG = fromTemp('node-file-download.config.json'
 const TEXT_NODE_FILE_DOWNLOAD_CONFIG = JSON.stringify({
   nodeAuthFile: './server-test.auth',
   nodeFileDownload: true,
-  fileDownloadServerUrl: 'http://localhost:8000/file-serve',
+  fileDownloadServerUrl: 'http://127.0.0.1:8000/file-serve',
   fileDownloadPath: './path-upload/test-file.download',
   fileDownloadKey: 'test-file.upload'
 })
@@ -79,7 +80,7 @@ const FILE_TEST = fromTemp('test-file')
 
 runMain(async ({ padLog, stepLog }) => {
   padLog(`create test directory`)
-  await modify.delete(PATH_TEMP).catch(() => {})
+  await modifyDeleteForce(PATH_TEMP)
   await withTempDirectory(PATH_TEMP, async () => {
     stepLog('create test directory done')
 

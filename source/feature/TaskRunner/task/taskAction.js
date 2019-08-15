@@ -4,10 +4,10 @@ import { spawn } from 'child_process'
 import { getTimestamp } from 'dr-js/module/common/time'
 import { string, boolean, basicArray, basicObject } from 'dr-js/module/common/verify'
 
-import { statAsync, openAsync, truncateAsync, readFileAsync, writeFileAsync, createReadStream, createPathPrefixLock, toPosixPath } from 'dr-js/module/node/file/function'
-import { createDirectory } from 'dr-js/module/node/file/File'
-import { getDirectorySubInfoList } from 'dr-js/module/node/file/Directory'
-import { modify } from 'dr-js/module/node/file/Modify'
+import { statAsync, openAsync, truncateAsync, readFileAsync, writeFileAsync, createReadStream } from 'dr-js/module/node/file/function'
+import { createPathPrefixLock, toPosixPath } from 'dr-js/module/node/file/Path'
+import { getDirectorySubInfoList, createDirectory } from 'dr-js/module/node/file/Directory'
+import { modifyDelete } from 'dr-js/module/node/file/Modify'
 import {
   getProcessListAsync,
   toProcessPidMap, findProcessPidMapInfo,
@@ -15,7 +15,7 @@ import {
   killProcessTreeInfoAsync,
   getAllProcessStatusAsync, describeAllProcessStatusAsync,
   isPidExist
-} from 'dr-js/module/node/system/ProcessStatus'
+} from 'dr-js/module/node/system/Process'
 
 const TASK_CONFIG_SET = 'task-config:set'
 const TASK_CONFIG_GET = 'task-config:get'
@@ -169,7 +169,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     [ TASK_DELETE ]: async ({ key }) => {
       const config = await loadConfig(key)
       if (await existTaskProcessAsync(config)) throw new Error(`task process running at: ${config.status.processInfo.pid}`)
-      await modify.delete(getPath(key))
+      await modifyDelete(getPath(key))
     },
     [ TASK_LIST ]: async () => {
       const configList = []

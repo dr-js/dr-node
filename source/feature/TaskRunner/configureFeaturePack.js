@@ -11,10 +11,9 @@ import { PERMISSION_TASK_RUNNER_TASK_ACTION } from './permission'
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',
   featureAuth: { authPack: { authMode }, createResponderCheckAuth, URL_AUTH_CHECK },
+  featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
 
-  taskRunnerRootPath,
-
-  checkPermission = (type, payload) => true // async (type, { store, ... }) => true/false
+  taskRunnerRootPath
 }) => {
   const URL_HTML = `${routePrefix}/task-runner`
   const URL_TASK_ACTION = `${routePrefix}/task-action`

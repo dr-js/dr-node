@@ -1,6 +1,6 @@
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
-import { getParamFromRequest } from 'source/function'
+import { getRequestParam } from 'source/share/module/RequestParam'
 
 const createResponderCheckAuth = ({
   authPack: { authKey, checkAuth },
@@ -8,7 +8,7 @@ const createResponderCheckAuth = ({
   responderDeny // optional
 }) => createResponderCheckRateLimit({
   checkFunc: async (store) => {
-    const authToken = await checkAuth(getParamFromRequest(store, authKey))
+    const authToken = await checkAuth(getRequestParam(store, authKey))
     store.setState({ authToken })
     return true // pass check
   },

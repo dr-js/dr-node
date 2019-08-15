@@ -3,12 +3,13 @@ import { Preset, prepareOption } from 'dr-js/module/node/module/Option/preset'
 import {
   getServerFormatConfig,
   LogFormatConfig,
-  PidFormatConfig,
-  PermissionFormatConfig
+  PidFormatConfig
   // TokenCacheFormatConfig,
-} from 'dr-server/module/configure/option'
+} from 'dr-server/module/share/option'
 
 import { AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig } from 'dr-server/module/feature/Auth/option'
+import { PermissionFormatConfig } from 'dr-server/module/feature/Permission/option'
+
 import { ExplorerFormatConfig } from 'dr-server/module/feature/Explorer/option'
 import { StatusCollectFormatConfig } from 'dr-server/module/feature/StatusCollect/option'
 import { StatusReportFormatConfig } from 'dr-server/module/feature/StatusReport/option'
@@ -30,12 +31,13 @@ const OPTION_CONFIG = {
     getServerFormatConfig([
       LogFormatConfig,
       PidFormatConfig,
-      PermissionFormatConfig,
       // TokenCacheFormatConfig,
 
       AuthSkipFormatConfig,
       AuthFileFormatConfig,
       AuthFileGroupFormatConfig,
+      PermissionFormatConfig,
+
       ExplorerFormatConfig,
       StatusCollectFormatConfig,
       StatusReportFormatConfig,

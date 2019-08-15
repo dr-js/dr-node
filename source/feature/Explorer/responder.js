@@ -2,15 +2,14 @@ import { posix } from 'path'
 import { catchAsync } from 'dr-js/module/common/error'
 import { indentLine } from 'dr-js/module/common/string'
 
-import { createPathPrefixLock } from 'dr-js/module/node/file/function'
+import { createPathPrefixLock } from 'dr-js/module/node/file/Path'
 import { responderEndWithStatusCode } from 'dr-js/module/node/server/Responder/Common'
 import { responderSendJSON } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderServeStatic } from 'dr-js/module/node/server/Responder/ServeStatic'
 
-import { getCommonServerStatus } from 'source/function'
-
 import { createFileChunkUpload } from './task/fileChunkUpload'
 import { createGetPathAction } from './task/pathAction'
+import { getCommonServerStatus } from './task/serverStatus'
 
 const createResponderPathAction = ({
   rootPath,

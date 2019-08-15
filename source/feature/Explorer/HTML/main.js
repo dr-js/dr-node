@@ -1,8 +1,8 @@
 import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/server/commonHTML'
 import { DR_BROWSER_SCRIPT_TAG } from 'dr-js/module/node/resource'
 
-import { initModal } from 'source/HTML/Modal'
-import { initLoadingMask } from 'source/HTML/LoadingMask'
+import { initModal } from 'source/share/HTML/Modal'
+import { initLoadingMask } from 'source/share/HTML/LoadingMask'
 
 import { initAuthMask } from 'source/feature/Auth/HTML'
 

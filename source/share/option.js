@@ -1,6 +1,6 @@
 import { Preset } from 'dr-js/module/node/module/Option/preset'
 
-const { parseCompact, parseCompactList, pickOneOf } = Preset
+const { parseCompact, parseCompactList } = Preset
 
 const getServerFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
   parseCompact('https,S/T', parseCompactList(
@@ -41,24 +41,9 @@ const getPidOption = ({ tryGet, tryGetFirst }) => ({
   shouldIgnoreExistPid: Boolean(tryGet('pid-ignore-exist'))
 })
 
-const PermissionFormatConfig = {
-  ...pickOneOf([ 'allow', 'deny', 'func', 'file' ]),
-  name: 'permission-type',
-  extendFormatList: parseCompactList(
-    'permission-func/SF,O',
-    'permission-file/SP,O'
-  )
-}
-const getPermissionOption = ({ tryGetFirst }) => ({
-  permissionType: tryGetFirst('permission-type'),
-  permissionFunc: tryGetFirst('permission-func'),
-  permissionFile: tryGetFirst('permission-file')
-})
-
 export {
   getServerFormatConfig, getServerOption,
 
   LogFormatConfig, getLogOption,
-  PidFormatConfig, getPidOption,
-  PermissionFormatConfig, getPermissionOption
+  PidFormatConfig, getPidOption
 }

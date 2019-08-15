@@ -3,14 +3,14 @@ import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, cre
 import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap, createResponderRouteListHTML } from 'dr-js/module/node/server/Responder/Router'
 
-import { configureLog } from 'dr-server/module/configure/log'
-import { configurePid } from 'dr-server/module/configure/pid'
-import { configurePermission } from 'dr-server/module/configure/permission'
-import { configureServer } from 'dr-server/module/configure/server'
+import { configureLog } from 'dr-server/module/share/configure/log'
+import { configurePid } from 'dr-server/module/share/configure/pid'
+import { configureServer } from 'dr-server/module/share/configure/server'
 
-import { responderCommonExtend } from 'dr-server/module/responder/Common'
+import { responderCommonExtend } from 'dr-server/module/share/responder'
 
 import { configureFeaturePack as configureFeaturePackAuth } from 'dr-server/module/feature/Auth/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackPermission } from 'dr-server/module/feature/Permission/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackExplorer } from 'dr-server/module/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusCollect } from 'dr-server/module/feature/StatusCollect/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatusReport } from 'dr-server/module/feature/StatusReport/configureFeaturePack'
@@ -24,13 +24,13 @@ const createServer = async ({
   pathLogDirectory, logFilePrefix,
   // pid
   filePid, shouldIgnoreExistPid,
-  // permission
-  permissionType, permissionFunc, permissionFile,
 
   // auth
   authSkip = false,
   authFile, authFileGenTag, authFileGenSize, authFileGenTokenSize, authFileGenTimeGap,
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
+  // permission
+  permissionType, permissionFunc, permissionFile,
 
   // explorer
   explorerRootPath, explorerUploadMergePath,
@@ -47,8 +47,6 @@ const createServer = async ({
 
   const logger = await configureLog({ pathLogDirectory, logFilePrefix })
 
-  const { checkPermission } = await configurePermission({ permissionType, permissionFunc, permissionFile, logger })
-
   const responderLogEnd = createResponderLogEnd({ log: logger.add })
 
   const routePrefix = ''
@@ -62,11 +60,15 @@ const createServer = async ({
     URL_AUTH_CHECK
   })
 
+  const featurePermission = await configureFeaturePackPermission({
+    ...{ option, logger, routePrefix },
+    ...{ permissionType, permissionFunc, permissionFile }
+  })
+
   const featureExplorer = explorerRootPath && await configureFeaturePackExplorer({
-    ...{ option, logger, routePrefix, featureAuth },
+    ...{ option, logger, routePrefix, featureAuth, featurePermission },
     explorerRootPath,
-    explorerUploadMergePath,
-    checkPermission
+    explorerUploadMergePath
   })
 
   const featureStatusCollect = statusCollectPath && await configureFeaturePackStatusCollect({
@@ -82,9 +84,8 @@ const createServer = async ({
   })
 
   const featureTaskRunner = taskRunnerRootPath && await configureFeaturePackTaskRunner({
-    ...{ option, logger, routePrefix, featureAuth },
-    taskRunnerRootPath,
-    checkPermission
+    ...{ option, logger, routePrefix, featureAuth, featurePermission },
+    taskRunnerRootPath
   })
 
   const redirectUrl = featureExplorer ? featureExplorer.URL_HTML

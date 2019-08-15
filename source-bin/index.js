@@ -10,12 +10,13 @@ import { startClient } from 'dr-server/sample/client'
 import {
   getServerOption,
   getLogOption,
-  getPidOption,
-  getPermissionOption
+  getPidOption
   // getTokenCacheOption,
-} from 'dr-server/module/configure/option'
+} from 'dr-server/module/share/option'
 
 import { getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption } from 'dr-server/module/feature/Auth/option'
+import { getPermissionOption } from 'dr-server/module/feature/Permission/option'
+
 import { getExplorerOption } from 'dr-server/module/feature/Explorer/option'
 import { getStatusCollectOption } from 'dr-server/module/feature/StatusCollect/option'
 import { getStatusReportOption } from 'dr-server/module/feature/StatusReport/option'
@@ -39,13 +40,12 @@ const startServer = async (optionData) => {
     ...getServerOption(optionData),
     ...getLogOption(optionData),
     ...getPidOption(optionData),
+    // ...getTokenCacheOption(optionData),
 
     ...getAuthSkipOption(optionData),
     ...getAuthFileOption(optionData),
     ...getAuthFileGroupOption(optionData),
-
     ...getPermissionOption(optionData),
-    // ...getTokenCacheOption(optionData),
     ...extraConfig
   })
   await start()

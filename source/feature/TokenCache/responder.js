@@ -1,6 +1,6 @@
 import { createResponderCheckRateLimit } from 'dr-js/module/node/server/Responder/RateLimit'
 
-import { getParamFromRequest } from 'source/function'
+import { getRequestParam } from 'source/share/module/RequestParam'
 
 const createResponderCheckToken = ({
   tokenCachePack: { tokenKey, tryGetToken },
@@ -8,7 +8,7 @@ const createResponderCheckToken = ({
   responderDeny
 }) => createResponderCheckRateLimit({
   checkFunc: (store) => {
-    const tokenObject = tryGetToken(getParamFromRequest(store, tokenKey))
+    const tokenObject = tryGetToken(getRequestParam(store, tokenKey))
     tokenObject && store.setState({ tokenObject })
     return Boolean(tokenObject)
   },

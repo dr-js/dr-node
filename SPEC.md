@@ -4,18 +4,6 @@
 * [Bin Option Format](#bin-option-format)
 
 #### Export Path
-+ 📄 [source/function.js](source/function.js)
-  - `getCommonServerStatus`, `getParamFromRequest`, `isPrivateAddress`
-+ 📄 [source/configure/log.js](source/configure/log.js)
-  - `configureLog`
-+ 📄 [source/configure/option.js](source/configure/option.js)
-  - `LogFormatConfig`, `PermissionFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPermissionOption`, `getPidOption`, `getServerFormatConfig`, `getServerOption`
-+ 📄 [source/configure/permission.js](source/configure/permission.js)
-  - `configurePermission`
-+ 📄 [source/configure/pid.js](source/configure/pid.js)
-  - `configurePid`
-+ 📄 [source/configure/server.js](source/configure/server.js)
-  - `configureServer`, `getServerSNIOption`
 + 📄 [source/feature/Auth/HTML.js](source/feature/Auth/HTML.js)
   - `initAuthMask`
 + 📄 [source/feature/Auth/configure.js](source/feature/Auth/configure.js)
@@ -46,6 +34,14 @@
   - `createFileChunkUpload`, `uploadFileByChunk`
 + 📄 [source/feature/Explorer/task/pathAction.js](source/feature/Explorer/task/pathAction.js)
   - `PATH_ACTION_TYPE`, `createGetPathAction`
++ 📄 [source/feature/Explorer/task/serverStatus.js](source/feature/Explorer/task/serverStatus.js)
+  - `getCommonServerStatus`
++ 📄 [source/feature/Permission/configure.js](source/feature/Permission/configure.js)
+  - `configurePermission`
++ 📄 [source/feature/Permission/configureFeaturePack.js](source/feature/Permission/configureFeaturePack.js)
+  - `configureFeaturePack`
++ 📄 [source/feature/Permission/option.js](source/feature/Permission/option.js)
+  - `PermissionFormatConfig`, `getPermissionOption`
 + 📄 [source/feature/ServerFetch/HTML.js](source/feature/ServerFetch/HTML.js)
   - `initServerFetch`
 + 📄 [source/feature/ServerFetch/responder.js](source/feature/ServerFetch/responder.js)
@@ -90,12 +86,24 @@
   - `TokenCacheFormatConfig`, `getTokenCacheOption`
 + 📄 [source/feature/TokenCache/responder.js](source/feature/TokenCache/responder.js)
   - `createResponderAssignTokenCookie`, `createResponderAssignTokenHeader`, `createResponderCheckToken`
-+ 📄 [source/HTML/LoadingMask.js](source/HTML/LoadingMask.js)
-  - `initLoadingMask`
-+ 📄 [source/HTML/Modal.js](source/HTML/Modal.js)
-  - `initModal`
-+ 📄 [source/responder/Common.js](source/responder/Common.js)
++ 📄 [source/share/option.js](source/share/option.js)
+  - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerFormatConfig`, `getServerOption`
++ 📄 [source/share/responder.js](source/share/responder.js)
   - `responderCommonExtend`
++ 📄 [source/share/configure/log.js](source/share/configure/log.js)
+  - `configureLog`
++ 📄 [source/share/configure/pid.js](source/share/configure/pid.js)
+  - `configurePid`
++ 📄 [source/share/configure/server.js](source/share/configure/server.js)
+  - `configureServer`, `getServerSNIOption`
++ 📄 [source/share/HTML/LoadingMask.js](source/share/HTML/LoadingMask.js)
+  - `initLoadingMask`
++ 📄 [source/share/HTML/Modal.js](source/share/HTML/Modal.js)
+  - `initModal`
++ 📄 [source/share/module/PrivateAddress.js](source/share/module/PrivateAddress.js)
+  - `isPrivateAddress`
++ 📄 [source/share/module/RequestParam.js](source/share/module/RequestParam.js)
+  - `getRequestParam`
 
 #### Bin Option Format
 📄 [source-bin/option.js](source-bin/option.js)
@@ -123,11 +131,6 @@
 >     --pid-file [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --pid-ignore-exist [OPTIONAL-CHECK] [ARGUMENT=0+]
 >           set to enable
->     --permission-type [OPTIONAL-CHECK] [ARGUMENT=1]
->         one of:
->           allow deny func file
->       --permission-func [OPTIONAL-CHECK] [ARGUMENT=1]
->       --permission-file [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --auth-skip [OPTIONAL-CHECK] [ARGUMENT=0+]
 >         set to enable
 >     --auth-file [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -139,6 +142,11 @@
 >     --auth-file-group-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --auth-file-group-default-tag [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --auth-file-group-key-suffix [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --permission-type [OPTIONAL-CHECK] [ARGUMENT=1]
+>         one of:
+>           allow deny func file
+>       --permission-func [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --permission-file [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --explorer-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >       --explorer-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
 >     --status-collect-path [OPTIONAL-CHECK] [ARGUMENT=1]
@@ -185,9 +193,6 @@
 >     export DR_SERVER_LOG_FILE_PREFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PID_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_PID_IGNORE_EXIST="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_PERMISSION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PERMISSION_FUNC="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PERMISSION_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_SKIP="[OPTIONAL-CHECK] [ARGUMENT=0+]"
 >     export DR_SERVER_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_FILE_GEN_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -197,6 +202,9 @@
 >     export DR_SERVER_AUTH_FILE_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_FILE_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_AUTH_FILE_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PERMISSION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PERMISSION_FUNC="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_SERVER_PERMISSION_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
 >     export DR_SERVER_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
@@ -237,9 +245,6 @@
 >     "logFilePrefix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pidFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "pidIgnoreExist": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "permissionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "permissionFunc": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "permissionFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authSkip": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
 >     "authFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authFileGenTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
@@ -249,6 +254,9 @@
 >     "authFileGroupPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authFileGroupDefaultTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "authFileGroupKeySuffix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "permissionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "permissionFunc": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "permissionFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "explorerUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
 >     "statusCollectPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
