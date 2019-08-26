@@ -1,6 +1,6 @@
-import { Preset } from 'dr-js/module/node/module/Option/preset'
+import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { PATH_ACTION_TYPE } from 'dr-server/module/feature/Explorer/task/pathAction'
+import { PATH_ACTION_TYPE } from '@dr-js/node/module/server/feature/Explorer/task/pathAction'
 
 const { pickOneOf, parseCompact, parseCompactList } = Preset
 

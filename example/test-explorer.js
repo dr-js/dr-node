@@ -1,4 +1,4 @@
-const { describeServer } = require('dr-js/bin/function')
+const { describeServer } = require('@dr-js/core/bin/function')
 const { createServer } = require('../output-gitignore/sample/server')
 
 const SERVER_TAG = 'explorer'

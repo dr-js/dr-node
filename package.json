@@ -1,12 +1,15 @@
 {
   "private": true,
-  "name": "dr-server",
-  "version": "0.3.0-dev.0",
-  "description": "A collection of strange functions, for server",
+  "name": "@dr-js/node",
+  "version": "0.0.0-dev.0",
+  "description": "A collection of strange functions, for node",
   "author": "dr-js",
   "license": "MIT",
-  "repository": "github:dr-js/dr-server",
-  "bin": "bin/index.js",
+  "repository": "github:dr-js/dr-node",
+  "bin": {
+    "dr-node": "bin/index.js",
+    "DN": "bin/index.js"
+  },
   "scripts": {
     "// script ======================": "",
     "script-pack": "node -r @babel/register ./script quiet pack",
@@ -33,10 +36,10 @@
     "npm": ">=6.10"
   },
   "dependencies": {
-    "dr-js": "^0.23.0 || ^0.23.0-dev.2"
+    "@dr-js/core": "^0.0.0 || ^0.0.0-dev.0"
   },
   "devDependencies": {
-    "dr-dev": "0.0.7-dev.1",
-    "dr-dev-babel": "0.0.7-dev.1"
+    "@dr-js/dev": "0.0.0-dev.0",
+    "@dr-js/dev-babel": "0.0.0-dev.0"
   }
 }

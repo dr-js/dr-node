@@ -4,105 +4,105 @@
 * [Bin Option Format](#bin-option-format)
 
 #### Export Path
-+ 📄 [source/feature/Auth/HTML.js](source/feature/Auth/HTML.js)
++ 📄 [source/server/feature/Auth/HTML.js](source/server/feature/Auth/HTML.js)
   - `initAuthMask`
-+ 📄 [source/feature/Auth/configure.js](source/feature/Auth/configure.js)
++ 📄 [source/server/feature/Auth/configure.js](source/server/feature/Auth/configure.js)
   - `AUTH_FILE`, `AUTH_FILE_GROUP`, `AUTH_SKIP`, `DEFAULT_AUTH_KEY`, `configureAuthFile`, `configureAuthFileGroup`, `configureAuthSkip`
-+ 📄 [source/feature/Auth/configureFeaturePack.js](source/feature/Auth/configureFeaturePack.js)
++ 📄 [source/server/feature/Auth/configureFeaturePack.js](source/server/feature/Auth/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/feature/Auth/option.js](source/feature/Auth/option.js)
++ 📄 [source/server/feature/Auth/option.js](source/server/feature/Auth/option.js)
   - `AuthFileFormatConfig`, `AuthFileGroupFormatConfig`, `AuthSkipFormatConfig`, `getAuthFileGroupOption`, `getAuthFileOption`, `getAuthSkipOption`
-+ 📄 [source/feature/Auth/responder.js](source/feature/Auth/responder.js)
++ 📄 [source/server/feature/Auth/responder.js](source/server/feature/Auth/responder.js)
   - `createResponderCheckAuth`, `createResponderGrantAuthHeader`
-+ 📄 [source/feature/Explorer/configureFeaturePack.js](source/feature/Explorer/configureFeaturePack.js)
++ 📄 [source/server/feature/Explorer/configureFeaturePack.js](source/server/feature/Explorer/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/feature/Explorer/option.js](source/feature/Explorer/option.js)
++ 📄 [source/server/feature/Explorer/option.js](source/server/feature/Explorer/option.js)
   - `ExplorerFormatConfig`, `getExplorerOption`
-+ 📄 [source/feature/Explorer/permission.js](source/feature/Explorer/permission.js)
++ 📄 [source/server/feature/Explorer/permission.js](source/server/feature/Explorer/permission.js)
   - `CREATE_PERMISSION_CHECK_MAP`, `PERMISSION_EXPLORER_FILE_UPLOAD_START`, `PERMISSION_EXPLORER_PATH_ACTION`, `PERMISSION_TYPE`
-+ 📄 [source/feature/Explorer/responder.js](source/feature/Explorer/responder.js)
++ 📄 [source/server/feature/Explorer/responder.js](source/server/feature/Explorer/responder.js)
   - `createResponderFileChunkUpload`, `createResponderPathAction`, `createResponderServeFile`, `createResponderStorageStatus`
-+ 📄 [source/feature/Explorer/HTML/main.js](source/feature/Explorer/HTML/main.js)
++ 📄 [source/server/feature/Explorer/HTML/main.js](source/server/feature/Explorer/HTML/main.js)
   - `getHTML`
-+ 📄 [source/feature/Explorer/HTML/pathContent.js](source/feature/Explorer/HTML/pathContent.js)
++ 📄 [source/server/feature/Explorer/HTML/pathContent.js](source/server/feature/Explorer/HTML/pathContent.js)
   - `initPathContent`, `pathContentStyle`
-+ 📄 [source/feature/Explorer/HTML/uploader.js](source/feature/Explorer/HTML/uploader.js)
++ 📄 [source/server/feature/Explorer/HTML/uploader.js](source/server/feature/Explorer/HTML/uploader.js)
   - `initFileUpload`, `initUploader`
-+ 📄 [source/feature/Explorer/task/client.js](source/feature/Explorer/task/client.js)
++ 📄 [source/server/feature/Explorer/task/client.js](source/server/feature/Explorer/task/client.js)
   - `fileDownload`, `fileUpload`, `pathAction`
-+ 📄 [source/feature/Explorer/task/fileChunkUpload.js](source/feature/Explorer/task/fileChunkUpload.js)
++ 📄 [source/server/feature/Explorer/task/fileChunkUpload.js](source/server/feature/Explorer/task/fileChunkUpload.js)
   - `createFileChunkUpload`, `uploadFileByChunk`
-+ 📄 [source/feature/Explorer/task/pathAction.js](source/feature/Explorer/task/pathAction.js)
++ 📄 [source/server/feature/Explorer/task/pathAction.js](source/server/feature/Explorer/task/pathAction.js)
   - `PATH_ACTION_TYPE`, `createGetPathAction`
-+ 📄 [source/feature/Explorer/task/serverStatus.js](source/feature/Explorer/task/serverStatus.js)
++ 📄 [source/server/feature/Explorer/task/serverStatus.js](source/server/feature/Explorer/task/serverStatus.js)
   - `getCommonServerStatus`
-+ 📄 [source/feature/Permission/configure.js](source/feature/Permission/configure.js)
++ 📄 [source/server/feature/Permission/configure.js](source/server/feature/Permission/configure.js)
   - `configurePermission`
-+ 📄 [source/feature/Permission/configureFeaturePack.js](source/feature/Permission/configureFeaturePack.js)
++ 📄 [source/server/feature/Permission/configureFeaturePack.js](source/server/feature/Permission/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/feature/Permission/option.js](source/feature/Permission/option.js)
++ 📄 [source/server/feature/Permission/option.js](source/server/feature/Permission/option.js)
   - `PermissionFormatConfig`, `getPermissionOption`
-+ 📄 [source/feature/ServerFetch/HTML.js](source/feature/ServerFetch/HTML.js)
++ 📄 [source/server/feature/ServerFetch/HTML.js](source/server/feature/ServerFetch/HTML.js)
   - `initServerFetch`
-+ 📄 [source/feature/ServerFetch/responder.js](source/feature/ServerFetch/responder.js)
++ 📄 [source/server/feature/ServerFetch/responder.js](source/server/feature/ServerFetch/responder.js)
   - `responderServerFetch`
-+ 📄 [source/feature/StatusCollect/HTML.js](source/feature/StatusCollect/HTML.js)
++ 📄 [source/server/feature/StatusCollect/HTML.js](source/server/feature/StatusCollect/HTML.js)
   - `getHTML`
-+ 📄 [source/feature/StatusCollect/configure.js](source/feature/StatusCollect/configure.js)
++ 📄 [source/server/feature/StatusCollect/configure.js](source/server/feature/StatusCollect/configure.js)
   - `configureStatusCollector`
-+ 📄 [source/feature/StatusCollect/configureFeaturePack.js](source/feature/StatusCollect/configureFeaturePack.js)
++ 📄 [source/server/feature/StatusCollect/configureFeaturePack.js](source/server/feature/StatusCollect/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/feature/StatusCollect/option.js](source/feature/StatusCollect/option.js)
++ 📄 [source/server/feature/StatusCollect/option.js](source/server/feature/StatusCollect/option.js)
   - `StatusCollectFormatConfig`, `getStatusCollectOption`
-+ 📄 [source/feature/StatusCollect/responder.js](source/feature/StatusCollect/responder.js)
++ 📄 [source/server/feature/StatusCollect/responder.js](source/server/feature/StatusCollect/responder.js)
   - `createResponderStatusCollect`, `createResponderStatusState`
-+ 📄 [source/feature/StatusCollect/module/applyStatusFact.js](source/feature/StatusCollect/module/applyStatusFact.js)
++ 📄 [source/server/feature/StatusCollect/module/applyStatusFact.js](source/server/feature/StatusCollect/module/applyStatusFact.js)
   - `applyStatusFact`
-+ 📄 [source/feature/StatusCollect/module/combineStatus.js](source/feature/StatusCollect/module/combineStatus.js)
++ 📄 [source/server/feature/StatusCollect/module/combineStatus.js](source/server/feature/StatusCollect/module/combineStatus.js)
   - `combineStatus`, `combineStatusRaw`, `setRangeRaw`, `setSumRaw`
-+ 📄 [source/feature/StatusReport/configureFeaturePack.js](source/feature/StatusReport/configureFeaturePack.js)
++ 📄 [source/server/feature/StatusReport/configureFeaturePack.js](source/server/feature/StatusReport/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/feature/StatusReport/option.js](source/feature/StatusReport/option.js)
++ 📄 [source/server/feature/StatusReport/option.js](source/server/feature/StatusReport/option.js)
   - `StatusReportFormatConfig`, `getStatusReportOption`
-+ 📄 [source/feature/StatusReport/task/statusReport.js](source/feature/StatusReport/task/statusReport.js)
++ 📄 [source/server/feature/StatusReport/task/statusReport.js](source/server/feature/StatusReport/task/statusReport.js)
   - `createGetStatusReport`
-+ 📄 [source/feature/TaskRunner/configureFeaturePack.js](source/feature/TaskRunner/configureFeaturePack.js)
++ 📄 [source/server/feature/TaskRunner/configureFeaturePack.js](source/server/feature/TaskRunner/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/feature/TaskRunner/option.js](source/feature/TaskRunner/option.js)
++ 📄 [source/server/feature/TaskRunner/option.js](source/server/feature/TaskRunner/option.js)
   - `TaskRunnerFormatConfig`, `getTaskRunnerOption`
-+ 📄 [source/feature/TaskRunner/permission.js](source/feature/TaskRunner/permission.js)
++ 📄 [source/server/feature/TaskRunner/permission.js](source/server/feature/TaskRunner/permission.js)
   - `CREATE_PERMISSION_CHECK_MAP`, `PERMISSION_TASK_RUNNER_TASK_ACTION`, `PERMISSION_TYPE`
-+ 📄 [source/feature/TaskRunner/responder.js](source/feature/TaskRunner/responder.js)
++ 📄 [source/server/feature/TaskRunner/responder.js](source/server/feature/TaskRunner/responder.js)
   - `createResponderTaskAction`
-+ 📄 [source/feature/TaskRunner/HTML/main.js](source/feature/TaskRunner/HTML/main.js)
++ 📄 [source/server/feature/TaskRunner/HTML/main.js](source/server/feature/TaskRunner/HTML/main.js)
   - `getHTML`
-+ 📄 [source/feature/TaskRunner/HTML/taskList.js](source/feature/TaskRunner/HTML/taskList.js)
++ 📄 [source/server/feature/TaskRunner/HTML/taskList.js](source/server/feature/TaskRunner/HTML/taskList.js)
   - `initTaskList`, `taskListStyle`
-+ 📄 [source/feature/TaskRunner/task/taskAction.js](source/feature/TaskRunner/task/taskAction.js)
++ 📄 [source/server/feature/TaskRunner/task/taskAction.js](source/server/feature/TaskRunner/task/taskAction.js)
   - `TASK_ACTION_TYPE`, `createTaskAction`
-+ 📄 [source/feature/TokenCache/configure.js](source/feature/TokenCache/configure.js)
++ 📄 [source/server/feature/TokenCache/configure.js](source/server/feature/TokenCache/configure.js)
   - `DEFAULT_TOKEN_KEY`, `configureTokenCache`
-+ 📄 [source/feature/TokenCache/option.js](source/feature/TokenCache/option.js)
++ 📄 [source/server/feature/TokenCache/option.js](source/server/feature/TokenCache/option.js)
   - `TokenCacheFormatConfig`, `getTokenCacheOption`
-+ 📄 [source/feature/TokenCache/responder.js](source/feature/TokenCache/responder.js)
++ 📄 [source/server/feature/TokenCache/responder.js](source/server/feature/TokenCache/responder.js)
   - `createResponderAssignTokenCookie`, `createResponderAssignTokenHeader`, `createResponderCheckToken`
-+ 📄 [source/share/option.js](source/share/option.js)
++ 📄 [source/server/share/option.js](source/server/share/option.js)
   - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerFormatConfig`, `getServerOption`
-+ 📄 [source/share/responder.js](source/share/responder.js)
++ 📄 [source/server/share/responder.js](source/server/share/responder.js)
   - `responderCommonExtend`
-+ 📄 [source/share/configure/log.js](source/share/configure/log.js)
++ 📄 [source/server/share/configure/log.js](source/server/share/configure/log.js)
   - `configureLog`
-+ 📄 [source/share/configure/pid.js](source/share/configure/pid.js)
++ 📄 [source/server/share/configure/pid.js](source/server/share/configure/pid.js)
   - `configurePid`
-+ 📄 [source/share/configure/server.js](source/share/configure/server.js)
++ 📄 [source/server/share/configure/server.js](source/server/share/configure/server.js)
   - `configureServer`, `getServerSNIOption`
-+ 📄 [source/share/HTML/LoadingMask.js](source/share/HTML/LoadingMask.js)
++ 📄 [source/server/share/HTML/LoadingMask.js](source/server/share/HTML/LoadingMask.js)
   - `initLoadingMask`
-+ 📄 [source/share/HTML/Modal.js](source/share/HTML/Modal.js)
++ 📄 [source/server/share/HTML/Modal.js](source/server/share/HTML/Modal.js)
   - `initModal`
-+ 📄 [source/share/module/PrivateAddress.js](source/share/module/PrivateAddress.js)
++ 📄 [source/server/share/module/PrivateAddress.js](source/server/share/module/PrivateAddress.js)
   - `isPrivateAddress`
-+ 📄 [source/share/module/RequestParam.js](source/share/module/RequestParam.js)
++ 📄 [source/server/share/module/RequestParam.js](source/server/share/module/RequestParam.js)
   - `getRequestParam`
 
 #### Bin Option Format
@@ -179,55 +179,55 @@
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
->     export DR_SERVER_CONFIG="[OPTIONAL] [ARGUMENT=1]"
->     export DR_SERVER_HELP="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_SERVER_QUIET="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_SERVER_VERSION="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_SERVER_HOST="[OPTIONAL] [ARGUMENT=1]"
->     export DR_SERVER_HTTPS="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_FILE_SSL_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_SSL_CERT="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_SSL_CHAIN="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_SSL_DHPARAM="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_LOG_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_LOG_FILE_PREFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PID_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PID_IGNORE_EXIST="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_AUTH_SKIP="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GEN_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GEN_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GEN_TIME_GAP="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_AUTH_FILE_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PERMISSION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PERMISSION_FUNC="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PERMISSION_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_STATUS_COLLECT_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_STATUS_COLLECT_INTERVAL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_STATUS_REPORT_PROCESS_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_TASK_RUNNER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_NODE_AUTH_FILE="[OPTIONAL] [ARGUMENT=1]"
->     export DR_SERVER_NODE_AUTH_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_NODE_FILE_UPLOAD="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_FILE_UPLOAD_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_UPLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_UPLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_NODE_FILE_DOWNLOAD="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_FILE_DOWNLOAD_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_DOWNLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_FILE_DOWNLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_NODE_PATH_ACTION="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_SERVER_PATH_ACTION_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_KEY_TO="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_SERVER_PATH_ACTION_NAME_LIST="[OPTIONAL-CHECK] [ARGUMENT=1+]"
+>     export DR_NODE_CONFIG="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_HELP="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_QUIET="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_VERSION="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_HTTPS="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_NODE_FILE_SSL_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_SSL_CERT="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_SSL_CHAIN="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_SSL_DHPARAM="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_LOG_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_LOG_FILE_PREFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PID_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PID_IGNORE_EXIST="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_NODE_AUTH_SKIP="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_NODE_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GEN_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GEN_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GEN_TIME_GAP="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PERMISSION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PERMISSION_FUNC="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PERMISSION_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_STATUS_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_STATUS_COLLECT_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_STATUS_COLLECT_INTERVAL="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_STATUS_REPORT_PROCESS_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_TASK_RUNNER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_NODE_AUTH_FILE="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_NODE_AUTH_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_NODE_FILE_UPLOAD="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_NODE_FILE_UPLOAD_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_UPLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_UPLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_NODE_FILE_DOWNLOAD="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_NODE_FILE_DOWNLOAD_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_DOWNLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_DOWNLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_NODE_PATH_ACTION="[OPTIONAL-CHECK] [ARGUMENT=0+]"
+>     export DR_NODE_PATH_ACTION_SERVER_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_KEY_TO="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_NAME_LIST="[OPTIONAL-CHECK] [ARGUMENT=1+]"
 >   "
 > CONFIG Usage:
 >   {

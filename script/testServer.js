@@ -1,15 +1,15 @@
 import { resolve } from 'path'
 
-import { withRunBackground } from 'dr-dev/module/node/run'
-import { withTempDirectory } from 'dr-dev/module/node/file'
-import { runMain, argvFlag } from 'dr-dev/module/main'
+import { withRunBackground } from '@dr-js/dev/module/node/run'
+import { withTempDirectory } from '@dr-js/dev/module/node/file'
+import { runMain, argvFlag } from '@dr-js/dev/module/main'
 
-import { stringifyEqual } from 'dr-js/module/common/verify'
-import { readFileAsync, writeFileAsync } from 'dr-js/module/node/file/function'
-import { modifyDeleteForce } from 'dr-js/module/node/file/Modify'
-import { run, runQuiet } from 'dr-js/module/node/system/Run'
+import { stringifyEqual } from '@dr-js/core/module/common/verify'
+import { readFileAsync, writeFileAsync } from '@dr-js/core/module/node/file/function'
+import { modifyDeleteForce } from '@dr-js/core/module/node/file/Modify'
+import { run, runQuiet } from '@dr-js/core/module/node/system/Run'
 
-import { PATH_ACTION_TYPE } from 'source/feature/Explorer/task/pathAction'
+import { PATH_ACTION_TYPE } from 'source/server/feature/Explorer/task/pathAction'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_TEMP = resolve(__dirname, '../.temp-gitignore/test-server')

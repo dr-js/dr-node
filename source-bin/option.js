@@ -1,26 +1,26 @@
-import { Preset, prepareOption } from 'dr-js/module/node/module/Option/preset'
+import { Preset, prepareOption } from '@dr-js/core/module/node/module/Option/preset'
 
 import {
   getServerFormatConfig,
   LogFormatConfig,
   PidFormatConfig
   // TokenCacheFormatConfig,
-} from 'dr-server/module/share/option'
+} from '@dr-js/node/module/server/share/option'
 
-import { AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig } from 'dr-server/module/feature/Auth/option'
-import { PermissionFormatConfig } from 'dr-server/module/feature/Permission/option'
+import { AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig } from '@dr-js/node/module/server/feature/Auth/option'
+import { PermissionFormatConfig } from '@dr-js/node/module/server/feature/Permission/option'
 
-import { ExplorerFormatConfig } from 'dr-server/module/feature/Explorer/option'
-import { StatusCollectFormatConfig } from 'dr-server/module/feature/StatusCollect/option'
-import { StatusReportFormatConfig } from 'dr-server/module/feature/StatusReport/option'
-import { TaskRunnerFormatConfig } from 'dr-server/module/feature/TaskRunner/option'
+import { ExplorerFormatConfig } from '@dr-js/node/module/server/feature/Explorer/option'
+import { StatusCollectFormatConfig } from '@dr-js/node/module/server/feature/StatusCollect/option'
+import { StatusReportFormatConfig } from '@dr-js/node/module/server/feature/StatusReport/option'
+import { TaskRunnerFormatConfig } from '@dr-js/node/module/server/feature/TaskRunner/option'
 
 import { ExplorerClientFormatConfig } from './optionExplorerClient'
 
 const { Config, parseCompactList } = Preset
 
 const OPTION_CONFIG = {
-  prefixENV: 'dr-server',
+  prefixENV: 'dr-node',
   formatList: [
     Config,
     ...parseCompactList(

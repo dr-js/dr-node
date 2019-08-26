@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 
-import { time } from 'dr-js/module/common/format'
-import { createStepper } from 'dr-js/module/common/time'
-import { describeServer } from 'dr-js/bin/function'
+import { time } from '@dr-js/core/module/common/format'
+import { createStepper } from '@dr-js/core/module/common/time'
+import { describeServer } from '@dr-js/core/bin/function'
 
-import { createServer } from 'dr-server/sample/server'
-import { startClient } from 'dr-server/sample/client'
+import { createServer } from '@dr-js/node/sample/server'
+import { startClient } from '@dr-js/node/sample/client'
 
 import {
   getServerOption,
   getLogOption,
   getPidOption
   // getTokenCacheOption,
-} from 'dr-server/module/share/option'
+} from '@dr-js/node/module/server/share/option'
 
-import { getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption } from 'dr-server/module/feature/Auth/option'
-import { getPermissionOption } from 'dr-server/module/feature/Permission/option'
+import { getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption } from '@dr-js/node/module/server/feature/Auth/option'
+import { getPermissionOption } from '@dr-js/node/module/server/feature/Permission/option'
 
-import { getExplorerOption } from 'dr-server/module/feature/Explorer/option'
-import { getStatusCollectOption } from 'dr-server/module/feature/StatusCollect/option'
-import { getStatusReportOption } from 'dr-server/module/feature/StatusReport/option'
-import { getTaskRunnerOption } from 'dr-server/module/feature/TaskRunner/option'
+import { getExplorerOption } from '@dr-js/node/module/server/feature/Explorer/option'
+import { getStatusCollectOption } from '@dr-js/node/module/server/feature/StatusCollect/option'
+import { getStatusReportOption } from '@dr-js/node/module/server/feature/StatusReport/option'
+import { getTaskRunnerOption } from '@dr-js/node/module/server/feature/TaskRunner/option'
 
 import { getExplorerClientOption } from './optionExplorerClient'
 

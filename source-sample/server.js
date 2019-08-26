@@ -1,20 +1,20 @@
-import { createRequestListener } from 'dr-js/module/node/server/Server'
-import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from 'dr-js/module/node/server/Responder/Common'
-import { createResponderFavicon } from 'dr-js/module/node/server/Responder/Send'
-import { createResponderRouter, createRouteMap, createResponderRouteListHTML } from 'dr-js/module/node/server/Responder/Router'
+import { createRequestListener } from '@dr-js/core/module/node/server/Server'
+import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from '@dr-js/core/module/node/server/Responder/Common'
+import { createResponderFavicon } from '@dr-js/core/module/node/server/Responder/Send'
+import { createResponderRouter, createRouteMap, createResponderRouteListHTML } from '@dr-js/core/module/node/server/Responder/Router'
 
-import { configureLog } from 'dr-server/module/share/configure/log'
-import { configurePid } from 'dr-server/module/share/configure/pid'
-import { configureServer } from 'dr-server/module/share/configure/server'
+import { configureLog } from '@dr-js/node/module/server/share/configure/log'
+import { configurePid } from '@dr-js/node/module/server/share/configure/pid'
+import { configureServer } from '@dr-js/node/module/server/share/configure/server'
 
-import { responderCommonExtend } from 'dr-server/module/share/responder'
+import { responderCommonExtend } from '@dr-js/node/module/server/share/responder'
 
-import { configureFeaturePack as configureFeaturePackAuth } from 'dr-server/module/feature/Auth/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackPermission } from 'dr-server/module/feature/Permission/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackExplorer } from 'dr-server/module/feature/Explorer/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackStatusCollect } from 'dr-server/module/feature/StatusCollect/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackStatusReport } from 'dr-server/module/feature/StatusReport/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackTaskRunner } from 'dr-server/module/feature/TaskRunner/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackAuth } from '@dr-js/node/module/server/feature/Auth/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackPermission } from '@dr-js/node/module/server/feature/Permission/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackExplorer } from '@dr-js/node/module/server/feature/Explorer/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackStatusCollect } from '@dr-js/node/module/server/feature/StatusCollect/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackStatusReport } from '@dr-js/node/module/server/feature/StatusReport/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackTaskRunner } from '@dr-js/node/module/server/feature/TaskRunner/configureFeaturePack'
 
 const createServer = async ({
   // server
@@ -53,38 +53,38 @@ const createServer = async ({
   const URL_AUTH_CHECK = '/auth'
 
   const featureAuth = await configureFeaturePackAuth({
-    ...{ option, logger, routePrefix },
-    ...{ authSkip },
-    ...{ authFile, authFileGenTag, authFileGenSize, authFileGenTokenSize, authFileGenTimeGap },
-    ...{ authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix },
+    option, logger, routePrefix,
+    authSkip,
+    authFile, authFileGenTag, authFileGenSize, authFileGenTokenSize, authFileGenTimeGap,
+    authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
     URL_AUTH_CHECK
   })
 
   const featurePermission = await configureFeaturePackPermission({
-    ...{ option, logger, routePrefix },
-    ...{ permissionType, permissionFunc, permissionFile }
+    option, logger, routePrefix,
+    permissionType, permissionFunc, permissionFile
   })
 
   const featureExplorer = explorerRootPath && await configureFeaturePackExplorer({
-    ...{ option, logger, routePrefix, featureAuth, featurePermission },
+    option, logger, routePrefix, featureAuth, featurePermission,
     explorerRootPath,
     explorerUploadMergePath
   })
 
   const featureStatusCollect = statusCollectPath && await configureFeaturePackStatusCollect({
-    ...{ option, logger, routePrefix, featureAuth },
+    option, logger, routePrefix, featureAuth,
     statusCollectPath,
     statusCollectUrl,
     statusCollectInterval
   })
 
   const featureStatusReport = statusReportProcessTag && await configureFeaturePackStatusReport({
-    ...{ option, logger, routePrefix, featureAuth },
+    option, logger, routePrefix, featureAuth,
     statusReportProcessTag
   })
 
   const featureTaskRunner = taskRunnerRootPath && await configureFeaturePackTaskRunner({
-    ...{ option, logger, routePrefix, featureAuth, featurePermission },
+    option, logger, routePrefix, featureAuth, featurePermission,
     taskRunnerRootPath
   })
 

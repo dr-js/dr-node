@@ -1,5 +1,5 @@
-import { configureAuthFile } from 'dr-server/module/feature/Auth/configure'
-import { fileUpload, fileDownload, pathAction } from 'dr-server/module/feature/Explorer/task/client'
+import { configureAuthFile } from '@dr-js/node/module/server/feature/Auth/configure'
+import { fileUpload, fileDownload, pathAction } from '@dr-js/node/module/server/feature/Explorer/task/client'
 
 const startClient = async ({
   modeName,
