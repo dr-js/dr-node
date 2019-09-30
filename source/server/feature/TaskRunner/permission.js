@@ -1,4 +1,4 @@
-import { TASK_ACTION_TYPE } from './task/taskAction'
+import { TASK_ACTION_TYPE } from 'source/module/TaskAction'
 
 const READ_ONLY = 'READ_ONLY'
 const ADD_ONLY = 'ADD_ONLY'

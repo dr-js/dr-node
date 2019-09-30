@@ -1,6 +1,6 @@
 import { createResponderCheckRateLimit } from '@dr-js/core/module/node/server/Responder/RateLimit'
 
-import { getRequestParam } from 'source/server/share/module/RequestParam'
+import { getRequestParam } from 'source/module/RequestCommon'
 
 const createResponderCheckToken = ({
   tokenCachePack: { tokenKey, tryGetToken },

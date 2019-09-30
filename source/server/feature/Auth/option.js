@@ -7,19 +7,9 @@ const getAuthSkipOption = ({ tryGetFirst }) => ({
   authSkip: tryGetFirst('auth-skip')
 })
 
-const AuthFileFormatConfig = parseCompact('auth-file/SP,O', parseCompactList(
-  [ 'auth-file-gen-tag/SS,O|set to enable auto gen auth file', parseCompactList(
-    'auth-file-gen-size/SI,O',
-    'auth-file-gen-token-size/SI,O',
-    'auth-file-gen-time-gap/SI,O'
-  ) ]
-))
+const AuthFileFormatConfig = parseCompact('auth-file/SP,O')
 const getAuthFileOption = ({ tryGetFirst }) => ({
-  authFile: tryGetFirst('auth-file'),
-  authFileGenTag: tryGetFirst('auth-file-gen-tag'),
-  authFileGenSize: tryGetFirst('auth-file-gen-size'),
-  authFileGenTokenSize: tryGetFirst('auth-file-gen-token-size'),
-  authFileGenTimeGap: tryGetFirst('auth-file-gen-time-gap')
+  authFile: tryGetFirst('auth-file')
 })
 
 const AuthFileGroupFormatConfig = parseCompact('auth-file-group-path/SP,O', parseCompactList(

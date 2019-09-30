@@ -23,8 +23,6 @@ A collection of strange functions, for node
     - `@dr-js/node/module`: for re-pack, keep `import / export` and readability
 - 📁 [source-bin/](source-bin/)
   - bin source code, in output package will be `@dr-js/node/bin`
-- 📁 [source-sample/](source-sample/)
-  - sample server source code, in output package will be `@dr-js/node/sample`
 - 📁 [example/](example/)
   - some example (unsorted tests)
 - 📄 [SPEC.md](SPEC.md)

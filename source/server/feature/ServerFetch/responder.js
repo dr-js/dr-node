@@ -4,16 +4,26 @@ import { parseBufferPacket, packBufferPacket } from '@dr-js/core/module/node/dat
 import { responderSendBufferCompress } from '@dr-js/core/module/node/server/Responder/Send'
 import { fetchLikeRequest } from '@dr-js/core/module/node/net'
 
+import { getRequestBuffer } from 'source/module/RequestCommon'
+
 const responderServerFetch = async (store) => {
-  const [ headerString, requestBodyBuffer ] = parseBufferPacket(await store.requestBuffer())
+  const [ headerString, requestBodyBuffer ] = parseBufferPacket(await getRequestBuffer(store))
   const { url, option = {} } = JSON.parse(headerString)
   __DEV__ && console.log(`   - [ResponderServerFetch] url: ${url}, method: ${option.method}, request-body: ${binary(requestBodyBuffer.length)}B`)
 
-  const { status, headers, buffer } = await fetchLikeRequest(url, { ...option, body: requestBodyBuffer })
+  const { status, headers, buffer } = await fetchLikeRequest(url, {
+    ...option,
+    body: requestBodyBuffer
+  })
   const responseBodyBuffer = await buffer()
   __DEV__ && console.log(`   - [ResponderServerFetch] url: ${url}, status: ${status}, response-body: ${binary(responseBodyBuffer.length)}B`)
 
-  return responderSendBufferCompress(store, { buffer: packBufferPacket(JSON.stringify({ status, headers }), responseBodyBuffer) })
+  return responderSendBufferCompress(store, {
+    buffer: packBufferPacket(
+      JSON.stringify({ status, headers }),
+      responseBodyBuffer
+    )
+  })
 }
 
 export { responderServerFetch }

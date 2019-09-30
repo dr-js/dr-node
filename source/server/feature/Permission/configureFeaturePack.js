@@ -1,4 +1,4 @@
-import { configurePermission } from './configure'
+import { configurePermission } from 'source/module/Permission'
 
 const configureFeaturePack = async ({
   option, logger, routePrefix = '',

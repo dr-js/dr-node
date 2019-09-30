@@ -2,7 +2,7 @@ const initAuthMask = ({
   IS_SKIP_AUTH = false,
   URL_AUTH_CHECK,
   onAuthPass,
-  authKey = 'auth-check-code' // TODO: NOTE: should match 'DEFAULT_AUTH_KEY' from `./configure.js`
+  authKey = 'auth-check-code' // TODO: NOTE: should match 'DEFAULT_AUTH_KEY' from `module/Auth.js`
 }) => {
   const {
     fetch, location, URL,
@@ -36,14 +36,14 @@ const initAuthMask = ({
     const authUrl = (url) => {
       const urlObject = new URL(url, location.origin)
       !IS_SKIP_AUTH && urlObject.searchParams.set(authKey, generateCheckCode(timedLookupData))
-      return urlObject.toString()
+      return String(urlObject)
     }
     return onAuthPass({
       IS_SKIP_AUTH,
       authRevoke, // should reload after
       authUrl,
       authFetch: getAuthFetch(timedLookupData),
-      authDownload: (url, filename) => createDownload(filename, authUrl(url))
+      authDownload: (url, fileName) => createDownload(fileName, authUrl(url))
     })
   }
 

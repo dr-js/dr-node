@@ -98,7 +98,14 @@ const initModal = () => {
     setTimeout(() => inputElementList[ 1 ].focus(), 200)
   }))
 
-  return { MODAL_Z_INDEX, renderModal, withModal, withAlertModal, withConfirmModal, withPromptModal, withPromptExtModal }
+  return {
+    MODAL_Z_INDEX,
+    renderModal,
+    withModal,
+    withAlertModal,
+    withConfirmModal,
+    withPromptModal, withPromptExtModal
+  }
 }
 
 export { initModal }

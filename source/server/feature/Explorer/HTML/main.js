@@ -106,7 +106,7 @@ const onLoadFunc = () => {
       relativePath: pathContentStore.getState().pathContent.relativePath
     }))
     const createNewDirectory = async () => pathAction(
-      [ await withPromptModal('Directory Name', `new-directory-${Date.now().toString(36)}`) ],
+      [ await withPromptModal('Directory Name', `new-directory-${Date.now().toString(36)}`) ], // TODO: cancel will still fetch and cause server 400
       PATH_ACTION_TYPE.DIRECTORY_CREATE,
       pathContentStore.getState().pathContent.relativePath
     )
@@ -122,7 +122,7 @@ const onLoadFunc = () => {
     const loadPathWithHistoryState = (relativePath = pathContentStore.getState().pathContent.relativePath) => {
       const urlObject = new URL(historyStateStore.getState())
       urlObject.hash = `#${encodeURIComponent(relativePath)}`
-      historyStateStore.setState(urlObject.toString())
+      historyStateStore.setState(String(urlObject))
     }
 
     loadingMaskStore.subscribe(() => renderLoadingMask(loadingMaskStore))

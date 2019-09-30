@@ -14,6 +14,4 @@ const getTokenCacheOption = ({ tryGet, tryGetFirst }) => ({
   tokenCacheSize: tryGetFirst('token-cache-size')
 })
 
-export {
-  TokenCacheFormatConfig, getTokenCacheOption
-}
+export { TokenCacheFormatConfig, getTokenCacheOption }

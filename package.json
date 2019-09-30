@@ -1,14 +1,14 @@
 {
   "private": true,
   "name": "@dr-js/node",
-  "version": "0.0.0-dev.0",
+  "version": "0.0.0-dev.1",
   "description": "A collection of strange functions, for node",
   "author": "dr-js",
   "license": "MIT",
   "repository": "github:dr-js/dr-node",
   "bin": {
     "dr-node": "bin/index.js",
-    "DN": "bin/index.js"
+    "DRN": "bin/index.js"
   },
   "scripts": {
     "// script ======================": "",
@@ -22,24 +22,22 @@
     "build-library": "babel ./source --out-dir ./output-gitignore/library",
     "build-library-dev": "cross-env BABEL_ENV=dev npm run build-library -- --watch",
     "build-module": "cross-env BABEL_ENV=module babel ./source --out-dir ./output-gitignore/module",
-    "build-sample": "babel ./source-sample --out-dir ./output-gitignore/sample",
-    "build-sample-dev": "cross-env BABEL_ENV=dev npm run build-sample -- --watch",
     "// test ========================": "",
     "test-server": "node -r @babel/register ./script/testServer",
     "// =============================": "",
-    "lint": "eslint ./source/ ./source-bin/ ./source-sample/ ./script/",
+    "lint": "eslint ./source/ ./source-bin/ ./script/",
     "test": "npm run script-pack-test",
     "prepack": "echo \"Error: pack with script-*\" && exit 1"
   },
   "engines": {
-    "node": ">=10.16",
-    "npm": ">=6.10"
+    "node": ">=12.13",
+    "npm": ">=6.12"
   },
   "dependencies": {
-    "@dr-js/core": "^0.0.0 || ^0.0.0-dev.0"
+    "@dr-js/core": "^0.0.0 || ^0.0.0-dev.4"
   },
   "devDependencies": {
-    "@dr-js/dev": "0.0.0-dev.0",
-    "@dr-js/dev-babel": "0.0.0-dev.0"
+    "@dr-js/dev": "0.0.0-dev.2",
+    "@dr-js/dev-babel": "0.0.0-dev.2"
   }
 }

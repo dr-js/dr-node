@@ -24,14 +24,11 @@ const buildOutput = async ({ logger: { padLog } }) => {
 
   padLog(`build module`)
   execSync('npm run build-module', execOptionRoot)
-
-  padLog(`build sample`)
-  execSync('npm run build-sample', execOptionRoot)
 }
 
 const processOutput = async ({ logger }) => {
   const fileListLibraryBin = await getScriptFileListFromPathList([ 'library', 'bin' ], fromOutput)
-  const fileListModuleSample = await getScriptFileListFromPathList([ 'module', 'sample' ], fromOutput)
+  const fileListModuleSample = await getScriptFileListFromPathList([ 'module' ], fromOutput)
   const fileListAll = [ ...fileListLibraryBin, ...fileListModuleSample ]
 
   let sizeReduce = 0
@@ -47,7 +44,6 @@ const processOutput = async ({ logger }) => {
 runMain(async (logger) => {
   await verifyNoGitignore({ path: fromRoot('source'), logger })
   await verifyNoGitignore({ path: fromRoot('source-bin'), logger })
-  await verifyNoGitignore({ path: fromRoot('source-sample'), logger })
 
   const packageJSON = await initOutput({ fromRoot, fromOutput, logger })
 
@@ -73,5 +69,5 @@ runMain(async (logger) => {
   await verifyOutputBinVersion({ fromOutput, packageJSON, logger })
 
   const pathPackagePack = await packOutput({ fromRoot, fromOutput, logger })
-  await publishOutput({ flagList: process.argv, packageJSON, pathPackagePack, isPublicScoped: true, logger })
+  await publishOutput({ flagList: process.argv, isPublicScoped: true, packageJSON, pathPackagePack, logger })
 })

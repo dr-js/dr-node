@@ -1,6 +1,6 @@
 import { visibleAsync } from '@dr-js/core/module/node/file/function'
 
-import { PATH_ACTION_TYPE } from './task/pathAction'
+import { PATH_ACTION_TYPE } from 'source/module/PathAction'
 
 const READ_ONLY = 'READ_ONLY'
 const ADD_ONLY = 'ADD_ONLY'

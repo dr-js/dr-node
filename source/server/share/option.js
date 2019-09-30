@@ -2,26 +2,30 @@ import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
 const { parseCompact, parseCompactList } = Preset
 
-const getServerFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
+const getServerPackFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
   parseCompact('https,S/T', parseCompactList(
-    'file-SSL-key/SP',
-    'file-SSL-cert/SP',
-    'file-SSL-chain/SP',
-    'file-SSL-dhparam/SP'
+    'file-TLS-key/SP',
+    'file-TLS-cert/SP',
+    'file-TLS-CA/SP,O|trusted CA cert',
+    'file-TLS-SNI-config/SP,O|TLS SNI JSON like: { [hostname]: { key, cert, ca } }',
+    'file-TLS-dhparam/SP|Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"'
   )),
   ...extraList
 ])
-const getServerOption = ({ tryGet, tryGetFirst }) => {
+const getServerPackOption = ({ tryGet, tryGetFirst }, defaultHostname = '127.0.0.1') => {
   const host = tryGetFirst('host') || ''
-  const [ hostname, port ] = host.split(':')
+  const hostnameList = host.split(':')
+  const port = Number(hostnameList.pop())
+  const hostname = hostnameList.join(':') || defaultHostname
   return {
     protocol: tryGet('https') ? 'https:' : 'http:',
     hostname: hostname || undefined,
     port: Number(port) || undefined,
-    fileSSLKey: tryGetFirst('file-SSL-key'),
-    fileSSLCert: tryGetFirst('file-SSL-cert'),
-    fileSSLChain: tryGetFirst('file-SSL-chain'),
-    fileSSLDHParam: tryGetFirst('file-SSL-dhparam')
+    fileTLSKey: tryGetFirst('file-TLS-key'),
+    fileTLSCert: tryGetFirst('file-TLS-cert'),
+    fileTLSCA: tryGetFirst('file-TLS-ca'),
+    fileTLSSNIConfig: tryGetFirst('file-TLS-SNI-config'),
+    fileTLSDHParam: tryGetFirst('file-TLS-dhparam')
   }
 }
 
@@ -42,7 +46,7 @@ const getPidOption = ({ tryGet, tryGetFirst }) => ({
 })
 
 export {
-  getServerFormatConfig, getServerOption,
+  getServerPackFormatConfig, getServerPackOption,
 
   LogFormatConfig, getLogOption,
   PidFormatConfig, getPidOption

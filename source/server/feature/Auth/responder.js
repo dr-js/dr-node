@@ -1,6 +1,6 @@
 import { createResponderCheckRateLimit } from '@dr-js/core/module/node/server/Responder/RateLimit'
 
-import { getRequestParam } from 'source/server/share/module/RequestParam'
+import { getRequestParam } from 'source/module/RequestCommon'
 
 const createResponderCheckAuth = ({
   authPack: { authKey, checkAuth },
@@ -17,10 +17,10 @@ const createResponderCheckAuth = ({
 })
 
 const createResponderGrantAuthHeader = ({
-  authPack: { authKey, generateAuthHeader },
+  authPack: { authKey, generateAuthCheckCode },
   responder
 }) => async (store, requestTag) => {
-  store.response.setHeader(authKey, await generateAuthHeader(requestTag))
+  store.response.setHeader(authKey, await generateAuthCheckCode(requestTag))
   return responder(store)
 }
 

@@ -7,9 +7,10 @@ import { responderEndWithStatusCode } from '@dr-js/core/module/node/server/Respo
 import { responderSendJSON } from '@dr-js/core/module/node/server/Responder/Send'
 import { createResponderServeStatic } from '@dr-js/core/module/node/server/Responder/ServeStatic'
 
-import { createFileChunkUpload } from './task/fileChunkUpload'
-import { createGetPathAction } from './task/pathAction'
-import { getCommonServerStatus } from './task/serverStatus'
+import { getCommonServerStatus } from 'source/module/ServerStatus'
+import { createFileChunkUpload } from 'source/module/FileChunkUpload'
+import { createGetPathAction } from 'source/module/PathAction'
+import { getRequestBuffer } from 'source/module/RequestCommon'
 
 const createResponderPathAction = ({
   rootPath,
@@ -32,9 +33,7 @@ const createResponderPathAction = ({
       const keyTo = relativeRootTo && posixNormalize(relativeRootTo, name)
       const { result, error } = await catchAsync(getPathAction, actionType, key, keyTo)
       const response = { actionType, key, keyTo, ...result }
-      response.relativeFrom = key // TODO: DEPRECATED back support code, drop at 20190930?
-      response.relativeTo = keyTo // TODO: DEPRECATED back support code, drop at 20190930?
-      error ? errorList.push({ ...response, error: error.toString() }) : resultList.push(response)
+      error ? errorList.push({ ...response, error: String(error) }) : resultList.push(response)
     }
     return responderSendJSON(store, { object: { resultList, errorList } })
   }
@@ -63,7 +62,7 @@ const createResponderFileChunkUpload = async ({
   })
   return async (store, extraFileUploadOption = {}) => {
     await fileChunkUpload({
-      bufferPacket: await store.requestBuffer(),
+      bufferPacket: await getRequestBuffer(store),
       ...extraFileUploadOption
     })
     responderEndWithStatusCode(store, { statusCode: 200 })
@@ -71,9 +70,9 @@ const createResponderFileChunkUpload = async ({
 }
 
 const createResponderStorageStatus = ({
-  rootPath
+  rootPath, statusCommandList
 }) => async (store) => {
-  const storageStatusText = (await getCommonServerStatus(rootPath))
+  const storageStatusText = (await getCommonServerStatus(rootPath, statusCommandList))
     .map(([ title, output ]) => output && `${`[${title}] `.padEnd(80, '=')}\n${indentLine(output, '  ')}`)
     .filter(Boolean).join('\n')
   return responderSendJSON(store, { object: { storageStatusText } })
