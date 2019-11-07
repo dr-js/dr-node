@@ -134,27 +134,27 @@
 >       common option
 >   --file-upload-server-url --fusu [OPTIONAL] [ARGUMENT=1]
 >       require provide "auth-file" or "auth-file-group"
->     --file-upload-key [OPTIONAL-CHECK] [ARGUMENT=1]
->     --file-upload-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --file-upload-key [ARGUMENT=1]
+>     --file-upload-path [ARGUMENT=1]
 >   --file-download-server-url --fdsu [OPTIONAL] [ARGUMENT=1]
 >       require provide "auth-file" or "auth-file-group"
->     --file-download-key [OPTIONAL-CHECK] [ARGUMENT=1]
->     --file-download-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --file-download-key [ARGUMENT=1]
+>     --file-download-path [ARGUMENT=1]
 >   --path-action-server-url --pasu [OPTIONAL] [ARGUMENT=1]
 >       require provide "auth-file" or "auth-file-group"
->     --path-action-type [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --path-action-type [ARGUMENT=1]
 >         one of:
 >           path:visible path:stat path:copy path:move
 >           path:delete directory:create directory:content directory:all-file-list
->     --path-action-key [OPTIONAL-CHECK] [ARGUMENT=1]
->     --path-action-key-to [OPTIONAL-CHECK] [ARGUMENT=1]
->     --path-action-name-list [OPTIONAL-CHECK] [ARGUMENT=1+]
+>     --path-action-key [ARGUMENT=1]
+>     --path-action-key-to [ARGUMENT=1]
+>     --path-action-name-list [ARGUMENT=1+]
 >   --auth-gen-tag --agt [OPTIONAL] [ARGUMENT=1]
 >       generate auth file: -O=outputFile
->     --auth-gen-size [OPTIONAL-CHECK] [ARGUMENT=1]
->     --auth-gen-token-size [OPTIONAL-CHECK] [ARGUMENT=1]
->     --auth-gen-time-gap [OPTIONAL-CHECK] [ARGUMENT=1]
->     --auth-gen-info [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --auth-gen-size [ARGUMENT=1]
+>     --auth-gen-token-size [ARGUMENT=1]
+>     --auth-gen-time-gap [ARGUMENT=1]
+>     --auth-gen-info [ARGUMENT=1]
 >   --auth-file-describe --afd [OPTIONAL] [ARGUMENT=0+]
 >       describe auth file: -I=authFile
 >   --auth-check-code-generate --accg [OPTIONAL] [ARGUMENT=0-1]
@@ -181,40 +181,40 @@
 >       print git commit hash
 >   --host --H -H [OPTIONAL] [ARGUMENT=1]
 >       set "hostname:port"
->     --https --S -S [OPTIONAL-CHECK] [ARGUMENT=0+]
+>     --https --S -S [ARGUMENT=0+]
 >         set to enable
->       --file-TLS-key [OPTIONAL-CHECK] [ARGUMENT=1]
->       --file-TLS-cert [OPTIONAL-CHECK] [ARGUMENT=1]
->       --file-TLS-CA [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --file-TLS-key [ARGUMENT=1]
+>       --file-TLS-cert [ARGUMENT=1]
+>       --file-TLS-CA [ARGUMENT=1]
 >           trusted CA cert
->       --file-TLS-SNI-config [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --file-TLS-SNI-config [ARGUMENT=1]
 >           TLS SNI JSON like: { [hostname]: { key, cert, ca } }
->       --file-TLS-dhparam [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --file-TLS-dhparam [ARGUMENT=1]
 >           Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
->     --log-path [OPTIONAL-CHECK] [ARGUMENT=1]
->       --log-file-prefix [OPTIONAL-CHECK] [ARGUMENT=1]
->     --pid-file [OPTIONAL-CHECK] [ARGUMENT=1]
->       --pid-ignore-exist [OPTIONAL-CHECK] [ARGUMENT=0+]
+>     --log-path [ARGUMENT=1]
+>       --log-file-prefix [ARGUMENT=1]
+>     --pid-file [ARGUMENT=1]
+>       --pid-ignore-exist [ARGUMENT=0+]
 >           set to enable
->     --auth-skip [OPTIONAL-CHECK] [ARGUMENT=0+]
+>     --auth-skip [ARGUMENT=0+]
 >         set to enable
->     --auth-file [OPTIONAL-CHECK] [ARGUMENT=1]
->     --auth-file-group-path [OPTIONAL-CHECK] [ARGUMENT=1]
->       --auth-file-group-default-tag [OPTIONAL-CHECK] [ARGUMENT=1]
->       --auth-file-group-key-suffix [OPTIONAL-CHECK] [ARGUMENT=1]
->     --permission-type [OPTIONAL-CHECK] [ARGUMENT=1]
+>     --auth-file [ARGUMENT=1]
+>     --auth-file-group-path [ARGUMENT=1]
+>       --auth-file-group-default-tag [ARGUMENT=1]
+>       --auth-file-group-key-suffix [ARGUMENT=1]
+>     --permission-type [ARGUMENT=1]
 >         one of:
 >           allow deny func file
->       --permission-func [OPTIONAL-CHECK] [ARGUMENT=1]
->       --permission-file [OPTIONAL-CHECK] [ARGUMENT=1]
->     --explorer-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
->       --explorer-upload-merge-path [OPTIONAL-CHECK] [ARGUMENT=1]
->       --explorer-status-command-list [OPTIONAL-CHECK]
->     --stat-collect-path [OPTIONAL-CHECK] [ARGUMENT=1]
->       --stat-collect-url [OPTIONAL-CHECK] [ARGUMENT=1]
->       --stat-collect-interval [OPTIONAL-CHECK] [ARGUMENT=1]
->     --stat-report-process-tag [OPTIONAL-CHECK] [ARGUMENT=1]
->     --task-runner-root-path [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --permission-func [ARGUMENT=1]
+>       --permission-file [ARGUMENT=1]
+>     --explorer-root-path [ARGUMENT=1]
+>       --explorer-upload-merge-path [ARGUMENT=1]
+>       --explorer-status-command-list
+>     --stat-collect-path [ARGUMENT=1]
+>       --stat-collect-url [ARGUMENT=1]
+>       --stat-collect-interval [ARGUMENT=1]
+>     --stat-report-process-tag [ARGUMENT=1]
+>     --task-runner-root-path [ARGUMENT=1]
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
@@ -225,21 +225,21 @@
 >     export DR_NODE_INPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_OUTPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_FILE_UPLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_FILE_UPLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_FILE_UPLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_UPLOAD_KEY="[ARGUMENT=1]"
+>     export DR_NODE_FILE_UPLOAD_PATH="[ARGUMENT=1]"
 >     export DR_NODE_FILE_DOWNLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_FILE_DOWNLOAD_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_FILE_DOWNLOAD_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_FILE_DOWNLOAD_KEY="[ARGUMENT=1]"
+>     export DR_NODE_FILE_DOWNLOAD_PATH="[ARGUMENT=1]"
 >     export DR_NODE_PATH_ACTION_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_PATH_ACTION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PATH_ACTION_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PATH_ACTION_KEY_TO="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PATH_ACTION_NAME_LIST="[OPTIONAL-CHECK] [ARGUMENT=1+]"
+>     export DR_NODE_PATH_ACTION_TYPE="[ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_KEY="[ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_KEY_TO="[ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_NAME_LIST="[ARGUMENT=1+]"
 >     export DR_NODE_AUTH_GEN_TAG="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_AUTH_GEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_AUTH_GEN_TOKEN_SIZE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_AUTH_GEN_TIME_GAP="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_AUTH_GEN_INFO="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_AUTH_GEN_SIZE="[ARGUMENT=1]"
+>     export DR_NODE_AUTH_GEN_TOKEN_SIZE="[ARGUMENT=1]"
+>     export DR_NODE_AUTH_GEN_TIME_GAP="[ARGUMENT=1]"
+>     export DR_NODE_AUTH_GEN_INFO="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_FILE_DESCRIBE="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_AUTH_CHECK_CODE_GENERATE="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_AUTH_CHECK_CODE_VERIFY="[OPTIONAL] [ARGUMENT=1-2]"
@@ -253,32 +253,32 @@
 >     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_HTTPS="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_NODE_FILE_TLS_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_CERT="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_CA="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_SNI_CONFIG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_DHPARAM="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_LOG_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_LOG_FILE_PREFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PID_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PID_IGNORE_EXIST="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_NODE_AUTH_SKIP="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export DR_NODE_AUTH_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_AUTH_FILE_GROUP_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_AUTH_FILE_GROUP_DEFAULT_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_AUTH_FILE_GROUP_KEY_SUFFIX="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PERMISSION_TYPE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PERMISSION_FUNC="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_PERMISSION_FILE="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_EXPLORER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_EXPLORER_UPLOAD_MERGE_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_EXPLORER_STATUS_COMMAND_LIST="[OPTIONAL-CHECK]"
->     export DR_NODE_STAT_COLLECT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_STAT_COLLECT_URL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_STAT_COLLECT_INTERVAL="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_STAT_REPORT_PROCESS_TAG="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export DR_NODE_TASK_RUNNER_ROOT_PATH="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export DR_NODE_HTTPS="[ARGUMENT=0+]"
+>     export DR_NODE_FILE_TLS_KEY="[ARGUMENT=1]"
+>     export DR_NODE_FILE_TLS_CERT="[ARGUMENT=1]"
+>     export DR_NODE_FILE_TLS_CA="[ARGUMENT=1]"
+>     export DR_NODE_FILE_TLS_SNI_CONFIG="[ARGUMENT=1]"
+>     export DR_NODE_FILE_TLS_DHPARAM="[ARGUMENT=1]"
+>     export DR_NODE_LOG_PATH="[ARGUMENT=1]"
+>     export DR_NODE_LOG_FILE_PREFIX="[ARGUMENT=1]"
+>     export DR_NODE_PID_FILE="[ARGUMENT=1]"
+>     export DR_NODE_PID_IGNORE_EXIST="[ARGUMENT=0+]"
+>     export DR_NODE_AUTH_SKIP="[ARGUMENT=0+]"
+>     export DR_NODE_AUTH_FILE="[ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GROUP_PATH="[ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GROUP_DEFAULT_TAG="[ARGUMENT=1]"
+>     export DR_NODE_AUTH_FILE_GROUP_KEY_SUFFIX="[ARGUMENT=1]"
+>     export DR_NODE_PERMISSION_TYPE="[ARGUMENT=1]"
+>     export DR_NODE_PERMISSION_FUNC="[ARGUMENT=1]"
+>     export DR_NODE_PERMISSION_FILE="[ARGUMENT=1]"
+>     export DR_NODE_EXPLORER_ROOT_PATH="[ARGUMENT=1]"
+>     export DR_NODE_EXPLORER_UPLOAD_MERGE_PATH="[ARGUMENT=1]"
+>     export DR_NODE_EXPLORER_STATUS_COMMAND_LIST=""
+>     export DR_NODE_STAT_COLLECT_PATH="[ARGUMENT=1]"
+>     export DR_NODE_STAT_COLLECT_URL="[ARGUMENT=1]"
+>     export DR_NODE_STAT_COLLECT_INTERVAL="[ARGUMENT=1]"
+>     export DR_NODE_STAT_REPORT_PROCESS_TAG="[ARGUMENT=1]"
+>     export DR_NODE_TASK_RUNNER_ROOT_PATH="[ARGUMENT=1]"
 >   "
 > CONFIG Usage:
 >   {
@@ -289,21 +289,21 @@
 >     "inputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "outputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "fileUploadServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "fileUploadKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileUploadPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "fileUploadKey": [ "[ARGUMENT=1]" ],
+>     "fileUploadPath": [ "[ARGUMENT=1]" ],
 >     "fileDownloadServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "fileDownloadKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileDownloadPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "fileDownloadKey": [ "[ARGUMENT=1]" ],
+>     "fileDownloadPath": [ "[ARGUMENT=1]" ],
 >     "pathActionServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "pathActionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionKeyTo": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pathActionNameList": [ "[OPTIONAL-CHECK] [ARGUMENT=1+]" ],
+>     "pathActionType": [ "[ARGUMENT=1]" ],
+>     "pathActionKey": [ "[ARGUMENT=1]" ],
+>     "pathActionKeyTo": [ "[ARGUMENT=1]" ],
+>     "pathActionNameList": [ "[ARGUMENT=1+]" ],
 >     "authGenTag": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "authGenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGenTokenSize": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGenTimeGap": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authGenInfo": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "authGenSize": [ "[ARGUMENT=1]" ],
+>     "authGenTokenSize": [ "[ARGUMENT=1]" ],
+>     "authGenTimeGap": [ "[ARGUMENT=1]" ],
+>     "authGenInfo": [ "[ARGUMENT=1]" ],
 >     "authFileDescribe": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "authCheckCodeGenerate": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "authCheckCodeVerify": [ "[OPTIONAL] [ARGUMENT=1-2]" ],
@@ -317,31 +317,31 @@
 >     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "https": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "fileTLSKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileTLSCert": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileTLSCA": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileTLSSNIConfig": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileTLSDhparam": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "logPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "logFilePrefix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pidFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "pidIgnoreExist": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "authSkip": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "authFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authFileGroupPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authFileGroupDefaultTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "authFileGroupKeySuffix": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "permissionType": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "permissionFunc": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "permissionFile": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "explorerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "explorerUploadMergePath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "explorerStatusCommandList": [ "[OPTIONAL-CHECK]" ],
->     "statCollectPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "statCollectUrl": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "statCollectInterval": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "statReportProcessTag": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "taskRunnerRootPath": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "https": [ "[ARGUMENT=0+]" ],
+>     "fileTLSKey": [ "[ARGUMENT=1]" ],
+>     "fileTLSCert": [ "[ARGUMENT=1]" ],
+>     "fileTLSCA": [ "[ARGUMENT=1]" ],
+>     "fileTLSSNIConfig": [ "[ARGUMENT=1]" ],
+>     "fileTLSDhparam": [ "[ARGUMENT=1]" ],
+>     "logPath": [ "[ARGUMENT=1]" ],
+>     "logFilePrefix": [ "[ARGUMENT=1]" ],
+>     "pidFile": [ "[ARGUMENT=1]" ],
+>     "pidIgnoreExist": [ "[ARGUMENT=0+]" ],
+>     "authSkip": [ "[ARGUMENT=0+]" ],
+>     "authFile": [ "[ARGUMENT=1]" ],
+>     "authFileGroupPath": [ "[ARGUMENT=1]" ],
+>     "authFileGroupDefaultTag": [ "[ARGUMENT=1]" ],
+>     "authFileGroupKeySuffix": [ "[ARGUMENT=1]" ],
+>     "permissionType": [ "[ARGUMENT=1]" ],
+>     "permissionFunc": [ "[ARGUMENT=1]" ],
+>     "permissionFile": [ "[ARGUMENT=1]" ],
+>     "explorerRootPath": [ "[ARGUMENT=1]" ],
+>     "explorerUploadMergePath": [ "[ARGUMENT=1]" ],
+>     "explorerStatusCommandList": [ "" ],
+>     "statCollectPath": [ "[ARGUMENT=1]" ],
+>     "statCollectUrl": [ "[ARGUMENT=1]" ],
+>     "statCollectInterval": [ "[ARGUMENT=1]" ],
+>     "statReportProcessTag": [ "[ARGUMENT=1]" ],
+>     "taskRunnerRootPath": [ "[ARGUMENT=1]" ],
 >   }
 > ```

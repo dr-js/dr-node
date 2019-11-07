@@ -2,11 +2,10 @@ import { resolve } from 'path'
 
 import { createDetect } from './function'
 
-// $ tar --version
-//   tar (GNU tar) 1.28
-
 const command = 'tar'
 
+// $ tar --version
+//   tar (GNU tar) 1.28
 const detect = createDetect(
   'tar',
   'expect "tar" in PATH',

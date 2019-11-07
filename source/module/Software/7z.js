@@ -3,11 +3,11 @@ import { resolve } from 'path'
 import { createDetect } from './function'
 
 // NOTE: require 7z@>=16.00 for `-bs` switch
-// $ 7z
-//   7-Zip 18.06 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2018-12-30
 
 const command = '7z'
 
+// $ 7z
+//   7-Zip 18.06 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2018-12-30
 const detect = createDetect( // test for: `-bs{o|e|p}{0|1|2} : set output stream for output/error/progress line`
   '-bs{o|e|p}{0|1|2}',
   'expect "7z" in PATH with "-bs{o|e|p}{0|1|2}" support',
