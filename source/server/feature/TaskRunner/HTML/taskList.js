@@ -1,9 +1,9 @@
 const taskListStyle = `<style>
 h2, h6 { margin: 0.5em 4px; }
 .item { display: flex; flex-flow: row nowrap; align-items: stretch; }
-.item:hover { background: #eee; }
+.item:hover { background: var(--c-fill-s); }
 .name { overflow:hidden; flex: 1; white-space:nowrap; text-align: left; text-overflow: ellipsis; background: transparent; }
-.item .name { pointer-events: none; color: #666; }
+.item .name { pointer-events: none; color: #888; }
 .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 

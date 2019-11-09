@@ -1,9 +1,9 @@
 const pathContentStyle = `<style>
 h2, h6 { margin: 0.5em 4px; }
 .select, .directory, .file { display: flex; flex-flow: row nowrap; align-items: stretch; }
-.directory:hover, .file:hover { background: #eee; }
+.directory:hover, .file:hover { background: var(--c-fill-s); }
 .name { overflow:hidden; flex: 1; white-space:nowrap; text-align: left; text-overflow: ellipsis; background: transparent; }
-.select .name, .file .name { pointer-events: none; color: #666; }
+.select .name, .file .name { pointer-events: none; color: #888; }
 .edit { pointer-events: auto; min-width: 1.5em; min-height: auto; line-height: normal; }
 </style>`
 

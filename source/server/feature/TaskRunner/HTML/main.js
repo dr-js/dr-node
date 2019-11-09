@@ -19,7 +19,7 @@ const getHTML = ({
   mainStyle,
   taskListStyle
 ], [
-  `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
+  `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 8px 0 #888;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
   COMMON_SCRIPT({
     URL_AUTH_CHECK,

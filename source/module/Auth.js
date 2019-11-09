@@ -41,10 +41,10 @@ const AUTH_SKIP = 'auth-skip'
 const AUTH_FILE = 'auth-file'
 const AUTH_FILE_GROUP = 'auth-file-group'
 
-const authFetchWrap = async (url, config, timedLookupData, authKey) => {
+const authFetchWrap = async (url, option = {}, timedLookupData, authKey) => {
   const response = await fetchLikeRequest(url, {
-    ...config,
-    headers: { [ authKey ]: generateCheckCode(timedLookupData), ...config.headers }
+    ...option,
+    headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers }
   })
   if (!response.ok) throw new Error(`[authFetch] status: ${response.status}`)
   return response

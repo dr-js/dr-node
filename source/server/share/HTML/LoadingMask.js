@@ -22,7 +22,7 @@ const initLoadingMask = () => {
     if (loadingMaskDiv) return
     document.body.appendChild(cE('div', {
       id: 'loading-mask',
-      style: `position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #eee; opacity: 0; z-index: ${MASK_Z_INDEX}; transition: opacity 1s ease;`
+      style: `position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--c-fill-d); opacity: 0; z-index: ${MASK_Z_INDEX}; transition: opacity 1s ease;`
     }))
     setTimeout(() => {
       if (qS('#loading-mask')) qS('#loading-mask').style.opacity = '0.5'

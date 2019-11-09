@@ -14,7 +14,7 @@ const initAuthMask = ({
         Module: { TimedLookup: { generateCheckCode, packDataArrayBuffer, parseDataArrayBuffer } }
       },
       Browser: {
-        DOM: { applyDragFileListListener },
+        DOM: { applyReceiveFileListListener },
         Data: { Blob: { parseBlobAsArrayBuffer } },
         Resource: { saveArrayBufferCache, loadArrayBufferCache, deleteArrayBufferCache, createDownload }
       }
@@ -68,7 +68,7 @@ const initAuthMask = ({
   const authSaveInput = cE('input', { type: 'checkbox' })
   const authSaveLabel = cE('label', {}, [ authSaveInput, document.createTextNode('save auth in CacheStorage') ])
   const authMainDiv = cE('div', {
-    style: 'display: flex; flex-flow: column; margin: 8px; padding: 8px; width: 480px; height: 480px; max-width: 92vw; max-height: 64vh; line-height: 2em; box-shadow: 0 0 2px 0 #666;'
+    style: 'display: flex; flex-flow: column; margin: 8px; padding: 8px; width: 480px; height: 480px; max-width: 92vw; max-height: 64vh; line-height: 2em; box-shadow: 0 0 2px 0 #888;'
   }, [ authInfoDiv, authKeyInput, authSaveLabel ])
   const authMaskDiv = cE('div', {
     style: 'position: fixed; display: flex; align-items: center; justify-content: center; top: 0px; left: 0px; width: 100vw; height: 100vh; z-index: 256;'
@@ -92,7 +92,7 @@ const initAuthMask = ({
   }).trigger
 
   authKeyInput.addEventListener('change', tryAuthCheck)
-  applyDragFileListListener(authMaskDiv, (fileList) => {
+  applyReceiveFileListListener(authMaskDiv, (fileList) => {
     authKeyInput.files = fileList
     tryAuthCheck()
   })

@@ -24,7 +24,7 @@ const getHTML = ({
   mainStyle,
   pathContentStyle
 ], [
-  `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
+  `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 8px 0 #888;"></div>`,
   `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
   COMMON_SCRIPT({
     URL_AUTH_CHECK,
@@ -62,7 +62,7 @@ const onLoadFunc = () => {
     Dr: {
       Common: { Immutable: { StateStore: { createStateStore } } },
       Browser: {
-        DOM: { applyDragFileListListener },
+        DOM: { applyReceiveFileListListener },
         Module: { HistoryStateStore: { createHistoryStateStore } }
       }
     }
@@ -141,7 +141,7 @@ const onLoadFunc = () => {
       !IS_SKIP_AUTH && cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })
     ])
 
-    !IS_READ_ONLY && applyDragFileListListener(document.body, (fileList) => appendUploadFileList(fileList))
+    !IS_READ_ONLY && applyReceiveFileListListener(document.body, (fileList) => appendUploadFileList(fileList))
     historyStateListener(historyStateStore.getState())
     updateSort()
 

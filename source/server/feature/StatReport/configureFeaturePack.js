@@ -19,8 +19,8 @@ const configureFeaturePack = async ({
   ]
 
   const reportStat = async (url) => { // TODO: move out
-    const { stat } = await authFetch(url, { method: 'POST', body: JSON.stringify(getStatReport()) })
-    __DEV__ && console.log('reported stat:', stat)
+    const { status } = await authFetch(url, { method: 'POST', body: JSON.stringify(getStatReport()) })
+    __DEV__ && console.log('reported status:', status)
   }
 
   return {

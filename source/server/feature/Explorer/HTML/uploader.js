@@ -116,9 +116,9 @@ const initUploader = (
 
     uploadBlockDiv = uploadBlockDiv || document.body.appendChild(cE('div', {
       id: 'upload-panel',
-      style: 'overflow: hidden; position: absolute; bottom: 0; right: 0; margin: 8px; background: #fff; box-shadow: 0 0 2px 0 #666;',
+      style: 'overflow: hidden; position: absolute; bottom: 0; right: 0; margin: 8px; background: var(--ct-bg-n); box-shadow: 0 0 2px 0 #888;',
       innerHTML: [
-        '<div style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;">',
+        '<div style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 8px 0 #888;">',
         ...[
           '<button class="edit">Upload</button>',
           '<button class="edit">Clear</button>',
@@ -127,7 +127,7 @@ const initUploader = (
         ],
         '</div>',
         '<label>Select file: <input type="file" multiple/></label>',
-        '<pre style="overflow: auto; padding: 8px 4px; max-width: 80vw; max-height: 60vh; min-height: 64px; color: #666;"></pre>'
+        '<pre style="overflow: auto; padding: 8px 4px; max-width: 80vw; max-height: 60vh; min-height: 64px; color: #888;"></pre>'
       ].join('<br />')
     }))
 

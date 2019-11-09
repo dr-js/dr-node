@@ -12,7 +12,7 @@ const getHTML = ({
   COMMON_STYLE(),
   mainStyle
 ], [
-  `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 12px 0 #666;"></div>`,
+  `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 8px 0 #888;"></div>`,
   `<div id="chart-panel" style="overflow: auto; flex: 1; min-height: 0;"></div>`,
   COMMON_SCRIPT({
     URL_AUTH_CHECK,
@@ -29,15 +29,15 @@ h2, h4 { padding: 4px 2px 2px; }
 
 .chart { user-select: none; position: relative; overflow: visible; margin: 10px; outline: none; }
 .chart-panel-vertical { pointer-events: none; position: absolute; left: 0; top: 0; overflow: visible; }
-.chart-label-vertical { position: absolute; left: 0; transform: translateY(50%); color: #666; z-index: 1; }
-.chart-main { display: flex; flex-flow: row nowrap; position: relative; overflow-x: auto; box-shadow: 0 0 2px 0 #6666; }
+.chart-label-vertical { position: absolute; left: 0; transform: translateY(50%); color: #888; z-index: 1; }
+.chart-main { display: flex; flex-flow: row nowrap; position: relative; overflow-x: auto; box-shadow: 0 0 2px 0 #8884; }
 .chart-label-horizontal { pointer-events: none; position: relative; overflow: visible; width: 0; box-shadow: 0 0 0 1px #8886; z-index: 1; }
-.chart-label-horizontal-tag { position: absolute; top: 0; color: #6666; }
+.chart-label-horizontal-tag { position: absolute; top: 0; color: #8886; }
 .chart-bar { position: relative; overflow: visible; flex: 0 0; height: 100%; }
-.chart-bar-value { position: absolute; left: 0; bottom: 0; width: 100%; background: #faa; }
-.chart-bar-value-range { position: absolute; left: 0; width: 100%; box-shadow: inset 0 0 2px 0 #666b; }
-.chart-bar-tag { display: none; pointer-events: none; position: absolute; left: 100%; top: 0; background: #ddd6; white-space: pre; z-index: 2; }
-.chart-bar:hover { box-shadow: 0 0 12px 0 #666; z-index: 2; }
+.chart-bar-value { position: absolute; left: 0; bottom: 0; width: 100%; background: var(--c-dr); }
+.chart-bar-value-range { position: absolute; left: 0; width: 100%; box-shadow: inset 0 0 2px 0 #888; }
+.chart-bar-tag { display: none; pointer-events: none; position: absolute; left: 100%; top: 0; background: #8884; white-space: pre; z-index: 2; }
+.chart-bar:hover { box-shadow: 0 0 8px 0 #888; z-index: 2; }
 .chart-bar:hover .chart-bar-tag { display: initial; }
 
 .chart-panel-vertical, .chart-main { height: 100px; }

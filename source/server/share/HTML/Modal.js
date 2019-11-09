@@ -8,8 +8,8 @@ const initModal = () => {
   const FULLSCREEN_STYLE = 'position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;'
 
   const renderModal = () => {
-    const modalMaskDiv = cE('div', { style: `${FULLSCREEN_STYLE} background: rgba(0, 0, 0, 0.4);` })
-    const modalMainDiv = cE('div', { style: `position: relative; overflow-y: auto; margin: 8px; padding: 4px; width: 640px; max-width: 92vw; min-width: 240px; background: #fff; box-shadow: 0 0 2px 0 #666;` })
+    const modalMaskDiv = cE('div', { style: `${FULLSCREEN_STYLE} background: var(--c-fill-l);` })
+    const modalMainDiv = cE('div', { style: `position: relative; overflow-y: auto; margin: 8px; padding: 4px; width: 640px; max-width: 92vw; min-width: 240px; background: var(--ct-bg-n); box-shadow: 0 0 2px 0 #888;` })
     const modalDiv = cE('div', { style: `${FULLSCREEN_STYLE} display: flex; flex-flow: column; align-items: center; justify-content: center; z-index: ${MODAL_Z_INDEX};` }, [ modalMaskDiv, modalMainDiv ])
     return { modalDiv, modalMaskDiv, modalMainDiv }
   }
