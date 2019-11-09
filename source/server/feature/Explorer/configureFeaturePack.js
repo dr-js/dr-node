@@ -19,7 +19,7 @@ import {
 } from './permission'
 
 const configureFeaturePack = async ({
-  option, logger, routePrefix = '',
+  logger, routePrefix = '',
   featureAuth: { authPack: { authMode }, createResponderCheckAuth, URL_AUTH_CHECK },
   featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
 

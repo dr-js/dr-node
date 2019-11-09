@@ -1,7 +1,7 @@
 import { configurePermission } from 'source/module/Permission'
 
 const configureFeaturePack = async ({
-  option, logger, routePrefix = '',
+  logger, routePrefix = '',
   permissionType, permissionFunc, permissionFile
 }) => {
   const permissionPack = await configurePermission({ permissionType, permissionFunc, permissionFile, logger })

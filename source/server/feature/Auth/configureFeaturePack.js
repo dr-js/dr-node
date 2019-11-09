@@ -5,7 +5,7 @@ import { getRequestParam } from 'source/module/RequestCommon'
 import { configureAuthSkip, configureAuthFile, configureAuthFileGroup } from 'source/module/Auth'
 
 const configureFeaturePack = async ({
-  option, logger: { add: log }, routePrefix = '',
+  logger: { add: log }, routePrefix = '',
   authSkip = false,
   authFile,
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,

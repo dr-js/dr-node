@@ -14,7 +14,7 @@ const detect = createDetect(
 
 const runSync = (command, ...argList) => String(spawnSync(command, argList).stdout).replace(/\s/g, '')
 
-const getGitBranch = () => runSync(command, 'symbolic-ref', '--short', 'HEAD') || `detached-HEAD/${runSync('git', 'rev-parse', '--short', 'HEAD')}`
+const getGitBranch = () => runSync(command, 'symbolic-ref', '--short', 'HEAD') || `detached-HEAD/${runSync(command, 'rev-parse', '--short', 'HEAD')}`
 const getGitCommitHash = () => runSync(command, 'log', '-1', '--format=%H')
 
 export {

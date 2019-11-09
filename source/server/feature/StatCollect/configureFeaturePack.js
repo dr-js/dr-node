@@ -7,7 +7,7 @@ import { createResponderStatState, createResponderStatCollect } from './responde
 import { getHTML } from './HTML'
 
 const configureFeaturePack = async ({
-  option, logger, routePrefix = '',
+  logger, routePrefix = '',
   featureAuth: { authPack: { authFetch }, createResponderCheckAuth, URL_AUTH_CHECK },
 
   statCollectPath,

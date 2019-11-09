@@ -32,7 +32,7 @@ const configureSampleServer = async ({
   const URL_AUTH_CHECK = '/auth'
 
   const featureAuth = await configureFeaturePackAuth({
-    option, logger, routePrefix,
+    logger, routePrefix,
     authSkip,
     authFile,
     authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
@@ -40,27 +40,27 @@ const configureSampleServer = async ({
   })
 
   const featurePermission = await configureFeaturePackPermission({
-    option, logger, routePrefix,
+    logger, routePrefix,
     permissionType, permissionFunc, permissionFile
   })
 
   const featureExplorer = explorerRootPath && await configureFeaturePackExplorer({
-    option, logger, routePrefix, featureAuth, featurePermission,
+    logger, routePrefix, featureAuth, featurePermission,
     explorerRootPath, explorerUploadMergePath, explorerStatusCommandList
   })
 
   const featureStatCollect = statCollectPath && await configureFeaturePackStatCollect({
-    option, logger, routePrefix, featureAuth,
+    logger, routePrefix, featureAuth,
     statCollectPath, statCollectUrl, statCollectInterval
   })
 
   const featureStatReport = statReportProcessTag && await configureFeaturePackStatReport({
-    option, logger, routePrefix, featureAuth,
+    logger, routePrefix, featureAuth,
     statReportProcessTag
   })
 
   const featureTaskRunner = taskRunnerRootPath && await configureFeaturePackTaskRunner({
-    option, logger, routePrefix, featureAuth, featurePermission,
+    logger, routePrefix, featureAuth, featurePermission,
     taskRunnerRootPath
   })
 

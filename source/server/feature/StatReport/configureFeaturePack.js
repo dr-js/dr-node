@@ -3,7 +3,7 @@ import { responderSendJSON } from '@dr-js/core/module/node/server/Responder/Send
 import { createGetStatReport } from 'source/module/Stat/StatReport'
 
 const configureFeaturePack = async ({
-  option, logger, routePrefix = '',
+  logger, routePrefix = '',
   featureAuth: { authPack: { authFetch }, createResponderCheckAuth },
 
   statReportProcessTag
