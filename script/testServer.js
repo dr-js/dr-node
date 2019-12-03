@@ -9,7 +9,7 @@ import { readFileAsync, writeFileAsync } from '@dr-js/core/module/node/file/func
 import { modifyDeleteForce } from '@dr-js/core/module/node/file/Modify'
 import { run } from '@dr-js/core/module/node/system/Run'
 
-import { PATH_ACTION_TYPE } from 'source/module/PathAction'
+import { PATH_ACTION_TYPE } from 'source/module/PathAction/base'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_TEMP = resolve(__dirname, '../.temp-gitignore/test-server')

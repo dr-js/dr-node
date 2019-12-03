@@ -28,12 +28,12 @@ const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
   DIRECTORY_ALL_FILE_LIST
 }
 
-const PATH_ACTION_MAP = {
+const PATH_ACTION_MAP = { // all async
   [ PATH_VISIBLE ]: (absolutePath) => visibleAsync(absolutePath).then((isVisible) => ({ isVisible })),
   [ PATH_STAT ]: (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
-  [ PATH_COPY ]: modifyCopy,
-  [ PATH_MOVE ]: modifyMove,
-  [ PATH_DELETE ]: modifyDelete,
+  [ PATH_COPY ]: modifyCopy, // consider the result is undefined
+  [ PATH_MOVE ]: modifyMove, // consider the result is undefined
+  [ PATH_DELETE ]: modifyDelete, // consider the result is undefined
 
   [ DIRECTORY_CREATE ]: (absolutePath) => createDirectory(absolutePath),
   [ DIRECTORY_CONTENT ]: async (absolutePath) => { // single level, both file & directory
@@ -59,19 +59,26 @@ const PATH_ACTION_MAP = {
   }
 }
 
-const createGetPathAction = (rootPath) => {
-  const getPath = createPathPrefixLock(rootPath)
+const createPathActionTask = ({
+  rootPath,
+  getPath = createPathPrefixLock(rootPath),
+  pathActionMap = PATH_ACTION_MAP
+}) => {
   __DEV__ && console.log('[PathAction]', { rootPath }, Object.keys(PATH_ACTION_MAP))
-
   return async (actionType, key, keyTo) => { // key/keyTo must be under rootPath
-    __DEV__ && console.log('[PathAction]', actionType, key, keyTo)
     const absolutePath = getPath(key)
     const absolutePathTo = keyTo && getPath(keyTo)
-    return PATH_ACTION_MAP[ actionType ](absolutePath, absolutePathTo)
+    __DEV__ && console.log('[PathActionTask]', {
+      actionType,
+      key, keyTo,
+      absolutePath, absolutePathTo
+    })
+    return pathActionMap[ actionType ](absolutePath, absolutePathTo)
   }
 }
 
 export {
   PATH_ACTION_TYPE,
-  createGetPathAction
+  PATH_ACTION_MAP,
+  createPathActionTask
 }

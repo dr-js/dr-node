@@ -13,6 +13,8 @@ const initPathContent = (
   URL_PATH_ACTION,
   URL_FILE_SERVE,
   IS_READ_ONLY = true,
+  IS_EXTRA_7Z = false,
+  IS_EXTRA_TAR = false,
   PATH_ACTION_TYPE,
   authFetch,
   withConfirmModal,
@@ -100,6 +102,9 @@ const initPathContent = (
     const TEXT_COPY = '📋'
     const TEXT_DELETE = '🗑️'
 
+    const TEXT_COMPRESS = '📥'
+    const TEXT_EXTRACT = '📤'
+
     const selectEditSelectNone = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_NONE), onclick: doSelectRemaining })
     const selectEditSelectSome = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_SOME), onclick: doSelectRemaining })
     const selectEditSelectAll = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_ALL), onclick: doSelectNone })
@@ -135,11 +140,33 @@ const initPathContent = (
       return element
     }
 
-    const renderCommonEditList = (relativePath) => (IS_READ_ONLY || (window.innerWidth <= 480)) ? [] : [
+    const isWideL = window.innerWidth >= 800
+    const editBlocker = (IS_READ_ONLY || window.innerWidth < 480) && []
+    const wideMBlocker = (window.innerWidth < 640) && []
+    const renderCommonEditList = (relativePath) => [
       cE('button', { className: 'edit', innerText: TEXT_CUT, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_MOVE, relativePath, await withPromptModal('Move To', relativePath)) }),
       cE('button', { className: 'edit', innerText: TEXT_COPY, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal('Copy To', relativePath)) }),
       cE('button', { className: 'edit', innerText: TEXT_DELETE, onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && pathAction([ '' ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
     ]
+    const renderExtraCompressEditList = (relativePath) => [
+      [ IS_EXTRA_7Z, PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z, '7z', ' (also support .zip|tar)' ],
+      [ IS_EXTRA_TAR, PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR, 'tgz' ]
+    ].map(([ isEnable, actionType, defaultExtension, extraMessage = '' ]) => isEnable && cE('button', {
+      className: 'edit', innerText: isWideL ? `${TEXT_COMPRESS}${defaultExtension}` : defaultExtension,
+      onclick: async () => pathAction([ '' ], actionType, relativePath, await withPromptModal(`Compress To${extraMessage}`, `${relativePath}.${defaultExtension}`))
+    }))
+    const renderExtraExtractEditList = (relativePath) => {
+      let actionType
+      if (IS_EXTRA_7Z && REGEXP_EXTRACT_7Z.test(relativePath)) actionType = PATH_ACTION_TYPE.EXTRA_EXTRACT_7Z
+      if ((IS_EXTRA_TAR || IS_EXTRA_7Z) && REGEXP_EXTRACT_TAR.test(relativePath)) actionType = IS_EXTRA_TAR ? PATH_ACTION_TYPE.EXTRA_EXTRACT_TAR : PATH_ACTION_TYPE.EXTRA_EXTRACT_7Z // prefer tar for .tgz
+      return !actionType ? [] : [ cE('button', {
+        className: 'edit', innerText: TEXT_EXTRACT,
+        // className: 'edit', innerText: isWideL ? `${TEXT_EXTRACT}${relativePath.split('.').pop()}` : TEXT_EXTRACT,
+        onclick: async () => pathAction([ '' ], actionType, relativePath, await withPromptModal('Extract To', `${relativePath}.content/`))
+      }) ]
+    }
+    const REGEXP_EXTRACT_7Z = /\.(7z|zip|tbz2?|txz|tar\.(bz2?|xz))$/
+    const REGEXP_EXTRACT_TAR = /\.(tgz|tar(\.gz)?)$/
 
     parentElement.innerHTML = ''
 
@@ -155,7 +182,8 @@ const initPathContent = (
         .map((name) => cE('div', { className: 'directory' }, [
           !IS_READ_ONLY && renderSelectButton(name),
           cE('button', { className: 'name', innerText: `📁|${name}/`, onclick: () => loadPath(pathPush(relativePath, name)) }),
-          ...renderCommonEditList(pathPush(relativePath, name))
+          ...(editBlocker || wideMBlocker || renderExtraCompressEditList(pathPush(relativePath, name))),
+          ...(editBlocker || renderCommonEditList(pathPush(relativePath, name)))
         ])),
       ...fileList
         .sort(SORT_FUNC[ pathSortType ])
@@ -163,8 +191,9 @@ const initPathContent = (
           !IS_READ_ONLY && renderSelectButton(name),
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
           cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => downloadFile(relativePath, name) }),
+          ...(editBlocker || wideMBlocker || renderExtraExtractEditList(pathPush(relativePath, name))),
           cE('button', { className: 'edit', innerText: `🔍`, onclick: () => previewFile(relativePath, name) }),
-          ...renderCommonEditList(pathPush(relativePath, name))
+          ...(editBlocker || renderCommonEditList(pathPush(relativePath, name)))
         ]))
     ])
 

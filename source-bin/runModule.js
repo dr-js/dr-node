@@ -11,7 +11,8 @@ import { getFileList, getDirectorySubInfoList, getDirectoryInfoTree } from '@dr-
 import { runSync } from '@dr-js/core/module/node/system/Run'
 
 import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from '@dr-js/node/module/module/Auth'
-import { PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction'
+import { PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/base'
+import { PATH_ACTION_TYPE as EXTRA_COMPRESS_PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/extraCompress'
 
 import { detect as detect7z, compressConfig as compressConfig7z, extractConfig as extractConfig7z } from '@dr-js/node/module/module/Software/7z'
 import { detect as detectTar, compressConfig as compressConfigTar, extractConfig as extractConfigTar } from '@dr-js/node/module/module/Software/tar'
@@ -39,7 +40,7 @@ const ModuleFormatConfigList = parseCompactList(
     'file-download-path/SP'
   ) ],
   [ `path-action-server-url,pasu/SS,O|${EXPLORER_CLIENT_DESC}`, parseCompactList(
-    [ 'path-action-type', pickOneOf(Object.values(PATH_ACTION_TYPE)) ],
+    [ 'path-action-type', pickOneOf(Object.values({ ...PATH_ACTION_TYPE, ...EXTRA_COMPRESS_PATH_ACTION_TYPE })) ],
     'path-action-key/SS,O',
     'path-action-key-to/SS,O',
     'path-action-name-list/AS,O'

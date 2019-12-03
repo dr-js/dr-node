@@ -17,6 +17,8 @@ const getHTML = ({
   URL_STORAGE_STATUS,
   IS_SKIP_AUTH = false,
   IS_READ_ONLY = false,
+  IS_EXTRA_7Z = false,
+  IS_EXTRA_TAR = false,
   PATH_ACTION_TYPE
 }) => COMMON_LAYOUT([
   `<title>Explorer</title>`,
@@ -34,6 +36,8 @@ const getHTML = ({
     URL_STORAGE_STATUS,
     IS_SKIP_AUTH,
     IS_READ_ONLY,
+    IS_EXTRA_7Z,
+    IS_EXTRA_TAR,
     PATH_ACTION_TYPE,
     initModal,
     initLoadingMask,
@@ -56,7 +60,7 @@ const onLoadFunc = () => {
     qS, cE, aCL,
 
     URL_AUTH_CHECK, URL_PATH_ACTION, URL_FILE_SERVE, URL_FILE_UPLOAD, URL_STORAGE_STATUS,
-    IS_SKIP_AUTH, IS_READ_ONLY, PATH_ACTION_TYPE,
+    IS_SKIP_AUTH, IS_READ_ONLY, IS_EXTRA_7Z, IS_EXTRA_TAR, PATH_ACTION_TYPE,
     initModal, initLoadingMask, initAuthMask, initPathContent, initFileUpload, initUploader,
 
     Dr: {
@@ -75,6 +79,8 @@ const onLoadFunc = () => {
       URL_PATH_ACTION,
       URL_FILE_SERVE,
       IS_READ_ONLY,
+      IS_EXTRA_7Z,
+      IS_EXTRA_TAR,
       PATH_ACTION_TYPE,
       authFetch,
       withConfirmModal,

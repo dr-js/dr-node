@@ -3,7 +3,8 @@ import { responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core
 import { getRouteParamAny } from '@dr-js/core/module/node/server/Responder/Router'
 
 import { AUTH_SKIP } from 'source/module/Auth'
-import { PATH_ACTION_TYPE } from 'source/module/PathAction'
+import { PATH_ACTION_TYPE } from 'source/module/PathAction/base'
+import { PATH_ACTION_TYPE as EXTRA_COMPRESS_PATH_ACTION_TYPE, PATH_ACTION_MAP as EXTRA_COMPRESS_PATH_ACTION_MAP } from 'source/module/PathAction/extraCompress'
 import { getRequestJSON } from 'source/module/RequestCommon'
 
 import { getHTML } from './HTML/main'
@@ -44,13 +45,15 @@ const configureFeaturePack = async ({
     URL_STORAGE_STATUS,
     IS_SKIP_AUTH,
     IS_READ_ONLY,
-    PATH_ACTION_TYPE
+    IS_EXTRA_7Z: Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z ]),
+    IS_EXTRA_TAR: Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR ]),
+    PATH_ACTION_TYPE: { ...PATH_ACTION_TYPE, ...EXTRA_COMPRESS_PATH_ACTION_TYPE }
   })), BASIC_EXTENSION_MAP.html)
 
   const responderPathAction = createResponderPathAction({ rootPath, logger })
   const responderFileServe = createResponderServeFile({ rootPath })
   const responderFileChunkUpload = IS_READ_ONLY
-    ? (store) => {}
+    ? (store, extraFileUploadOption) => {}
     : await createResponderFileChunkUpload({ rootPath, mergePath, logger })
   const responderStorageStatus = createResponderStorageStatus({ rootPath, statusCommandList })
 

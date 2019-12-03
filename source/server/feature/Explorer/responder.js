@@ -9,7 +9,8 @@ import { createResponderServeStatic } from '@dr-js/core/module/node/server/Respo
 
 import { getCommonServerStatus } from 'source/module/ServerStatus'
 import { createFileChunkUpload } from 'source/module/FileChunkUpload'
-import { createGetPathAction } from 'source/module/PathAction'
+import { PATH_ACTION_MAP, createPathActionTask } from 'source/module/PathAction/base'
+import { PATH_ACTION_MAP as EXTRA_COMPRESS_PATH_ACTION_MAP } from 'source/module/PathAction/extraCompress'
 import { getRequestBuffer } from 'source/module/RequestCommon'
 
 const createResponderPathAction = ({
@@ -17,7 +18,7 @@ const createResponderPathAction = ({
   logger
 }) => {
   const posixNormalize = (relativeRoot, name) => posix.normalize(posix.join(relativeRoot, name))
-  const getPathAction = createGetPathAction(rootPath)
+  const pathActionTask = createPathActionTask({ rootPath, pathActionMap: { ...PATH_ACTION_MAP, ...EXTRA_COMPRESS_PATH_ACTION_MAP } })
   return async (
     store,
     nameList, // mostly will be: `[ '' ]`
@@ -31,7 +32,7 @@ const createResponderPathAction = ({
     for (const name of nameList) {
       const key = posixNormalize(relativeRootFrom, name)
       const keyTo = relativeRootTo && posixNormalize(relativeRootTo, name)
-      const { result, error } = await catchAsync(getPathAction, actionType, key, keyTo)
+      const { result, error } = await catchAsync(pathActionTask, actionType, key, keyTo)
       const response = { actionType, key, keyTo, ...result }
       error ? errorList.push({ ...response, error: String(error) }) : resultList.push(response)
     }

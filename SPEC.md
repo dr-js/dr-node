@@ -14,8 +14,6 @@
   - `createFileChunkUpload`, `uploadFileByChunk`
 + 📄 [source/module/Log.js](source/module/Log.js)
   - `configureLog`
-+ 📄 [source/module/PathAction.js](source/module/PathAction.js)
-  - `PATH_ACTION_TYPE`, `createGetPathAction`
 + 📄 [source/module/Permission.js](source/module/Permission.js)
   - `configurePermission`
 + 📄 [source/module/Pid.js](source/module/Pid.js)
@@ -32,6 +30,10 @@
   - `TASK_ACTION_TYPE`, `createTaskAction`
 + 📄 [source/module/TokenCache.js](source/module/TokenCache.js)
   - `DEFAULT_TOKEN_KEY`, `configureTokenCache`
++ 📄 [source/module/PathAction/base.js](source/module/PathAction/base.js)
+  - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`, `createPathActionTask`
++ 📄 [source/module/PathAction/extraCompress.js](source/module/PathAction/extraCompress.js)
+  - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
   - `compressConfig`, `compressFileConfig`, `detect`, `extractConfig`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
@@ -146,6 +148,7 @@
 >         one of:
 >           path:visible path:stat path:copy path:move
 >           path:delete directory:create directory:content directory:all-file-list
+>           extra:compress:7z extra:extract:7z extra:compress:tar extra:extract:tar
 >     --path-action-key [ARGUMENT=1]
 >     --path-action-key-to [ARGUMENT=1]
 >     --path-action-name-list [ARGUMENT=1+]
