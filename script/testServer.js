@@ -1,12 +1,11 @@
 import { resolve } from 'path'
 
+import { withTempDirectory, resetDirectory } from '@dr-js/dev/module/node/file'
 import { withRunBackground } from '@dr-js/dev/module/node/run'
-import { withTempDirectory } from '@dr-js/dev/module/node/file'
 import { runMain } from '@dr-js/dev/module/main'
 
 import { stringifyEqual } from '@dr-js/core/module/common/verify'
 import { readFileAsync, writeFileAsync } from '@dr-js/core/module/node/file/function'
-import { modifyDeleteForce } from '@dr-js/core/module/node/file/Modify'
 import { run } from '@dr-js/core/module/node/system/Run'
 
 import { PATH_ACTION_TYPE } from 'source/module/PathAction/base'
@@ -74,7 +73,7 @@ const FILE_TEST = fromTemp('test-file')
 
 runMain(async ({ padLog, stepLog }) => {
   padLog(`create test directory`)
-  await modifyDeleteForce(PATH_TEMP)
+  await resetDirectory(PATH_TEMP)
   await withTempDirectory(PATH_TEMP, async () => {
     stepLog('create test directory done')
 

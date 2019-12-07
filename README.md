@@ -7,8 +7,8 @@
 
 A collection of strange functions, for node
 
-[i:npm]: https://img.shields.io/npm/v/@dr-js/node.svg?colorB=blue
-[i:npm-dev]: https://img.shields.io/npm/v/@dr-js/node/dev.svg
+[i:npm]: https://img.shields.io/npm/v/@dr-js/node?colorB=blue
+[i:npm-dev]: https://img.shields.io/npm/v/@dr-js/node/dev
 [l:npm]: https://npm.im/@dr-js/node
 [i:ci]: https://img.shields.io/github/workflow/status/dr-js/dr-node/ci-test
 [l:ci]: https://github.com/dr-js/dr-node/actions?query=workflow:ci-test
