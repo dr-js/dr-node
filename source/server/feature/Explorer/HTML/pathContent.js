@@ -64,7 +64,7 @@ const initPathContent = (
   const getLoadPathAsync = (pathContentStore) => async (relativePath) => doLoadPath(pathContentStore, relativePath)
   const getPathActionAsync = (pathContentStore) => async (nameList, actionType, key, keyTo) => {
     if (
-      (actionType === PATH_ACTION_TYPE.PATH_MOVE || actionType === PATH_ACTION_TYPE.PATH_COPY) &&
+      (actionType === PATH_ACTION_TYPE.PATH_COPY || actionType === PATH_ACTION_TYPE.PATH_RENAME) &&
       (!keyTo || keyTo === key)
     ) return
     await authFetchPathAction({ nameList, actionType, key, keyTo })
@@ -98,8 +98,8 @@ const initPathContent = (
     const TEXT_SELECT_ALL = '☑'
     const TEXT_BATCH = (text) => `🗃️${text}`
 
-    const TEXT_CUT = '✂️'
     const TEXT_COPY = '📋'
+    const TEXT_RENAME = '✂️'
     const TEXT_DELETE = '🗑️'
 
     const TEXT_COMPRESS = '📥'
@@ -109,14 +109,14 @@ const initPathContent = (
     const selectEditSelectSome = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_SOME), onclick: doSelectRemaining })
     const selectEditSelectAll = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_ALL), onclick: doSelectNone })
 
-    const selectEditMove = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_CUT), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_MOVE, relativePath, await withPromptModal(`Batch Move ${selectNameSet.size} Path To`, relativePath)) })
     const selectEditCopy = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_COPY), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditRename = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_RENAME), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_RENAME, relativePath, await withPromptModal(`Batch Rename ${selectNameSet.size} Path To`, relativePath)) })
     const selectEditDelete = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_DELETE), onclick: async () => (await withConfirmModal(`Batch Delete ${selectNameSet.size} Path In: ${pathName(relativePath)}?`)) && pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
 
     const updateSelectStatus = () => aCL(qS('.select', ''), [
       !selectNameSet.size ? selectEditSelectNone : (selectNameSet.size < (directoryList.length + fileList.length)) ? selectEditSelectSome : selectEditSelectAll,
-      selectNameSet.size && selectEditMove,
       selectNameSet.size && selectEditCopy,
+      selectNameSet.size && selectEditRename,
       selectNameSet.size && selectEditDelete,
       cE('span', { className: 'name button', innerText: `${selectNameSet.size} selected` })
     ])
@@ -144,8 +144,8 @@ const initPathContent = (
     const editBlocker = (IS_READ_ONLY || window.innerWidth < 480) && []
     const wideMBlocker = (window.innerWidth < 640) && []
     const renderCommonEditList = (relativePath) => [
-      cE('button', { className: 'edit', innerText: TEXT_CUT, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_MOVE, relativePath, await withPromptModal('Move To', relativePath)) }),
       cE('button', { className: 'edit', innerText: TEXT_COPY, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal('Copy To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: TEXT_RENAME, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_RENAME, relativePath, await withPromptModal('Rename To', relativePath)) }),
       cE('button', { className: 'edit', innerText: TEXT_DELETE, onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && pathAction([ '' ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
     ]
     const renderExtraCompressEditList = (relativePath) => [

@@ -146,9 +146,10 @@
 >       require provide "auth-file" or "auth-file-group"
 >     --path-action-type [ARGUMENT=1]
 >         one of:
->           path:visible path:stat path:copy path:move
->           path:delete directory:create directory:content directory:all-file-list
->           extra:compress:7z extra:extract:7z extra:compress:tar extra:extract:tar
+>           path:move path:visible path:stat path:copy
+>           path:rename path:delete directory:create directory:content
+>           directory:all-file-list extra:compress:7z extra:extract:7z extra:compress:tar
+>           extra:extract:tar
 >     --path-action-key [ARGUMENT=1]
 >     --path-action-key-to [ARGUMENT=1]
 >     --path-action-name-list [ARGUMENT=1+]

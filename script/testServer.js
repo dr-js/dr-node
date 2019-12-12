@@ -72,12 +72,12 @@ const TEXT_CLIENT_FILE_DOWNLOAD_CONFIG = JSON.stringify({
 const FILE_TEST = fromTemp('test-file')
 
 runMain(async ({ padLog, stepLog }) => {
-  padLog(`create test directory`)
+  padLog('create test directory')
   await resetDirectory(PATH_TEMP)
   await withTempDirectory(PATH_TEMP, async () => {
     stepLog('create test directory done')
 
-    padLog(`create config`)
+    padLog('create config')
     await writeFileAsync(FILE_SERVER_PERMISSION_CONFIG, TEXT_SERVER_PERMISSION_CONFIG)
     await writeFileAsync(FILE_SERVER_CONFIG, TEXT_SERVER_CONFIG)
     await writeFileAsync(FILE_CLIENT_PATH_ACTION_CONFIG, TEXT_CLIENT_PATH_ACTION_CONFIG)
@@ -85,13 +85,13 @@ runMain(async ({ padLog, stepLog }) => {
     await writeFileAsync(FILE_CLIENT_FILE_DOWNLOAD_CONFIG, TEXT_CLIENT_FILE_DOWNLOAD_CONFIG)
     await writeFileAsync(FILE_TEST, await readFileAsync(fromRoot('package-lock.json')))
 
-    padLog(`create FILE_AUTH_KEY`)
+    padLog('create FILE_AUTH_KEY')
     await run({
       command: 'node',
       argList: [ fromOutput('bin/index.js'), '-O', FILE_AUTH_KEY, '--auth-gen-tag', 'TEST_SERVER_AUTH' ]
     }).promise
 
-    padLog(`start server`)
+    padLog('start server')
     await withRunBackground({
       command: 'node',
       argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ]

@@ -4,12 +4,14 @@ import { catchAsync } from '@dr-js/core/module/common/error'
 import { visibleAsync, statAsync } from '@dr-js/core/module/node/file/function'
 import { createPathPrefixLock, toPosixPath } from '@dr-js/core/module/node/file/Path'
 import { getDirectorySubInfoList, getDirectoryInfoTree, walkDirectoryInfoTree, createDirectory } from '@dr-js/core/module/node/file/Directory'
-import { modifyMove, modifyCopy, modifyDelete } from '@dr-js/core/module/node/file/Modify'
+import { modifyRename, modifyCopy, modifyDelete } from '@dr-js/core/module/node/file/Modify'
+
+const PATH_MOVE = 'path:move' // TODO: deprecated, use PATH_RENAME
 
 const PATH_VISIBLE = 'path:visible'
 const PATH_STAT = 'path:stat'
 const PATH_COPY = 'path:copy'
-const PATH_MOVE = 'path:move'
+const PATH_RENAME = 'path:rename'
 const PATH_DELETE = 'path:delete'
 
 const DIRECTORY_CREATE = 'directory:create'
@@ -17,10 +19,12 @@ const DIRECTORY_CONTENT = 'directory:content'
 const DIRECTORY_ALL_FILE_LIST = 'directory:all-file-list'
 
 const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
+  PATH_MOVE, // TODO: deprecated, use PATH_RENAME
+
   PATH_VISIBLE,
   PATH_STAT,
   PATH_COPY,
-  PATH_MOVE,
+  PATH_RENAME,
   PATH_DELETE,
 
   DIRECTORY_CREATE,
@@ -29,10 +33,12 @@ const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
 }
 
 const PATH_ACTION_MAP = { // all async
+  [ PATH_MOVE ]: modifyRename, // TODO: deprecated, use PATH_RENAME
+
   [ PATH_VISIBLE ]: (absolutePath) => visibleAsync(absolutePath).then((isVisible) => ({ isVisible })),
   [ PATH_STAT ]: (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
   [ PATH_COPY ]: modifyCopy, // consider the result is undefined
-  [ PATH_MOVE ]: modifyMove, // consider the result is undefined
+  [ PATH_RENAME ]: modifyRename, // consider the result is undefined
   [ PATH_DELETE ]: modifyDelete, // consider the result is undefined
 
   [ DIRECTORY_CREATE ]: (absolutePath) => createDirectory(absolutePath),

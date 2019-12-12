@@ -11,17 +11,17 @@ const PATH_ROOT = resolve(__dirname, '..')
 const PATH_OUTPUT = resolve(__dirname, '../output-gitignore')
 const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
 const fromOutput = (...args) => resolve(PATH_OUTPUT, ...args)
-const execOptionRoot = { cwd: fromRoot(), stdio: argvFlag('quiet') ? [ 'ignore', 'ignore', 'inherit' ] : 'inherit', shell: true }
+const execShell = (command) => execSync(command, { cwd: fromRoot(), stdio: argvFlag('quiet') ? [ 'ignore', 'ignore', 'inherit' ] : 'inherit' })
 
 const buildOutput = async ({ logger }) => {
-  logger.padLog(`generate spec`)
-  execSync('npm run script-generate-spec', execOptionRoot)
-  logger.padLog(`build bin`)
-  execSync('npm run build-bin', execOptionRoot)
-  logger.padLog(`build library`)
-  execSync('npm run build-library', execOptionRoot)
-  logger.padLog(`build module`)
-  execSync('npm run build-module', execOptionRoot)
+  logger.padLog('generate spec')
+  execShell('npm run script-generate-spec')
+  logger.padLog('build bin')
+  execShell('npm run build-bin')
+  logger.padLog('build library')
+  execShell('npm run build-library')
+  logger.padLog('build module')
+  execShell('npm run build-module')
 }
 
 const processOutput = async ({ logger }) => {
@@ -43,11 +43,11 @@ runMain(async (logger) => {
   await buildOutput({ logger })
   await processOutput({ logger })
   if (argvFlag('test', 'publish', 'publish-dev')) {
-    logger.padLog(`lint source`)
-    execSync(`npm run lint`, execOptionRoot)
+    logger.padLog('lint source')
+    execShell('npm run lint')
     await processOutput({ logger }) // once more
-    logger.padLog(`test test-server`)
-    execSync(`npm run test-server`, execOptionRoot)
+    logger.padLog('test test-server')
+    execShell('npm run test-server')
   }
   await verifyOutputBin({ fromOutput, packageJSON, logger })
   await verifyGitStatusClean({ fromRoot, logger })
