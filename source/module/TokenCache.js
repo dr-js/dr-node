@@ -13,7 +13,7 @@ import { getRandomBufferAsync } from '@dr-js/core/module/node/data/function'
 const DEFAULT_TOKEN_KEY = 'auth-token'
 
 const loadTokenCache = async (tokenCacheMap, fileTokenCache) => {
-  tokenCacheMap.loadCacheList(JSON.parse(await readFileAsync(fileTokenCache)))
+  tokenCacheMap.loadCacheList(JSON.parse(String(await readFileAsync(fileTokenCache))))
   __DEV__ && console.log('loaded token cache file', fileTokenCache)
 }
 

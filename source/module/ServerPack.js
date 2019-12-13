@@ -24,7 +24,7 @@ const loadTLS = async (
   const loadTLSFile = (path) => readFileAsync(fileTLSSNIConfig ? resolve(fileTLSSNIConfig, '..', path) : path)
   const hostnameConfigPairList = Object.entries({
     default: fileTLSKey ? { key: fileTLSKey, cert: fileTLSCert, ca: fileTLSCA } : undefined,
-    ...(fileTLSSNIConfig && JSON.parse(await readFileAsync(fileTLSSNIConfig)))
+    ...(fileTLSSNIConfig && JSON.parse(String(await readFileAsync(fileTLSSNIConfig))))
   })
   for (const [ hostname, { key, cert, ca } ] of hostnameConfigPairList) {
     secureContextMap[ hostname ] = createSecureContext({

@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import { execSync } from 'child_process'
 
 import { getScriptFileListFromPathList } from '@dr-js/dev/module/node/file'
-import { initOutput, verifyNoGitignore, verifyGitStatusClean, verifyOutputBin, packOutput, publishOutput } from '@dr-js/dev/module/output'
+import { initOutput, packOutput, verifyNoGitignore, verifyGitStatusClean, verifyOutputBin, publishOutput } from '@dr-js/dev/module/output'
 import { getTerserOption, minifyFileListWithTerser } from '@dr-js/dev/module/minify'
 import { processFileList, fileProcessorBabel } from '@dr-js/dev/module/fileProcessor'
 import { runMain, argvFlag } from '@dr-js/dev/module/main'
@@ -32,7 +32,7 @@ const processOutput = async ({ logger }) => {
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListLibraryBin, option: getTerserOption(), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListModuleSample, option: getTerserOption({ isReadable: true }), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await processFileList({ fileList: fileListAll, processor: fileProcessorBabel, rootPath: PATH_OUTPUT, logger })
-  logger.padLog(`total size reduce: ${sizeReduce}B`)
+  logger.log(`total size reduce: ${sizeReduce}B`)
 }
 
 runMain(async (logger) => {
@@ -46,6 +46,9 @@ runMain(async (logger) => {
     logger.padLog('lint source')
     execShell('npm run lint')
     await processOutput({ logger }) // once more
+    logger.padLog('test output')
+    execShell('npm run test-output-library')
+    execShell('npm run test-output-module')
     logger.padLog('test test-server')
     execShell('npm run test-server')
   }

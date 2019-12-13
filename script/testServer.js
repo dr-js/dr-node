@@ -108,7 +108,7 @@ runMain(async ({ padLog, stepLog }) => {
           console.error('[error]', error)
           console.error('[stderrString]', String(await stderrPromise))
         })
-        return JSON.parse(await readFileAsync(FILE_PATH_CONTENT_OUTPUT))
+        return JSON.parse(String(await readFileAsync(FILE_PATH_CONTENT_OUTPUT)))
       }
 
       padLog('test node path action')

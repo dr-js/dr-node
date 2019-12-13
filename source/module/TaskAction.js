@@ -142,7 +142,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
 
   // add cacheMap here?
   const saveConfig = (config) => writeFileAsync(getConfigPath(config.key), JSON.stringify(config))
-  const loadConfig = async (key) => JSON.parse(await readFileAsync(getConfigPath(key)))
+  const loadConfig = async (key) => JSON.parse(String(await readFileAsync(getConfigPath(key))))
 
   const TASK_ACTION_MAP = {
     [ TASK_CONFIG_SET ]: async (payload) => {

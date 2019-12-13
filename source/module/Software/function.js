@@ -8,9 +8,8 @@ const createDetect = (expect, message, command, ...argList) => {
   let isDetected
   return (checkOnly) => {
     if (isDetected === undefined) isDetected = String(spawnSync(command, argList).stdout).includes(expect)
-
     if (checkOnly) return isDetected
-    else throw new Error(message)
+    if (!isDetected) throw new Error(message)
   }
 }
 

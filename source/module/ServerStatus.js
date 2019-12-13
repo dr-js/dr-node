@@ -1,4 +1,5 @@
 import { binary } from '@dr-js/core/module/common/format'
+import { isString, isBasicFunction } from '@dr-js/core/module/common/check'
 import { run } from '@dr-js/core/module/node/system/Run'
 import { describeSystemStatus } from '@dr-js/core/module/node/system/Status'
 
@@ -18,14 +19,14 @@ const COMMON_SERVER_STATUS_COMMAND_LIST = [
   [ 'Time', () => new Date().toISOString() ]
 ]
 const runQuick = async (command, rootPath) => {
-  const { promise, stdoutPromise } = run({ command, option: { cwd: rootPath }, quiet: true })
+  const { promise, stdoutPromise } = run({ command, option: { cwd: rootPath, shell: true }, quiet: true })
   await promise
   return String(await stdoutPromise)
 }
 const runStatusCommand = async (statusCommand, rootPath) => {
   let output = ''
-  if (typeof (statusCommand) === 'string') output = await runQuick(statusCommand, rootPath)
-  else if (typeof (statusCommand) === 'function') output = await statusCommand(rootPath)
+  if (isString(statusCommand)) output = await runQuick(statusCommand, rootPath)
+  else if (isBasicFunction(statusCommand)) output = await statusCommand(rootPath)
   return output
 }
 const getCommonServerStatus = async (rootPath, statusCommandList = COMMON_SERVER_STATUS_COMMAND_LIST) => {
