@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@dr-js/node",
-  "version": "0.2.0",
+  "version": "0.2.1-dev.0",
   "description": "A collection of strange functions, for node",
   "author": "dr-js",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "build-library-dev": "cross-env BABEL_ENV=dev npm run build-library -- --watch",
     "build-module": "cross-env BABEL_ENV=module babel ./source --out-dir ./output-gitignore/module",
     "// test ========================": "",
-    "test-dev": "cross-env BABEL_ENV=dev dr-dev --TR @babel/register -T source/module/Software/function.test.js",
+    "test-dev": "cross-env BABEL_ENV=dev dr-dev --TR @babel/register -T source/module/PingRace.test.js",
     "test-source": "dr-dev --TR @babel/register -T source/ --TFS .test.js",
     "test-output-library": "dr-dev -T output-gitignore/library/ --TFS .test.js",
     "test-output-module": "dr-dev --TR @babel/register -T output-gitignore/module/ --TFS .test.js",
@@ -38,10 +38,10 @@
     "npm": ">=6.12"
   },
   "dependencies": {
-    "@dr-js/core": "^0.2.0 || ^0.2.1-dev.0"
+    "@dr-js/core": "^0.2.1 || ^0.2.1-dev.0"
   },
   "devDependencies": {
-    "@dr-js/dev": "^0.2.1",
-    "@dr-js/dev-babel": "^0.2.0"
+    "@dr-js/dev": "^0.2.2",
+    "@dr-js/dev-babel": "^0.2.2"
   }
 }

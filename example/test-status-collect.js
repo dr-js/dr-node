@@ -6,6 +6,7 @@ startServer({
   port: 8002,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
 }, {
+  isDebugRoute: true,
   permissionType: 'allow',
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
   statCollectPath: `${__dirname}/fact-${SERVER_TAG}-gitignore`,

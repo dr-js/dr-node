@@ -13,6 +13,8 @@ import { configureFeaturePack as configureFeaturePackTaskRunner } from '@dr-js/n
 const configureSampleServer = async ({
   serverPack: { server, option }, logger, routePrefix = '',
 
+  isDebugRoute,
+
   // auth
   authSkip = false,
   authFile,
@@ -78,7 +80,7 @@ const configureSampleServer = async ({
     ...(featureStatCollect ? featureStatCollect.routeList : []),
     ...(featureStatReport ? featureStatReport.routeList : []),
     ...(featureTaskRunner ? featureTaskRunner.routeList : []),
-    [ '/', 'GET', __DEV__ ? createResponderRouteListHTML({ getRouteMap: () => routeMap })
+    [ '/', 'GET', isDebugRoute ? createResponderRouteListHTML({ getRouteMap: () => routeMap })
       : redirectUrl ? (store) => responderEndWithRedirect(store, { redirectUrl })
         : (store) => responderEndWithStatusCode(store, { statusCode: 400 })
     ],

@@ -1,4 +1,5 @@
 import { describeServerPack } from '@dr-js/core/module/node/server/Server'
+import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
 import { configureLog } from '@dr-js/node/module/module/Log'
 import { configurePid } from '@dr-js/node/module/module/Pid'
@@ -23,6 +24,8 @@ import { configureSampleServer } from './sampleServer'
 import { name as packageName, version as packageVersion } from '../package.json'
 
 const SampleServerFormatConfig = getServerPackFormatConfig([
+  Preset.parseCompact('debug-route/T|show debug route list on "/"'),
+
   LogFormatConfig,
   PidFormatConfig,
 
@@ -42,6 +45,7 @@ const runSampleServer = async (optionData) => startServer({
   ...getLogOption(optionData),
   ...getServerPackOption(optionData)
 }, {
+  isDebugRoute: optionData.tryGet('debug-route'),
   ...getAuthSkipOption(optionData),
   ...getAuthFileOption(optionData),
   ...getAuthFileGroupOption(optionData),

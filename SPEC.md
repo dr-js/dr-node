@@ -18,6 +18,8 @@
   - `configurePermission`
 + 📄 [source/module/Pid.js](source/module/Pid.js)
   - `configurePid`
++ 📄 [source/module/PingRace.js](source/module/PingRace.js)
+  - `pingRaceUrlList`
 + 📄 [source/module/PrivateAddress.js](source/module/PrivateAddress.js)
   - `isPrivateAddress`
 + 📄 [source/module/RequestCommon.js](source/module/RequestCommon.js)
@@ -195,6 +197,8 @@
 >           TLS SNI JSON like: { [hostname]: { key, cert, ca } }
 >       --file-TLS-dhparam [ARGUMENT=1]
 >           Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
+>     --debug-route [ARGUMENT=0+]
+>         show debug route list on "/"
 >     --log-path [ARGUMENT=1]
 >       --log-file-prefix [ARGUMENT=1]
 >     --pid-file [ARGUMENT=1]
@@ -263,6 +267,7 @@
 >     export DR_NODE_FILE_TLS_CA="[ARGUMENT=1]"
 >     export DR_NODE_FILE_TLS_SNI_CONFIG="[ARGUMENT=1]"
 >     export DR_NODE_FILE_TLS_DHPARAM="[ARGUMENT=1]"
+>     export DR_NODE_DEBUG_ROUTE="[ARGUMENT=0+]"
 >     export DR_NODE_LOG_PATH="[ARGUMENT=1]"
 >     export DR_NODE_LOG_FILE_PREFIX="[ARGUMENT=1]"
 >     export DR_NODE_PID_FILE="[ARGUMENT=1]"
@@ -327,6 +332,7 @@
 >     "fileTLSCA": [ "[ARGUMENT=1]" ],
 >     "fileTLSSNIConfig": [ "[ARGUMENT=1]" ],
 >     "fileTLSDhparam": [ "[ARGUMENT=1]" ],
+>     "debugRoute": [ "[ARGUMENT=0+]" ],
 >     "logPath": [ "[ARGUMENT=1]" ],
 >     "logFilePrefix": [ "[ARGUMENT=1]" ],
 >     "pidFile": [ "[ARGUMENT=1]" ],

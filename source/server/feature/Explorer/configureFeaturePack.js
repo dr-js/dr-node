@@ -1,5 +1,6 @@
+import { getTimestamp } from '@dr-js/core/module/common/time'
 import { BASIC_EXTENSION_MAP } from '@dr-js/core/module/common/module/MIME'
-import { responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core/module/node/server/Responder/Send'
+import { responderSendJSON, responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core/module/node/server/Responder/Send'
 import { getRouteParamAny } from '@dr-js/core/module/node/server/Responder/Router'
 
 import { AUTH_SKIP } from 'source/module/Auth'
@@ -33,6 +34,7 @@ const configureFeaturePack = async ({
   const URL_FILE_SERVE = `${routePrefix}/file-serve`
   const URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`
   const URL_STORAGE_STATUS = `${routePrefix}/storage-status`
+  const URL_TIMESTAMP = `${routePrefix}/timestamp`
 
   const IS_SKIP_AUTH = authMode === AUTH_SKIP
   const IS_READ_ONLY = !mergePath // TODO: should be decided by user permission
@@ -78,7 +80,8 @@ const configureFeaturePack = async ({
         }
       })
     }) ],
-    [ URL_STORAGE_STATUS, 'GET', createResponderCheckAuth({ responderNext: responderStorageStatus }) ]
+    [ URL_STORAGE_STATUS, 'GET', createResponderCheckAuth({ responderNext: responderStorageStatus }) ],
+    [ URL_TIMESTAMP, 'GET', (store) => responderSendJSON(store, { object: { timestamp: getTimestamp() } }) ]
   ].filter(Boolean)
 
   return {
@@ -87,6 +90,7 @@ const configureFeaturePack = async ({
     URL_FILE_SERVE,
     URL_FILE_UPLOAD,
     URL_STORAGE_STATUS,
+    URL_TIMESTAMP,
     routeList
   }
 }

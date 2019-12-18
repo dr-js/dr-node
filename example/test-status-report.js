@@ -6,6 +6,7 @@ startServer({
   port: 8003,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
 }, {
+  isDebugRoute: true,
   permissionType: 'allow',
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
   statReportProcessTag: SERVER_TAG

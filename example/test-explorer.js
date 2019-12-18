@@ -6,6 +6,7 @@ startServer({
   port: 8001,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
 }, {
+  isDebugRoute: true,
   permissionType: 'allow',
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
   explorerRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
