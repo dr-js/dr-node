@@ -25,6 +25,9 @@ jobs:
           echo "node: $(node -v)"
           echo "npm: $(npm -v)"
 
+      - name: Install 7zip
+        run: sudo apt-get -y install p7zip-full
+
       - run: npm ci
 
       - run: npm test

@@ -24,6 +24,8 @@
   - `isPrivateAddress`
 + 📄 [source/module/RequestCommon.js](source/module/RequestCommon.js)
   - `getRequestBuffer`, `getRequestJSON`, `getRequestParam`
++ 📄 [source/module/ResolveCommand.js](source/module/ResolveCommand.js)
+  - `resolveCommand`, `resolveCommandAsync`
 + 📄 [source/module/ServerPack.js](source/module/ServerPack.js)
   - `configureServerPack`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)
