@@ -1,16 +1,13 @@
 import { spawnSync } from 'child_process'
+import { resolve } from 'path'
 import { run } from '@dr-js/core/module/node/system/Run'
 
-const configureWin32 = () => {
-  // process.env.PATHEXT // '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC'
-  const extList = (process.env.PATHEXT || '.EXE;.BAT;.CMD').toUpperCase().split(';')
-  return [
-    'WHERE.EXE', // https://ss64.com/nt/where.html
-    (stdoutString) => stdoutString.split('\r\n').find((path) => extList.includes(path.slice(path.lastIndexOf('.')).toUpperCase())) || ''
-  ]
-}
+const configureWin32 = (extList = (process.env.PATHEXT || '.EXE;.BAT;.CMD').toUpperCase().split(';')) => [ // process.env.PATHEXT // '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC'
+  'WHERE.EXE', // search cwd // https://ss64.com/nt/where.html
+  (stdoutString) => stdoutString.split('\r\n').find((path) => extList.includes(path.slice(path.lastIndexOf('.')).toUpperCase())) || ''
+]
 const configureLinux = () => [
-  'which', // https://ss64.com/bash/which.html
+  'which', // do not search cwd // https://ss64.com/bash/which.html
   (stdoutString) => stdoutString.trim()
 ]
 
@@ -21,24 +18,27 @@ const CONFIGURE_MAP = {
   android: configureLinux()
 }
 
-// if not found, result in empty string: ""
-const resolveCommand = (command) => {
+const resolveCommandName = (commandName, cwd) => { // if not found, result in empty string: ""
   const configure = CONFIGURE_MAP[ process.platform ]
   if (!configure) throw new Error(`unsupported platform: ${process.platform}`)
   const [ checkCommand, processFunc ] = configure
-  return processFunc(String(spawnSync(checkCommand, [ command ]).stdout || ''))
+  return processFunc(String(spawnSync(checkCommand, [ commandName ], { cwd }).stdout || ''))
 }
 
-// if not found, result in empty string: ""
-const resolveCommandAsync = async (command) => {
+const resolveCommandNameAsync = async (commandName, cwd) => { // if not found, result in empty string: ""
   const configure = CONFIGURE_MAP[ process.platform ]
   if (!configure) throw new Error(`unsupported platform: ${process.platform}`)
   const [ checkCommand, processFunc ] = configure
-  const { promise, stdoutPromise } = run({ command: checkCommand, argList: [ command ], quiet: true })
+  const { promise, stdoutPromise } = run({ command: checkCommand, argList: [ commandName ], option: { cwd }, quiet: true })
   return processFunc(String(await promise.then(() => stdoutPromise, () => '')))
 }
 
+// try resolve command
+const resolveCommand = (command, cwd) => REGEXP_PATH_SEP.test(command) ? resolve(cwd || '', command) : resolveCommandName(command, cwd)
+const resolveCommandAsync = async (command, cwd) => REGEXP_PATH_SEP.test(command) ? resolve(cwd || '', command) : resolveCommandNameAsync(command, cwd)
+const REGEXP_PATH_SEP = /[\\/]/
+
 export {
-  resolveCommand,
-  resolveCommandAsync
+  resolveCommandName, resolveCommandNameAsync,
+  resolveCommand, resolveCommandAsync
 }

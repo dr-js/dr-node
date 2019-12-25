@@ -12,6 +12,8 @@
   - `INITIAL_FACT_INFO`, `createFactDatabase`, `tryDeleteExtraCache`, `tryLoadFactInfo`
 + 📄 [source/module/FileChunkUpload.js](source/module/FileChunkUpload.js)
   - `createFileChunkUpload`, `uploadFileByChunk`
++ 📄 [source/module/FsPack.js](source/module/FsPack.js)
+  - `TYPE_DIRECTORY`, `TYPE_FILE`, `append`, `appendContentList`, `appendDirectory`, `appendFile`, `appendFromPath`, `initFsPack`, `loadFsPack`, `saveFsPack`, `setFsPackPackRoot`, `setFsPackUnpackPath`, `unpack`, `unpackContentList`, `unpackDirectory`, `unpackFile`, `unpackToPath`
 + 📄 [source/module/Log.js](source/module/Log.js)
   - `configureLog`
 + 📄 [source/module/Permission.js](source/module/Permission.js)
@@ -25,7 +27,9 @@
 + 📄 [source/module/RequestCommon.js](source/module/RequestCommon.js)
   - `getRequestBuffer`, `getRequestJSON`, `getRequestParam`
 + 📄 [source/module/ResolveCommand.js](source/module/ResolveCommand.js)
-  - `resolveCommand`, `resolveCommandAsync`
+  - `resolveCommand`, `resolveCommandAsync`, `resolveCommandName`, `resolveCommandNameAsync`
++ 📄 [source/module/RunDetached.js](source/module/RunDetached.js)
+  - `findDetachedProcessAsync`, `runDetached`
 + 📄 [source/module/ServerPack.js](source/module/ServerPack.js)
   - `configureServerPack`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)

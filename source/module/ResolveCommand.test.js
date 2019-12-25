@@ -1,14 +1,14 @@
 import { strictEqual } from '@dr-js/core/module/common/verify'
 import {
-  resolveCommand,
-  resolveCommandAsync
+  resolveCommandName,
+  resolveCommandNameAsync
 } from './ResolveCommand'
 
 const { describe, it, info = console.log } = global
 
 describe('Node.Module.ResolveCommand', () => {
-  const COMMAND_LIST = [
-    // [ command, isExpectResult ]
+  const COMMAND_NAME_LIST = [
+    // [ commandName, isExpectResult ]
     [ process.platform === 'win32' ? 'ipconfig' : 'ifconfig', true ],
     [ 'npm', true ],
     [ 'npx', true ],
@@ -16,21 +16,21 @@ describe('Node.Module.ResolveCommand', () => {
     [ 'git', true ],
     [ 'tar', true ],
     [ '7z', true ],
-    [ 'noop-0123456789', false ] // non-exist command should return ""
+    [ 'noop-0123456789', false ] // non-exist commandName should return ""
   ]
 
-  it('resolveCommand()', () => {
-    for (const [ command, isExpectResult ] of COMMAND_LIST) {
-      const result = resolveCommand(command)
-      info(`${JSON.stringify(command)} => ${JSON.stringify(result)}`)
+  it('resolveCommandName()', () => {
+    for (const [ commandName, isExpectResult ] of COMMAND_NAME_LIST) {
+      const result = resolveCommandName(commandName)
+      info(`${JSON.stringify(commandName)} => ${JSON.stringify(result)}`)
       strictEqual(Boolean(result), isExpectResult)
     }
   })
 
-  it('resolveCommandAsync()', async () => {
-    for (const [ command, isExpectResult ] of COMMAND_LIST) {
-      const result = await resolveCommandAsync(command)
-      info(`${JSON.stringify(command)} => ${JSON.stringify(result)}`)
+  it('resolveCommandNameAsync()', async () => {
+    for (const [ commandName, isExpectResult ] of COMMAND_NAME_LIST) {
+      const result = await resolveCommandNameAsync(commandName)
+      info(`${JSON.stringify(commandName)} => ${JSON.stringify(result)}`)
       strictEqual(Boolean(result), isExpectResult)
     }
   })
