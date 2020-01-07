@@ -14,6 +14,8 @@ import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCh
 import { PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/base'
 import { PATH_ACTION_TYPE as EXTRA_COMPRESS_PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/extraCompress'
 
+import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/PingRace'
+
 import { detect as detect7z, compressConfig as compressConfig7z, extractConfig as extractConfig7z } from '@dr-js/node/module/module/Software/7z'
 import { detect as detectTar, compressConfig as compressConfigTar, extractConfig as extractConfigTar } from '@dr-js/node/module/module/Software/tar'
 import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
@@ -67,7 +69,11 @@ const ModuleFormatConfigList = parseCompactList(
   'extract-tar,etar/SP,O|extract with tar: -I=inputFile, $0=outputDirectory',
 
   'git-branch,gb/T|print git branch',
-  'git-commit-hash,gch/T|print git commit hash'
+  'git-commit-hash,gch/T|print git commit hash',
+
+  // TODO: currently timeout can not change
+  'ping-race,pr/AS,O|tcp-ping list of url to find the fastest',
+  'ping-stat,ps/AS,O|tcp-ping list of url and print result'
 
   // TODO: 'batch-command,bc/AS,O/1-|run batch command use placeholder like {file} {F} {...F} {directory} {D} {...D}: $@=...commands'
 )
@@ -167,6 +173,11 @@ const runModule = async (optionData, modeName) => {
     case 'git-commit-hash':
       detectGit()
       return outputAuto(getGitCommitHash())
+
+    case 'ping-race':
+      return outputAuto(await pingRaceUrlList(argumentList))
+    case 'ping-stat':
+      return outputAuto(await pingStatUrlList(argumentList))
   }
 }
 

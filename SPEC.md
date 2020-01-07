@@ -21,7 +21,7 @@
 + 📄 [source/module/Pid.js](source/module/Pid.js)
   - `configurePid`
 + 📄 [source/module/PingRace.js](source/module/PingRace.js)
-  - `pingRaceUrlList`
+  - `PING_STAT_ERROR`, `pingRaceUrlList`, `pingStatUrlList`
 + 📄 [source/module/PrivateAddress.js](source/module/PrivateAddress.js)
   - `isPrivateAddress`
 + 📄 [source/module/RequestCommon.js](source/module/RequestCommon.js)
@@ -191,6 +191,10 @@
 >       print git branch
 >   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0+]
 >       print git commit hash
+>   --ping-race --pr [OPTIONAL] [ARGUMENT=1+]
+>       tcp-ping list of url to find the fastest
+>   --ping-stat --ps [OPTIONAL] [ARGUMENT=1+]
+>       tcp-ping list of url and print result
 >   --host --H -H [OPTIONAL] [ARGUMENT=1]
 >       set "hostname:port"
 >     --https --S -S [ARGUMENT=0+]
@@ -266,6 +270,8 @@
 >     export DR_NODE_EXTRACT_TAR="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+]"
+>     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_HTTPS="[ARGUMENT=0+]"
 >     export DR_NODE_FILE_TLS_KEY="[ARGUMENT=1]"
@@ -331,6 +337,8 @@
 >     "extractTar": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+]" ],
+>     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+]" ],
+>     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "https": [ "[ARGUMENT=0+]" ],
 >     "fileTLSKey": [ "[ARGUMENT=1]" ],
