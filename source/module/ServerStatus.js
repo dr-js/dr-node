@@ -5,19 +5,27 @@ import { describeSystemStatus } from '@dr-js/core/module/node/system/Status'
 
 // TODO: allow user change || overwrite commands
 
+const IS_WIN32 = process.platform === 'win32'
+const IS_DARWIN = process.platform === 'darwin'
+
 const COMMON_SERVER_STATUS_COMMAND_LIST = [
   // [ title, ...tryList ]
-  [ 'Path', 'du -hd1' ],
-  [ 'Disk', 'df -h .', async (rootPath) => { // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
-    const freeByteString = (await runQuick('dir | find "bytes free"', rootPath))
-      .match(/([\d,]+) bytes/)[ 1 ]
-      .replace(/\D/g, '')
-    return `${binary(Number(freeByteString))}B free storage`
+  [ 'Disk', async (rootPath) => {
+    if (IS_WIN32) { // win32 alternative, sample stdout: `27 Dir(s)  147,794,321,408 bytes free`
+      const freeByteString = (await runQuick('dir | find "bytes free"', rootPath))
+        .match(/([\d,]+) bytes/)[ 1 ]
+        .replace(/\D/g, '')
+      return `${binary(Number(freeByteString))}B free storage`
+    } else {
+      const diskStatus = await runQuick('df -h .', rootPath)
+      if (!diskStatus.includes('/dev/')) return diskStatus // on remote-mount fs, skip `du` check (may be slow)
+      return [ diskStatus, 'Usage', await runQuick('du -hd1', rootPath) ].join('\n')
+    }
   } ],
-  [ 'Network', 'vnstat -s' ],
-  [ 'System', 'top -b -n 1 | head -n 5', describeSystemStatus ],
+  !IS_WIN32 && [ 'Network', 'vnstat -s' ],
+  [ 'System', IS_DARWIN ? 'top -l1 -n0' : 'top -bn1 | head -n5', describeSystemStatus ],
   [ 'Time', () => new Date().toISOString() ]
-]
+].filter(Boolean)
 const runQuick = async (command, rootPath) => {
   const { promise, stdoutPromise } = run({ command, option: { cwd: rootPath, shell: true }, quiet: true })
   await promise

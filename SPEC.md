@@ -199,14 +199,25 @@
 >       set "hostname:port"
 >     --https --S -S [ARGUMENT=0+]
 >         set to enable
+>       --TLS-SNI-config [ARGUMENT=1]
+>           TLS SNI config map:
+>             multi config: { [hostname]: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer } }, default to special hostname "default", or the first config
+>             single config: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer }
+>             key: Private keys in PEM format
+>             cert: Cert chains in PEM format
+>             ca: Optionally override the trusted CA certificates
+>       --TLS-dhparam [ARGUMENT=1]
+>           pathOrBuffer; Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
 >       --file-TLS-key [ARGUMENT=1]
+>           <DEPRECATE> Private keys in PEM format
 >       --file-TLS-cert [ARGUMENT=1]
+>           <DEPRECATE> Cert chains in PEM format
 >       --file-TLS-CA [ARGUMENT=1]
->           trusted CA cert
+>           <DEPRECATE> Optionally override the trusted CA certificates
 >       --file-TLS-SNI-config [ARGUMENT=1]
->           TLS SNI JSON like: { [hostname]: { key, cert, ca } }
+>           <DEPRECATE> path to TLS SNI JSON file
 >       --file-TLS-dhparam [ARGUMENT=1]
->           Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
+>           <DEPRECATE> Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
 >     --debug-route [ARGUMENT=0+]
 >         show debug route list on "/"
 >     --log-path [ARGUMENT=1]
@@ -274,6 +285,8 @@
 >     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_HTTPS="[ARGUMENT=0+]"
+>     export DR_NODE_TLS_SNI_CONFIG="[ARGUMENT=1]"
+>     export DR_NODE_TLS_DHPARAM="[ARGUMENT=1]"
 >     export DR_NODE_FILE_TLS_KEY="[ARGUMENT=1]"
 >     export DR_NODE_FILE_TLS_CERT="[ARGUMENT=1]"
 >     export DR_NODE_FILE_TLS_CA="[ARGUMENT=1]"
@@ -341,6 +354,8 @@
 >     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "https": [ "[ARGUMENT=0+]" ],
+>     "TLSSNIConfig": [ "[ARGUMENT=1]" ],
+>     "TLSDhparam": [ "[ARGUMENT=1]" ],
 >     "fileTLSKey": [ "[ARGUMENT=1]" ],
 >     "fileTLSCert": [ "[ARGUMENT=1]" ],
 >     "fileTLSCA": [ "[ARGUMENT=1]" ],
