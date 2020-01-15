@@ -5,6 +5,8 @@ import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
 import { isPidExist } from '@dr-js/core/module/node/system/Process'
 
+// TODO: support `stop/kill by pidFile`
+
 const configurePid = async ({
   filePid,
   shouldIgnoreExistPid = false

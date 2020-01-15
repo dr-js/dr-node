@@ -46,7 +46,7 @@ const getServerPackOption = ({ tryGet, tryGetFirst, pwd }, defaultHostname = '12
 }
 const objectMapDeep = (object, mapFunc) => {
   const result = {}
-  for (const [ key, value ] of Object.entries(object)) result[ key ] = isBasicObject(value) ? objectMapDeep(value, mapFunc) : mapFunc(value, key)
+  for (const [ key, value ] of Object.entries(object)) result[ key ] = (isBasicObject(value) && !Buffer.isBuffer(value)) ? objectMapDeep(value, mapFunc) : mapFunc(value, key)
   return result
 }
 

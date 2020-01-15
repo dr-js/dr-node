@@ -21,7 +21,7 @@ const deprecateTLSSNIConfigPatch = async (fileTLSKey, fileTLSCert, fileTLSCA, fi
 }
 const objectMapDeep = (object, mapFunc) => {
   const result = {}
-  for (const [ key, value ] of Object.entries(object)) result[ key ] = isBasicObject(value) ? objectMapDeep(value, mapFunc) : mapFunc(value, key)
+  for (const [ key, value ] of Object.entries(object)) result[ key ] = (isBasicObject(value) && !Buffer.isBuffer(value)) ? objectMapDeep(value, mapFunc) : mapFunc(value, key)
   return result
 }
 
@@ -49,6 +49,7 @@ const loadTLS = async (
   if (!TLSSNIConfig.default) throw new Error('no default TLS config')
   const dhparam = TLSDHParam && await autoBuffer(TLSDHParam)
   const optionMap = await objectMapAsync(TLSSNIConfig, async ({ key, cert, ca }) => ({
+    // for Let'sEncrypt/CertNot cert config check: https://community.letsencrypt.org/t/node-js-configuration/5175
     key: await autoBuffer(key),
     cert: await autoBuffer(cert),
     ca: ca && await autoBuffer(ca),
