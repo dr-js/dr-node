@@ -5,7 +5,7 @@ import { createStepper } from '@dr-js/core/module/common/time'
 import { isBasicObject } from '@dr-js/core/module/common/check'
 import { prettyStringifyTree } from '@dr-js/core/module/common/data/Tree'
 
-import { pipeStreamAsync, bufferToReadableStream } from '@dr-js/core/module/node/data/Stream'
+import { writeBufferToStreamAsync } from '@dr-js/core/module/node/data/Stream'
 import { writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { getFileList, getDirectorySubInfoList, getDirectoryInfoTree } from '@dr-js/core/module/node/file/Directory'
 import { runSync } from '@dr-js/core/module/node/system/Run'
@@ -96,7 +96,7 @@ const runModule = async (optionData, modeName) => {
       : Buffer.from(value)
   const outputAuto = async (result) => outputFile
     ? writeFileAsync(outputFile, toBuffer(result))
-    : pipeStreamAsync(process.stdout, bufferToReadableStream(toBuffer(result)))
+    : writeBufferToStreamAsync(process.stdout, toBuffer(result))
 
   switch (modeName) {
     case 'file-upload-server-url':

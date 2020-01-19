@@ -1,6 +1,4 @@
-import { resolve } from 'path'
 import { createSecureContext } from 'tls'
-import { isBasicObject } from '@dr-js/core/module/common/check'
 import { objectMap } from '@dr-js/core/module/common/immutable/Object'
 import { readFileAsync } from '@dr-js/core/module/node/file/function'
 import { createServerPack } from '@dr-js/core/module/node/server/Server'
@@ -12,27 +10,13 @@ __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: multi', {
   '1.domain.domain': { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined } // buffer or load from file
 })
 
-const deprecateTLSSNIConfigPatch = async (fileTLSKey, fileTLSCert, fileTLSCA, fileTLSSNIConfig) => { // TODO: deprecate
-  const TLSSNIConfig = {}
-  if (fileTLSSNIConfig) Object.assign(TLSSNIConfig, objectMapDeep(JSON.parse(String(await readFileAsync(fileTLSSNIConfig))), (value) => resolve(fileTLSSNIConfig, '..', value)))
-  if (fileTLSKey) TLSSNIConfig.default = { key: fileTLSKey, cert: fileTLSCert, ca: fileTLSCA }
-  __DEV__ && console.log({ TLSSNIConfig })
-  return TLSSNIConfig
-}
-const objectMapDeep = (object, mapFunc) => {
-  const result = {}
-  for (const [ key, value ] of Object.entries(object)) result[ key ] = (isBasicObject(value) && !Buffer.isBuffer(value)) ? objectMapDeep(value, mapFunc) : mapFunc(value, key)
-  return result
-}
-
 const configureServerPack = async ({
   protocol = 'http:', hostname = '127.0.0.1', port,
-  fileTLSKey, fileTLSCert, fileTLSCA, fileTLSSNIConfig, fileTLSDHParam, // TODO: deprecate
   TLSSNIConfig, TLSDHParam, // accept Buffer or String (absolute path)
   ...extraOption
 }) => createServerPack({
   protocol, hostname, port,
-  ...(protocol === 'https:' && await loadTLS(TLSSNIConfig || await deprecateTLSSNIConfigPatch(fileTLSKey, fileTLSCert, fileTLSCA, fileTLSSNIConfig), TLSDHParam || fileTLSDHParam)),
+  ...(protocol === 'https:' && await loadTLS(TLSSNIConfig, TLSDHParam)),
   ...extraOption
 })
 

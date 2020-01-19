@@ -1,4 +1,4 @@
-import { receiveBufferAsync } from '@dr-js/core/module/node/data/Buffer'
+import { readableStreamToBufferAsync } from '@dr-js/core/module/node/data/Stream'
 import { parseCookieString } from '@dr-js/core/module/node/server/function'
 
 const getRequestParam = (store, key) => {
@@ -10,7 +10,7 @@ const getRequestParam = (store, key) => {
   )
 }
 
-const getRequestBuffer = (store) => receiveBufferAsync(store.request)
+const getRequestBuffer = (store) => readableStreamToBufferAsync(store.request)
 
 const getRequestJSON = (store) => getRequestBuffer(store).then(JSON.parse)
 

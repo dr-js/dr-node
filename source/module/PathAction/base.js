@@ -6,8 +6,6 @@ import { createPathPrefixLock, toPosixPath } from '@dr-js/core/module/node/file/
 import { getDirectorySubInfoList, getDirectoryInfoTree, walkDirectoryInfoTree, createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { modifyRename, modifyCopy, modifyDelete } from '@dr-js/core/module/node/file/Modify'
 
-const PATH_MOVE = 'path:move' // TODO: deprecated, use PATH_RENAME
-
 const PATH_VISIBLE = 'path:visible'
 const PATH_STAT = 'path:stat'
 const PATH_COPY = 'path:copy'
@@ -19,8 +17,6 @@ const DIRECTORY_CONTENT = 'directory:content'
 const DIRECTORY_ALL_FILE_LIST = 'directory:all-file-list'
 
 const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
-  PATH_MOVE, // TODO: deprecated, use PATH_RENAME
-
   PATH_VISIBLE,
   PATH_STAT,
   PATH_COPY,
@@ -33,8 +29,6 @@ const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
 }
 
 const PATH_ACTION_MAP = { // all async
-  [ PATH_MOVE ]: modifyRename, // TODO: deprecated, use PATH_RENAME
-
   [ PATH_VISIBLE ]: (absolutePath) => visibleAsync(absolutePath).then((isVisible) => ({ isVisible })),
   [ PATH_STAT ]: (absolutePath) => statAsync(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
   [ PATH_COPY ]: modifyCopy, // consider the result is undefined

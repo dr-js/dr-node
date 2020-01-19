@@ -130,8 +130,8 @@
 > ```
 > CLI Usage:
 >   --config --c -c [OPTIONAL] [ARGUMENT=1]
->       from ENV: set to "env"
->       from JS/JSON file: set to "path/to/config.js|json"
+>       from ENV: set to "env" to enable, not using be default
+>       from JS/JSON file: set to "path/to/file.config.js|json"
 >   --help --h -h [OPTIONAL] [ARGUMENT=0+]
 >       show full help
 >   --version --v -v [OPTIONAL] [ARGUMENT=0+]
@@ -154,10 +154,9 @@
 >       require provide "auth-file" or "auth-file-group"
 >     --path-action-type [ARGUMENT=1]
 >         one of:
->           path:move path:visible path:stat path:copy
->           path:rename path:delete directory:create directory:content
->           directory:all-file-list extra:compress:7z extra:extract:7z extra:compress:tar
->           extra:extract:tar
+>           path:visible path:stat path:copy path:rename
+>           path:delete directory:create directory:content directory:all-file-list
+>           extra:compress:7z extra:extract:7z extra:compress:tar extra:extract:tar
 >     --path-action-key [ARGUMENT=1]
 >     --path-action-key-to [ARGUMENT=1]
 >     --path-action-name-list [ARGUMENT=1+]
@@ -197,27 +196,15 @@
 >       tcp-ping list of url and print result
 >   --host --H -H [OPTIONAL] [ARGUMENT=1]
 >       set "hostname:port"
->     --https --S -S [ARGUMENT=0+]
->         set to enable
->       --TLS-SNI-config [ARGUMENT=1]
->           TLS SNI config map:
->             multi config: { [hostname]: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer } }, default to special hostname "default", or the first config
->             single config: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer }
->             key: Private keys in PEM format
->             cert: Cert chains in PEM format
->             ca: Optionally override the trusted CA certificates
+>     --TLS-SNI-config [ARGUMENT=1]
+>         TLS SNI config map, set to enable https:
+>           multi config: { [hostname]: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer } }, default to special hostname "default", or the first config
+>           single config: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer }
+>           key: Private keys in PEM format
+>           cert: Cert chains in PEM format
+>           ca: Optionally override the trusted CA certificates
 >       --TLS-dhparam [ARGUMENT=1]
 >           pathOrBuffer; Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
->       --file-TLS-key [ARGUMENT=1]
->           <DEPRECATE> Private keys in PEM format
->       --file-TLS-cert [ARGUMENT=1]
->           <DEPRECATE> Cert chains in PEM format
->       --file-TLS-CA [ARGUMENT=1]
->           <DEPRECATE> Optionally override the trusted CA certificates
->       --file-TLS-SNI-config [ARGUMENT=1]
->           <DEPRECATE> path to TLS SNI JSON file
->       --file-TLS-dhparam [ARGUMENT=1]
->           <DEPRECATE> Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
 >     --debug-route [ARGUMENT=0+]
 >         show debug route list on "/"
 >     --log-path [ARGUMENT=1]
@@ -284,14 +271,8 @@
 >     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+]"
 >     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_HTTPS="[ARGUMENT=0+]"
 >     export DR_NODE_TLS_SNI_CONFIG="[ARGUMENT=1]"
 >     export DR_NODE_TLS_DHPARAM="[ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_KEY="[ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_CERT="[ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_CA="[ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_SNI_CONFIG="[ARGUMENT=1]"
->     export DR_NODE_FILE_TLS_DHPARAM="[ARGUMENT=1]"
 >     export DR_NODE_DEBUG_ROUTE="[ARGUMENT=0+]"
 >     export DR_NODE_LOG_PATH="[ARGUMENT=1]"
 >     export DR_NODE_LOG_FILE_PREFIX="[ARGUMENT=1]"
@@ -353,14 +334,8 @@
 >     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "https": [ "[ARGUMENT=0+]" ],
 >     "TLSSNIConfig": [ "[ARGUMENT=1]" ],
 >     "TLSDhparam": [ "[ARGUMENT=1]" ],
->     "fileTLSKey": [ "[ARGUMENT=1]" ],
->     "fileTLSCert": [ "[ARGUMENT=1]" ],
->     "fileTLSCA": [ "[ARGUMENT=1]" ],
->     "fileTLSSNIConfig": [ "[ARGUMENT=1]" ],
->     "fileTLSDhparam": [ "[ARGUMENT=1]" ],
 >     "debugRoute": [ "[ARGUMENT=0+]" ],
 >     "logPath": [ "[ARGUMENT=1]" ],
 >     "logFilePrefix": [ "[ARGUMENT=1]" ],

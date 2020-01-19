@@ -9,7 +9,7 @@ import { packChainArrayBufferPacket, parseChainArrayBufferPacket } from '@dr-js/
 import { createAsyncTaskQueue } from '@dr-js/core/module/common/module/AsyncTaskQueue'
 
 import { toArrayBuffer } from '@dr-js/core/module/node/data/Buffer'
-import { pipeStreamAsync } from '@dr-js/core/module/node/data/Stream'
+import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
 import { writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { createPathPrefixLock } from '@dr-js/core/module/node/file/Path'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
@@ -81,10 +81,10 @@ const createFileChunkUpload = async ({
       await createDirectory(dirname(chunkData.filePath))
       await writeFileAsync(chunkData.filePath, '') // reset old file
       for (const { chunkPath } of chunkData.chunkList) {
-        await pipeStreamAsync(
-          createWriteStream(chunkData.filePath, { flags: 'a' }),
-          createReadStream(chunkPath)
-        )
+        await waitStreamStopAsync(setupStreamPipe(
+          createReadStream(chunkPath),
+          createWriteStream(chunkData.filePath, { flags: 'a' })
+        ))
       }
       await modifyDelete(chunkData.tempPath)
       chunkCacheMap.delete(cacheKey)

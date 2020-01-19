@@ -1,6 +1,6 @@
 import { resolve, relative, /* isAbsolute, */ dirname } from 'path'
 import { catchAsync } from '@dr-js/core/module/common/error'
-import { bufferToReadableStream, pipeStreamAsync } from '@dr-js/core/module/node/data/Stream'
+import { setupStreamPipe, waitStreamStopAsync, bufferToReadableStream } from '@dr-js/core/module/node/data/Stream'
 import {
   createReadStream, createWriteStream,
   openAsync, closeAsync, readAsync, writeAsync, /* readlinkAsync, symlinkAsync, */
@@ -169,7 +169,7 @@ const writeFsPackAppendFile = async (packFd, fsPack, {
   }
   if (!readStream) readStream = buffer ? bufferToReadableStream(buffer) : createReadStream(path)
   const writeStream = createWriteStream(fsPack.packPath, { fd: packFd, start: fsPack.offset + fsPack.headerOffset, autoClose: false })
-  await pipeStreamAsync(writeStream, readStream)
+  await waitStreamStopAsync(setupStreamPipe(readStream, writeStream))
   fsPack.headerOffset += size
   fsPack.headerJSON.contentList.push({ type: TYPE_FILE, route, size, isExecutable })
 }
@@ -191,7 +191,7 @@ const unpackFsPackFile = async (packFd, fsPack, {
   else if (writeStream || size >= 64 * 1024) {
     const readStream = createReadStream(packPath, { fd: packFd, start: offsetSum, end: offsetSum + size - 1, autoClose: false })
     if (!writeStream) writeStream = createWriteStream(path, { mode: isExecutableToFileMode(isExecutable) })
-    await pipeStreamAsync(writeStream, readStream)
+    await waitStreamStopAsync(setupStreamPipe(readStream, writeStream))
   } else if (size > 0) await writeFileAsync(path, await readBuffer(packFd, offsetSum, size))
   else await writeFileAsync(path, '')
 }

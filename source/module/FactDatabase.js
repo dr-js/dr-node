@@ -4,7 +4,7 @@ import { lossyAsync } from '@dr-js/core/module/common/function'
 import { tryParseJSONObject } from '@dr-js/core/module/common/data/function'
 import { createStateStore } from '@dr-js/core/module/common/immutable/StateStore'
 
-import { createReadlineFromStreamAsync } from '@dr-js/core/module/node/data/Stream'
+import { readlineOfStreamAsync } from '@dr-js/core/module/node/data/Stream'
 import { readFileAsync, writeFileAsync, unlinkAsync, createReadStream } from '@dr-js/core/module/node/file/function'
 import { getDirectorySubInfoList } from '@dr-js/core/module/node/file/Directory'
 import { createLogger } from '@dr-js/core/module/node/module/Logger'
@@ -164,7 +164,7 @@ const tryLoadFactInfoFromLog = async (factInfo, { factLogFileList, decodeFact, a
   __DEV__ && factLogFileList.length && console.log('found fact log file:', factLogFileList.length, 'maxFactLogId:', maxFactLogId)
 
   for (const { path, name } of factLogFileList) {
-    await createReadlineFromStreamAsync(createReadStream(path), (logText) => { // TODO: should check multiline log? (from non-JSON encodeFact output)
+    await readlineOfStreamAsync(createReadStream(path), (logText) => { // TODO: should check multiline log? (from non-JSON encodeFact output)
       const fact = logText && decodeFact(logText)
       if (!fact || fact.id <= factId) return
       if (fact.id !== factId + 1) throw new Error(`invalid factId: ${fact.id}, should be: ${factId + 1}. file: ${name}`)
