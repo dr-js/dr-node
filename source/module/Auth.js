@@ -18,7 +18,7 @@ const saveAuthFile = (pathFile, timedLookupData) => writeFileAsync(pathFile, Buf
 const loadAuthFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await readFileAsync(pathFile)))
 const describeAuthFile = async (pathFile) => {
   const { tag, size, tokenSize, timeGap, info, dataView } = await loadAuthFile(pathFile)
-  return indentList(`[AuthFile]`, [
+  return indentList('[AuthFile]', [
     `tag: ${tag}`,
     `size: ${binary(size)}B`,
     `tokenSize: ${tokenSize}B`,

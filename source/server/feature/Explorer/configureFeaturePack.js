@@ -27,7 +27,13 @@ const configureFeaturePack = async ({
 
   explorerRootPath: rootPath,
   explorerUploadMergePath: mergePath,
-  explorerStatusCommandList: statusCommandList
+  explorerStatusCommandList: statusCommandList,
+
+  IS_SKIP_AUTH = authMode === AUTH_SKIP,
+  IS_READ_ONLY = !mergePath, // TODO: should be decided by user permission
+
+  IS_EXTRA_7Z = Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z ]),
+  IS_EXTRA_TAR = !IS_EXTRA_7Z && Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR ]) // prefer 7z
 }) => {
   const URL_HTML = `${routePrefix}/explorer`
   const URL_PATH_ACTION = `${routePrefix}/path-action`
@@ -35,9 +41,6 @@ const configureFeaturePack = async ({
   const URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`
   const URL_STORAGE_STATUS = `${routePrefix}/storage-status`
   const URL_TIMESTAMP = `${routePrefix}/timestamp`
-
-  const IS_SKIP_AUTH = authMode === AUTH_SKIP
-  const IS_READ_ONLY = !mergePath // TODO: should be decided by user permission
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
     URL_AUTH_CHECK,
@@ -47,8 +50,8 @@ const configureFeaturePack = async ({
     URL_STORAGE_STATUS,
     IS_SKIP_AUTH,
     IS_READ_ONLY,
-    IS_EXTRA_7Z: Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z ]),
-    IS_EXTRA_TAR: Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR ]),
+    IS_EXTRA_7Z,
+    IS_EXTRA_TAR,
     PATH_ACTION_TYPE: { ...PATH_ACTION_TYPE, ...EXTRA_COMPRESS_PATH_ACTION_TYPE }
   })), BASIC_EXTENSION_MAP.html)
 

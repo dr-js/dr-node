@@ -6,7 +6,7 @@ import { getRandomId } from '@dr-js/core/module/common/math/random'
 import { createCacheMap } from '@dr-js/core/module/common/data/CacheMap'
 import { toString as arrayBufferToString, fromString } from '@dr-js/core/module/common/data/ArrayBuffer'
 import { packChainArrayBufferPacket, parseChainArrayBufferPacket } from '@dr-js/core/module/common/data/ArrayBufferPacket'
-import { createAsyncTaskQueue } from '@dr-js/core/module/common/module/AsyncTaskQueue'
+import { createAsyncFuncQueue } from '@dr-js/core/module/common/module/AsyncFuncQueue'
 
 import { toArrayBuffer } from '@dr-js/core/module/node/data/Buffer'
 import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
@@ -30,12 +30,12 @@ const createFileChunkUpload = async ({
   await createDirectory(rootPath)
   await createDirectory(mergePath)
   const getPath = createPathPrefixLock(rootPath)
-  const { pushTask } = createAsyncTaskQueue(onError) // TODO: queue path delete, should also queue upload?
+  const { push } = createAsyncFuncQueue(onError) // TODO: queue path delete, should also queue upload?
 
   chunkCacheMap.subscribe(({ type, key, payload }) => {
     if (type !== 'delete') return
     const { tempPath } = payload
-    pushTask(() => modifyDeleteForce(tempPath))
+    push(() => modifyDeleteForce(tempPath))
   })
 
   return async ({
@@ -72,12 +72,12 @@ const createFileChunkUpload = async ({
     const chunkPath = resolve(chunkData.tempPath, `chunk-${chunkIndex}-${chunkTotal}`)
     await writeFileAsync(chunkPath, chunkBuffer)
     chunkData.chunkList[ chunkIndex ] = { chunkIndex, chunkByteLength, chunkPath }
-    __DEV__ && console.log(`[save chunk]`, chunkData.chunkList[ chunkIndex ])
+    __DEV__ && console.log('[save chunk]', chunkData.chunkList[ chunkIndex ])
     onUploadChunk && await onUploadChunk(chunkData, chunkIndex)
 
     const chunkCacheCount = Object.keys(chunkData.chunkList).length
     if (chunkCacheCount === chunkTotal) {
-      __DEV__ && console.log(`[merge chunk to file]`, chunkData.filePath)
+      __DEV__ && console.log('[merge chunk to file]', chunkData.filePath)
       await createDirectory(dirname(chunkData.filePath))
       await writeFileAsync(chunkData.filePath, '') // reset old file
       for (const { chunkPath } of chunkData.chunkList) {
@@ -88,14 +88,14 @@ const createFileChunkUpload = async ({
       }
       await modifyDelete(chunkData.tempPath)
       chunkCacheMap.delete(cacheKey)
-      __DEV__ && console.log(`##[done]`, chunkCacheMap.size, cacheKey)
+      __DEV__ && console.log('##[done]', chunkCacheMap.size, cacheKey)
       onUploadEnd && await onUploadEnd(chunkData)
     } else if (chunkCacheCount > 1) {
       chunkCacheMap.touch(cacheKey, Date.now() + expireTime)
-      __DEV__ && console.log(`##[touch]`, chunkCacheMap.size, cacheKey)
+      __DEV__ && console.log('##[touch]', chunkCacheMap.size, cacheKey)
     } else {
       chunkCacheMap.set(cacheKey, chunkData, 1, Date.now() + expireTime)
-      __DEV__ && console.log(`##[cache]`, chunkCacheMap.size, cacheKey)
+      __DEV__ && console.log('##[cache]', chunkCacheMap.size, cacheKey)
     }
   }
 }

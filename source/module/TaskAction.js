@@ -148,7 +148,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     [ TASK_CONFIG_SET ]: async (payload) => {
       let config = verifyAndFormatConfig(payload, getPath)
       const existConfig = await loadConfig(config.key).catch(onLoadConfigError)
-      if (existConfig && await existTaskProcessAsync(existConfig)) throw new Error(`config task running`)
+      if (existConfig && await existTaskProcessAsync(existConfig)) throw new Error('config task running')
       if (existConfig) config = updateConfig(existConfig, config)
       await createDirectory(getPath(config.key))
       await saveConfig(config)
@@ -156,7 +156,7 @@ const createTaskAction = (rootPath) => { // relativePath should be under rootPat
     [ TASK_CONFIG_GET ]: ({ key }) => loadConfig(key).catch(onLoadConfigError),
     [ TASK_START ]: async ({ key }) => {
       const config = await loadConfig(key)
-      if (await existTaskProcessAsync(config)) throw new Error(`task exist`)
+      if (await existTaskProcessAsync(config)) throw new Error('task exist')
       config.task.resetLog && await TASK_ACTION_MAP[ TASK_LOG_RESET ]({ key })
       const { processInfo } = await startDetachedProcess(config.task, getLogPath(key))
       await saveConfig({ ...config, status: { processInfo, timeStart: getTimestamp() } })

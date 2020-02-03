@@ -113,7 +113,7 @@ const initTaskList = (
           const { key, task, info, status } = config
           const isRunning = Boolean(status && status.processInfo)
           return cE('div', { className: 'item' }, [
-            cE('span', { className: 'name button', innerText: `📄|${info.note ? `[Note] ${info.note} ` : ``}[Command] ${task.command}` }),
+            cE('span', { className: 'name button', innerText: `📄|${info.note ? `[Note] ${info.note} ` : ''}[Command] ${task.command}` }),
             cE('button', { className: 'edit', innerText: TEXT_DETAIL, onclick: async () => withAlertModal(JSON.stringify(config, null, 2)) }),
             cE('button', { className: 'edit', innerText: TEXT_EDIT, disabled: isRunning, onclick: () => setTaskConfigAsync(config) }),
             cE('button', { className: 'edit', innerText: isRunning ? TEXT_STOP : TEXT_START, onclick: async () => (await withConfirmModal(`${isRunning ? 'Stop' : 'Start'} task: ${key}?`)) && taskAction(isRunning ? TASK_ACTION_TYPE.TASK_STOP : TASK_ACTION_TYPE.TASK_START, config) }),

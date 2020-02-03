@@ -192,7 +192,7 @@ const initPathContent = (
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
           cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => downloadFile(relativePath, name) }),
           ...(editBlocker || wideMBlocker || renderExtraExtractEditList(pathPush(relativePath, name))),
-          cE('button', { className: 'edit', innerText: `🔍`, onclick: () => previewFile(relativePath, name) }),
+          cE('button', { className: 'edit', innerText: '🔍', onclick: () => previewFile(relativePath, name) }),
           ...(editBlocker || renderCommonEditList(pathPush(relativePath, name)))
         ]))
     ])

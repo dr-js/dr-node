@@ -251,11 +251,11 @@ const autoFastCache = (fsPack) => {
 }
 
 const verifyEdit = (fsPack) => {
-  if (fsPack.isReadOnly) throw new Error(`no edit readOnly fsPack`)
+  if (fsPack.isReadOnly) throw new Error('no edit readOnly fsPack')
   resetFastCache(fsPack)
 }
 const verifyUnpack = (fsPack) => {
-  if (!fsPack.unpackPath) throw new Error(`expect unpackPath`)
+  if (!fsPack.unpackPath) throw new Error('expect unpackPath')
   autoFastCache(fsPack)
 }
 

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@dr-js/node",
-  "version": "0.3.0-dev.0",
+  "version": "0.3.0-dev.1",
   "description": "A collection of strange functions, for node",
   "author": "dr-js",
   "license": "MIT",
@@ -38,10 +38,10 @@
     "npm": ">=6.12"
   },
   "dependencies": {
-    "@dr-js/core": "^0.3.0 || ^0.3.0-dev.1"
+    "@dr-js/core": "^0.3.0 || ^0.3.0-dev.5"
   },
   "devDependencies": {
-    "@dr-js/dev": "0.3.0-dev.0",
-    "@dr-js/dev-babel": "0.3.0-dev.0"
+    "@dr-js/dev": "0.3.0-dev.4",
+    "@dr-js/dev-babel": "0.3.0-dev.4"
   }
 }

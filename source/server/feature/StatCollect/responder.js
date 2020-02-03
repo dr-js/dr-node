@@ -14,7 +14,7 @@ const createResponderStatState = ({ getStatState }) => {
 
 const createResponderStatCollect = ({ addStat }) => async (store) => {
   const stat = await getRequestJSON(store)
-  __DEV__ && console.log(`statBuffer`, stat)
+  __DEV__ && console.log('statBuffer', stat)
   addStat({
     timestamp: getTimestamp(),
     retryCount: 0, // TODO: strange value

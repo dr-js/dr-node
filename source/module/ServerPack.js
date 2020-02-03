@@ -33,7 +33,7 @@ const loadTLS = async (
   if (!TLSSNIConfig.default) throw new Error('no default TLS config')
   const dhparam = TLSDHParam && await autoBuffer(TLSDHParam)
   const optionMap = await objectMapAsync(TLSSNIConfig, async ({ key, cert, ca }) => ({
-    // for Let'sEncrypt/CertNot cert config check: https://community.letsencrypt.org/t/node-js-configuration/5175
+    // for Let'sEncrypt/CertBot cert config check: https://community.letsencrypt.org/t/node-js-configuration/5175
     key: await autoBuffer(key),
     cert: await autoBuffer(cert),
     ca: ca && await autoBuffer(ca),

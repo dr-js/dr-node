@@ -21,13 +21,13 @@ const getHTML = ({
   IS_EXTRA_TAR = false,
   PATH_ACTION_TYPE
 }) => COMMON_LAYOUT([
-  `<title>Explorer</title>`,
+  '<title>Explorer</title>',
   COMMON_STYLE(),
   mainStyle,
   pathContentStyle
 ], [
-  `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 8px 0 #888;"></div>`,
-  `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
+  '<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 8px 0 #888;"></div>',
+  '<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>',
   COMMON_SCRIPT({
     URL_AUTH_CHECK,
     URL_PATH_ACTION,
@@ -88,7 +88,7 @@ const onLoadFunc = () => {
     )
     const { initialUploaderState, getUploadFileAsync, getAppendUploadFileList, renderUploader } = IS_READ_ONLY ? {} : initUploader(
       IS_READ_ONLY
-        ? () => { throw new Error(`deny file upload, read only`) }
+        ? () => { throw new Error('deny file upload, read only') }
         : initFileUpload(URL_FILE_UPLOAD, authFetch).uploadFileByChunk
     )
 

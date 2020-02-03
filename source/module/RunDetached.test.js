@@ -160,7 +160,7 @@ describe('Node.Module.RunDetached', () => {
     while (isPidExist(subProcessPid)) await setTimeoutAsync(100)
     const logString = String(readFileSync(TEST_LOG_FILE))
     unlinkSync(TEST_LOG_FILE)
-    info(`check logString`) // info(`== logString ==\n${logString}`)
+    info('check logString') // info(`== logString ==\n${logString}`)
     strictEqual(logString, EXPECT_LOG_STRING)
   })
 })

@@ -14,13 +14,13 @@ const getHTML = ({
   IS_SKIP_AUTH = false,
   TASK_ACTION_TYPE
 }) => COMMON_LAYOUT([
-  `<title>Task Runner</title>`,
+  '<title>Task Runner</title>',
   COMMON_STYLE(),
   mainStyle,
   taskListStyle
 ], [
-  `<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 8px 0 #888;"></div>`,
-  `<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>`,
+  '<div id="control-panel" style="overflow-x: auto; white-space: nowrap; box-shadow: 0 0 8px 0 #888;"></div>',
+  '<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>',
   COMMON_SCRIPT({
     URL_AUTH_CHECK,
     URL_TASK_ACTION,

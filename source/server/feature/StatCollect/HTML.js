@@ -8,12 +8,12 @@ const getHTML = ({
   URL_STAT_STATE,
   CONFIG_RENDER_PRESET
 }) => COMMON_LAYOUT([
-  `<title>Stat Visualize</title>`,
+  '<title>Stat Visualize</title>',
   COMMON_STYLE(),
   mainStyle
 ], [
-  `<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 8px 0 #888;"></div>`,
-  `<div id="chart-panel" style="overflow: auto; flex: 1; min-height: 0;"></div>`,
+  '<div id="control-panel" style="overflow-x: auto; display: flex; flex-flow: row nowrap; box-shadow: 0 0 8px 0 #888;"></div>',
+  '<div id="chart-panel" style="overflow: auto; flex: 1; min-height: 0;"></div>',
   COMMON_SCRIPT({
     URL_AUTH_CHECK,
     URL_STAT_STATE,

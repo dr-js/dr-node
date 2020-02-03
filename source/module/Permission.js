@@ -27,7 +27,7 @@ const configurePermission = async ({
 
     case 'func':
       configurePermissionFunc = permissionFunc
-      if (!isBasicFunction(configurePermissionFunc)) throw new Error(`invalid permissionFunc`)
+      if (!isBasicFunction(configurePermissionFunc)) throw new Error('invalid permissionFunc')
       logger.add('use permissionFunc')
       break
 
@@ -43,7 +43,7 @@ const configurePermission = async ({
 
   const { result, error } = await catchAsync(configurePermissionFunc, { logger })
   if (error) throw error
-  if (!isBasicFunction(result.checkPermission)) throw new Error(`expect generated checkPermission function`)
+  if (!isBasicFunction(result.checkPermission)) throw new Error('expect generated checkPermission function')
 
   return result
 }

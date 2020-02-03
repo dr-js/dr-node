@@ -1,8 +1,8 @@
 import { resolve } from 'path'
 import { execSync } from 'child_process'
 
-import { getScriptFileListFromPathList } from '@dr-js/dev/module/node/file'
-import { initOutput, packOutput, verifyNoGitignore, verifyGitStatusClean, verifyOutputBin, publishOutput } from '@dr-js/dev/module/output'
+import { getSourceJsFileListFromPathList } from '@dr-js/dev/module/node/filePreset'
+import { initOutput, packOutput, clearOutput, verifyNoGitignore, verifyGitStatusClean, verifyOutputBin, publishOutput } from '@dr-js/dev/module/output'
 import { getTerserOption, minifyFileListWithTerser } from '@dr-js/dev/module/minify'
 import { processFileList, fileProcessorBabel } from '@dr-js/dev/module/fileProcessor'
 import { runMain, argvFlag } from '@dr-js/dev/module/main'
@@ -25,14 +25,14 @@ const buildOutput = async ({ logger }) => {
 }
 
 const processOutput = async ({ logger }) => {
-  const fileListLibraryBin = await getScriptFileListFromPathList([ 'library', 'bin' ], fromOutput)
-  const fileListModuleSample = await getScriptFileListFromPathList([ 'module' ], fromOutput)
+  const fileListLibraryBin = await getSourceJsFileListFromPathList([ 'library', 'bin' ], fromOutput)
+  const fileListModuleSample = await getSourceJsFileListFromPathList([ 'module' ], fromOutput)
   const fileListAll = [ ...fileListLibraryBin, ...fileListModuleSample ]
   let sizeReduce = 0
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListLibraryBin, option: getTerserOption(), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListModuleSample, option: getTerserOption({ isReadable: true }), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await processFileList({ fileList: fileListAll, processor: fileProcessorBabel, rootPath: PATH_OUTPUT, logger })
-  logger.log(`total size reduce: ${sizeReduce}B`)
+  logger.padLog(`size reduce: ${sizeReduce}B`)
 }
 
 runMain(async (logger) => {
@@ -51,6 +51,7 @@ runMain(async (logger) => {
   isTest && execShell('npm run test-output-module')
   isTest && logger.padLog('test test-server')
   isTest && execShell('npm run test-server')
+  await clearOutput({ fromOutput, logger })
   await verifyOutputBin({ fromOutput, packageJSON, logger })
   isTest && await verifyGitStatusClean({ fromRoot, logger })
   const pathPackagePack = await packOutput({ fromRoot, fromOutput, logger })
