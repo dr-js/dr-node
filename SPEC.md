@@ -26,8 +26,6 @@
   - `isPrivateAddress`
 + 📄 [source/module/RequestCommon.js](source/module/RequestCommon.js)
   - `getRequestBuffer`, `getRequestJSON`, `getRequestParam`
-+ 📄 [source/module/ResolveCommand.js](source/module/ResolveCommand.js)
-  - `resolveCommand`, `resolveCommandAsync`, `resolveCommandName`, `resolveCommandNameAsync`
 + 📄 [source/module/RunDetached.js](source/module/RunDetached.js)
   - `findDetachedProcessAsync`, `runDetached`
 + 📄 [source/module/ServerPack.js](source/module/ServerPack.js)

@@ -60,11 +60,11 @@ const isExecutableToFileMode = (isExecutable) => isExecutable ? 0x755 : 0x644 //
 
 const toRoute = (packRoot, path) => toPosixPath(relative(packRoot, path))
 
-const autoOpenFsPack = async (asyncTask, fsPack, openFlag, extra) => {
+const autoOpenFsPack = async (asyncFunc, fsPack, openFlag, extra) => {
   const { packPath, packFd } = fsPack
-  if (packFd) return asyncTask(packFd, fsPack, extra)
+  if (packFd) return asyncFunc(packFd, fsPack, extra)
   const packFdAuto = await openAsync(packPath, openFlag)
-  const { result, error } = await catchAsync(asyncTask, packFdAuto, fsPack, extra)
+  const { result, error } = await catchAsync(asyncFunc, packFdAuto, fsPack, extra)
   await closeAsync(packFdAuto)
   if (error) throw error
   return result
@@ -89,7 +89,7 @@ const writeHeaderNumberList = async (packFd, offset, numberList) => {
 }
 
 const parseHeaderJSON = (buffer) => {
-  const { [ KEY_CONTENT_COMPACT ]: contentCompact } = JSON.parse(String(buffer))
+  const { [ KEY_CONTENT_COMPACT ]: contentCompact = '' } = JSON.parse(String(buffer))
   const contentList = !contentCompact ? [] : contentCompact.split('\r').map((contentCompact) => {
     const contentCompactList = contentCompact.split('\n')
     const typeCompactList = contentCompactList[ 0 ].split(' ')

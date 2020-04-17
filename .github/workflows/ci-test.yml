@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest ] # [ ubuntu-latest, windows-latest, macos-latest ]
         node-version: [ 12.x, 13.x ]
 
     runs-on: ${{ matrix.os }}
@@ -32,5 +32,3 @@ jobs:
       - run: npm ci
 
       - run: npm test
-        env:
-          CI: true
