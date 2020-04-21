@@ -23,7 +23,7 @@ const TEST_DETACHED_PROCESS_FUNC = (TEST_LOG_FILE) => {
     const subProcess = spawn(command, argList, {
       ...option,
       stdio: [ 'ignore', stdoutFd, stdoutFd ], // TODO: NOTE: check: https://github.com/joyent/libuv/issues/923
-      detached: true, windowsHide: true // to allow server restart and find the process again
+      detached: true // to allow server restart and find the process again
     })
     subProcess.on('error', (error) => { console.warn('[ERROR][startDetachedProcess] config:', { command, argList, option }, 'error:', error) })
     subProcess.unref()

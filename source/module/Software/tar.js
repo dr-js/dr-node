@@ -1,19 +1,19 @@
 import { resolve } from 'path'
 
-import { createDetect } from './function'
+import { createCommandWrap, createDetect } from './function'
 
-const command = 'tar'
+const { getCommand, setCommand } = createCommandWrap('tar')
 
 // $ tar --version
 //   tar (GNU tar) 1.28
 const detect = createDetect(
   'tar',
   'expect "tar" in PATH',
-  command, '--version'
+  getCommand, '--version'
 )
 
 const compressConfig = (sourceDirectory, outputFile) => ({
-  command,
+  command: getCommand(),
   argList: [
     '-zcf', resolve(outputFile), // should ends with `.tgz`
     '-C', resolve(sourceDirectory),
@@ -22,16 +22,16 @@ const compressConfig = (sourceDirectory, outputFile) => ({
 })
 
 const extractConfig = (sourceFile, outputPath) => ({
-  command,
+  command: getCommand(),
   argList: [
     '--strip-components', '1',
-    '-xf', sourceFile, // use '-xf' for both gzip/xz
+    '-xf', sourceFile, // use '-xf' for both gzip/xz, check: https://unix.stackexchange.com/questions/253596/tar-extraction-also-automatically-decompresses
     '-C', outputPath
   ]
 })
 
 export {
-  detect,
+  getCommand, setCommand, detect,
 
   compressConfig,
   extractConfig

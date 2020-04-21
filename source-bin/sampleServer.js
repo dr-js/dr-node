@@ -8,7 +8,6 @@ import { configureFeaturePack as configureFeaturePackPermission } from '@dr-js/n
 import { configureFeaturePack as configureFeaturePackExplorer } from '@dr-js/node/module/server/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatCollect } from '@dr-js/node/module/server/feature/StatCollect/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatReport } from '@dr-js/node/module/server/feature/StatReport/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackTaskRunner } from '@dr-js/node/module/server/feature/TaskRunner/configureFeaturePack'
 
 const configureSampleServer = async ({
   serverPack: { server, option }, logger, routePrefix = '',
@@ -27,9 +26,7 @@ const configureSampleServer = async ({
   // stat collect
   statCollectPath, statCollectUrl, statCollectInterval,
   // stat report
-  statReportProcessTag,
-  // task-runner
-  taskRunnerRootPath
+  statReportProcessTag
 }) => {
   const URL_AUTH_CHECK = '/auth'
 
@@ -61,16 +58,10 @@ const configureSampleServer = async ({
     statReportProcessTag
   })
 
-  const featureTaskRunner = taskRunnerRootPath && await configureFeaturePackTaskRunner({
-    logger, routePrefix, featureAuth, featurePermission,
-    taskRunnerRootPath
-  })
-
   const redirectUrl = featureExplorer ? featureExplorer.URL_HTML
     : featureStatCollect ? featureStatCollect.URL_HTML
       : featureStatReport ? featureStatReport.URL_HTML
-        : featureTaskRunner ? featureTaskRunner.URL_HTML
-          : ''
+        : ''
 
   const responderLogEnd = createResponderLogEnd({ log: logger.add })
 
@@ -79,7 +70,6 @@ const configureSampleServer = async ({
     ...(featureExplorer ? featureExplorer.routeList : []),
     ...(featureStatCollect ? featureStatCollect.routeList : []),
     ...(featureStatReport ? featureStatReport.routeList : []),
-    ...(featureTaskRunner ? featureTaskRunner.routeList : []),
     [ '/', 'GET', isDebugRoute ? createResponderRouteListHTML({ getRouteMap: () => routeMap })
       : redirectUrl ? (store) => responderEndWithRedirect(store, { redirectUrl })
         : (store) => responderEndWithStatusCode(store, { statusCode: 400 })
@@ -102,8 +92,7 @@ const configureSampleServer = async ({
     featureAuth,
     featureExplorer,
     featureStatCollect,
-    featureStatReport,
-    featureTaskRunner
+    featureStatReport
   }
 }
 

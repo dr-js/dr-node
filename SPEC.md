@@ -32,8 +32,8 @@
   - `configureServerPack`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)
   - `getCommonServerStatus`
-+ 📄 [source/module/TaskAction.js](source/module/TaskAction.js)
-  - `TASK_ACTION_TYPE`, `createTaskAction`
++ 📄 [source/module/TerminalColor.js](source/module/TerminalColor.js)
+  - `configureTerminalColor`, `shouldSupportColor`
 + 📄 [source/module/TokenCache.js](source/module/TokenCache.js)
   - `DEFAULT_TOKEN_KEY`, `configureTokenCache`
 + 📄 [source/module/PathAction/base.js](source/module/PathAction/base.js)
@@ -41,13 +41,15 @@
 + 📄 [source/module/PathAction/extraCompress.js](source/module/PathAction/extraCompress.js)
   - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
-  - `compressConfig`, `compressFileConfig`, `detect`, `extractConfig`
+  - `compressConfig`, `compressFileConfig`, `compressTgzAsync`, `detect`, `extractConfig`, `extractTgzAsync`, `getCommand`, `setCommand`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
-  - `createDetect`
+  - `createCommandWrap`, `createDetect`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
-  - `detect`, `getGitBranch`, `getGitCommitHash`
+  - `detect`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setCommand`
++ 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
+  - `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)
-  - `compressConfig`, `detect`, `extractConfig`
+  - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
 + 📄 [source/module/Stat/StatCollect.js](source/module/Stat/StatCollect.js)
   - `configureStatCollect`
 + 📄 [source/module/Stat/StatReport.js](source/module/Stat/StatReport.js)
@@ -100,18 +102,6 @@
   - `configureFeaturePack`
 + 📄 [source/server/feature/StatReport/option.js](source/server/feature/StatReport/option.js)
   - `StatReportFormatConfig`, `getStatReportOption`
-+ 📄 [source/server/feature/TaskRunner/configureFeaturePack.js](source/server/feature/TaskRunner/configureFeaturePack.js)
-  - `configureFeaturePack`
-+ 📄 [source/server/feature/TaskRunner/option.js](source/server/feature/TaskRunner/option.js)
-  - `TaskRunnerFormatConfig`, `getTaskRunnerOption`
-+ 📄 [source/server/feature/TaskRunner/permission.js](source/server/feature/TaskRunner/permission.js)
-  - `CREATE_PERMISSION_CHECK_MAP`, `PERMISSION_TASK_RUNNER_TASK_ACTION`, `PERMISSION_TYPE`
-+ 📄 [source/server/feature/TaskRunner/responder.js](source/server/feature/TaskRunner/responder.js)
-  - `createResponderTaskAction`
-+ 📄 [source/server/feature/TaskRunner/HTML/main.js](source/server/feature/TaskRunner/HTML/main.js)
-  - `getHTML`
-+ 📄 [source/server/feature/TaskRunner/HTML/taskList.js](source/server/feature/TaskRunner/HTML/taskList.js)
-  - `initTaskList`, `taskListStyle`
 + 📄 [source/server/feature/TokenCache/option.js](source/server/feature/TokenCache/option.js)
   - `TokenCacheFormatConfig`, `getTokenCacheOption`
 + 📄 [source/server/feature/TokenCache/responder.js](source/server/feature/TokenCache/responder.js)
@@ -228,7 +218,6 @@
 >       --stat-collect-url [ARGUMENT=1]
 >       --stat-collect-interval [ARGUMENT=1]
 >     --stat-report-process-tag [ARGUMENT=1]
->     --task-runner-root-path [ARGUMENT=1]
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
@@ -291,7 +280,6 @@
 >     export DR_NODE_STAT_COLLECT_URL="[ARGUMENT=1]"
 >     export DR_NODE_STAT_COLLECT_INTERVAL="[ARGUMENT=1]"
 >     export DR_NODE_STAT_REPORT_PROCESS_TAG="[ARGUMENT=1]"
->     export DR_NODE_TASK_RUNNER_ROOT_PATH="[ARGUMENT=1]"
 >   "
 > CONFIG Usage:
 >   {
@@ -354,6 +342,5 @@
 >     "statCollectUrl": [ "[ARGUMENT=1]" ],
 >     "statCollectInterval": [ "[ARGUMENT=1]" ],
 >     "statReportProcessTag": [ "[ARGUMENT=1]" ],
->     "taskRunnerRootPath": [ "[ARGUMENT=1]" ],
 >   }
 > ```

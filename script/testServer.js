@@ -41,8 +41,7 @@ const TEXT_SERVER_CONFIG = JSON.stringify({
   permissionFile: './server-permission.config.js',
   authFile: FILE_AUTH_KEY,
   explorerRootPath: './path-upload',
-  explorerUploadMergePath: './path-upload.merge',
-  taskRunnerRootPath: './task-runner'
+  explorerUploadMergePath: './path-upload.merge'
 })
 
 const FILE_CLIENT_PATH_ACTION_CONFIG = fromTemp('client-path-action.config.json')
