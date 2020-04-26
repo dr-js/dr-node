@@ -32,7 +32,7 @@ jobs:
           echo "node: $(node -v)"
           echo "npm: $(npm -v)"
 
-      - name: Patch `7z`
+      - name: Patch `7z` on darwin
         run: node -e "process.exitCode = Number(os.platform() === 'darwin')" || brew install p7zip
         # linux supported: https://github.com/actions/virtual-environments/blob/ubuntu18/20200415.3/images/linux/scripts/installers/7-zip.sh
         # win32 supported: https://github.com/actions/virtual-environments/blob/win19/20200416.1/images/win/scripts/Installers/Install-7zip.ps1

@@ -1,33 +1,3 @@
-import { release } from 'os'
-
-// reduced code from: https://github.com/chalk/supports-color/blob/master/index.js
-const shouldSupportColor = () => {
-  { // check env for FORCE_COLOR // FORCE_COLOR: false/off = force no color, other = force color
-    const FORCE_COLOR = String(process.env.FORCE_COLOR)
-    if (FORCE_COLOR !== 'undefined') return ![ 'false', 'off' ].includes(FORCE_COLOR)
-  }
-
-  if ( // stdout/stderr stream type
-    !process.stdout.isTTY ||
-    !process.stderr.isTTY
-  ) return false
-
-  { // check env for conventional keys
-    const { CI, TERM } = process.env
-    if (CI) return true // CI = force color
-    if (TERM && /^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(TERM)) return true // TERM = test color
-  }
-
-  if ( // Windows 10 = should support color
-    process.platform === 'win32' &&
-    Number(release().split('.')[ 0 ]) >= 10
-  ) return true
-
-  __DEV__ && console.log('no color support')
-
-  return false
-}
-
 // AES = ANSI escape code
 // https://en.wikipedia.org/wiki/ANSI_escape_code
 // http://jafrog.com/2013/11/23/colors-in-terminal.html
@@ -63,7 +33,7 @@ white|97|107
 //   console.log(TerminalColor.fg.red(string))
 const configureTerminalColor = () => {
   const toAES = (value) => `\x1b[${value}m`
-  const createWrapper = shouldSupportColor()
+  const createWrapper = (process.stdout.isTTY && process.stdout.hasColors())
     ? (setAES, clearAES) => (text) => `${setAES}${text}${clearAES}` // TODO: no nesting support
     : () => (text) => text
 
@@ -81,7 +51,4 @@ const configureTerminalColor = () => {
   }
 }
 
-export {
-  shouldSupportColor,
-  configureTerminalColor
-}
+export { configureTerminalColor }

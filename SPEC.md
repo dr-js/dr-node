@@ -33,7 +33,9 @@
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)
   - `getCommonServerStatus`
 + 📄 [source/module/TerminalColor.js](source/module/TerminalColor.js)
-  - `configureTerminalColor`, `shouldSupportColor`
+  - `configureTerminalColor`
++ 📄 [source/module/TerminalStatusBar.js](source/module/TerminalStatusBar.js)
+  - `createStatusBar`
 + 📄 [source/module/TokenCache.js](source/module/TokenCache.js)
   - `DEFAULT_TOKEN_KEY`, `configureTokenCache`
 + 📄 [source/module/PathAction/base.js](source/module/PathAction/base.js)

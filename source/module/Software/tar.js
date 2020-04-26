@@ -17,16 +17,15 @@ const compressConfig = (sourceDirectory, outputFile) => ({
   argList: [
     '-zcf', resolve(outputFile), // should ends with `.tgz`
     '-C', resolve(sourceDirectory),
-    '.'
+    '.' // TODO: NOTE: the result tar will have a `./` as root folder, but this will get resolved and disappear after extract
   ]
 })
 
 const extractConfig = (sourceFile, outputPath) => ({
   command: getCommand(),
   argList: [
-    '--strip-components', '1',
-    '-xf', sourceFile, // use '-xf' for both gzip/xz, check: https://unix.stackexchange.com/questions/253596/tar-extraction-also-automatically-decompresses
-    '-C', outputPath
+    '-xf', resolve(sourceFile), // use '-xf' for both gzip/xz, check: https://unix.stackexchange.com/questions/253596/tar-extraction-also-automatically-decompresses
+    '-C', resolve(outputPath)
   ]
 })
 

@@ -55,7 +55,8 @@ const compressTgzAsync = async (sourceDirectory, outputFile) => { // for `.tgz` 
       'a', 'placeholder-name',
       resolve(sourceDirectory, '*'),
       '-ttar', '-so' // mark archive type and output to stdout
-    ]
+    ],
+    option: { stdio: [ 'ignore', 'pipe', 'ignore' ] }
   })
   await Promise.all([
     waitStreamStopAsync(setupStreamPipe(subProcess.stdout, createGzip(), outputStream)),
@@ -72,7 +73,8 @@ const extractTgzAsync = async (sourceFile, outputPath) => { // for `.tgz` or `.t
       `-o${resolve(outputPath)}`,
       '-aoa', // for overwrite existing
       '-ttar', '-si' // mark archive type and input from stdin
-    ]
+    ],
+    option: { stdio: [ 'pipe', 'ignore', 'ignore' ] }
   })
   await Promise.all([
     waitStreamStopAsync(setupStreamPipe(inputStream, createGunzip(), subProcess.stdin)),
