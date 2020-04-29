@@ -1,4 +1,5 @@
 import { resolve, basename } from 'path'
+import { doThrowAsync } from '@dr-js/core/module/common/verify'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { run } from '@dr-js/core/module/node/system/Run'
 
@@ -14,7 +15,7 @@ import {
   compressConfig, compressFileConfig,
   extractConfig,
 
-  compressTgzAsync, extractTgzAsync
+  compressTgzAsync, extractTgzAsync, extractTgzOrTarAsync
 } from './7z'
 
 const { describe, it, before, after, info = console.log } = global
@@ -68,5 +69,19 @@ describe('Node.Module.Software.7z', () => {
     await extractTgzAsync(fromTemp('compressTgzAsync/test.tgz'), fromTemp('extractTgzAsync/test.tgz-extract/'))
     info('verifyOutputDirectory')
     await verifyOutputDirectory(fromTemp('extractTgzAsync/test.tgz-extract/'))
+  })
+
+  it('extractTgzOrTarAsync()', async () => {
+    info('compressTgzAsync')
+    await run(compressConfig(SOURCE_DIRECTORY, fromTemp('compressTgzAsync/test.tar'))).promise
+    info('extractTgzAsync')
+    await extractTgzOrTarAsync(fromTemp('compressTgzAsync/test.tar'), fromTemp('extractTgzOrTarAsync/test.tar-extract/'))
+    info('verifyOutputDirectory')
+    await verifyOutputDirectory(fromTemp('extractTgzOrTarAsync/test.tar-extract/'))
+
+    await doThrowAsync(
+      async () => extractTgzAsync(fromTemp('compressTgzAsync/test.tar'), fromTemp('extractTgzOrTarAsync/test.tar-extract/')),
+      'extractTgzAsync() should throw when not gzip'
+    )
   })
 })

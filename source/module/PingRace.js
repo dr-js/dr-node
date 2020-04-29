@@ -22,7 +22,7 @@ const batchRequestUrlList = (onResponse, urlList, option, body) => {
     })
   }))
   const clear = () => {
-    for (const request of requestSet) request.abort()
+    for (const request of requestSet) request.destroy()
     return promise
   }
   return { requestSet, promise, clear }

@@ -1,5 +1,5 @@
 import { createGzip } from 'zlib'
-import { createReadStream, createWriteStream, statAsync, unlinkAsync, readableAsync } from '@dr-js/core/module/node/file/function'
+import { createReadStream, createWriteStream, readAsync, statAsync, unlinkAsync, readableAsync } from '@dr-js/core/module/node/file/function'
 
 const compressFile = (
   inputFile,
@@ -41,8 +41,25 @@ const checkBloat = async (inputFile, outputFile, bloatRatio) => {
   return (outputSize * bloatRatio) >= inputSize
 }
 
+// the `0x1f8b08` check for: containing a magic number (1f 8b), the compression method (08 for DEFLATE)
+// https://en.wikipedia.org/wiki/Gzip
+// https://github.com/kevva/is-gzip
+// https://stackoverflow.com/questions/6059302/how-to-check-if-a-file-is-gzip-compressed
+const isBufferGzip = (buffer) => (
+  buffer && buffer.length > 3 &&
+  buffer[ 0 ] === 0x1f &&
+  buffer[ 1 ] === 0x8b &&
+  buffer[ 2 ] === 0x08
+)
+const isFileGzip = async (file) => {
+  const buffer = Buffer.allocUnsafe(3)
+  await readAsync(file, buffer, 0, 3, 0)
+  return isBufferGzip(buffer)
+}
+
 export {
   compressFile,
   compressFileList,
-  checkBloat
+  checkBloat,
+  isBufferGzip, isFileGzip
 }

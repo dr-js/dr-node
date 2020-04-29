@@ -158,14 +158,14 @@ const initPathContent = (
     const renderExtraExtractEditList = (relativePath) => {
       let actionType
       if (IS_EXTRA_7Z && REGEXP_EXTRACT_7Z.test(relativePath)) actionType = PATH_ACTION_TYPE.EXTRA_EXTRACT_7Z
-      if ((IS_EXTRA_TAR || IS_EXTRA_7Z) && REGEXP_EXTRACT_TAR.test(relativePath)) actionType = IS_EXTRA_TAR ? PATH_ACTION_TYPE.EXTRA_EXTRACT_TAR : PATH_ACTION_TYPE.EXTRA_EXTRACT_7Z // prefer tar for .tgz
+      if (IS_EXTRA_TAR && REGEXP_EXTRACT_TAR.test(relativePath)) actionType = PATH_ACTION_TYPE.EXTRA_EXTRACT_TAR
       return !actionType ? [] : [ cE('button', {
         className: 'edit', innerText: TEXT_EXTRACT,
         // className: 'edit', innerText: isWideL ? `${TEXT_EXTRACT}${relativePath.split('.').pop()}` : TEXT_EXTRACT,
         onclick: async () => pathAction([ '' ], actionType, relativePath, await withPromptModal('Extract To', `${relativePath}.content/`))
       }) ]
     }
-    const REGEXP_EXTRACT_7Z = /\.(7z|zip|tbz2?|txz|tar\.(bz2?|xz))$/
+    const REGEXP_EXTRACT_7Z = /\.(7z|zip|tbz2?|txz|tar(\.bz2?|\.xz))$/
     const REGEXP_EXTRACT_TAR = /\.(tgz|tar(\.gz)?)$/
 
     parentElement.innerHTML = ''

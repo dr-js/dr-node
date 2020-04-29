@@ -4,6 +4,7 @@ import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/da
 import { createReadStream, createWriteStream } from '@dr-js/core/module/node/file/function'
 import { run } from '@dr-js/core/module/node/system/Run'
 
+import { isFileGzip } from '../Compress'
 import { createCommandWrap, createDetect } from './function'
 
 // NOTE: require 7z@>=16.00 for `-bs` switch
@@ -21,7 +22,7 @@ const detect = createDetect( // test for: `-bs{o|e|p}{0|1|2} : set output stream
 const compressConfig = (sourceDirectory, outputFile) => ({
   command: getCommand(),
   argList: [
-    'a', resolve(outputFile), // can ends with `.7z` or `.zip`
+    'a', resolve(outputFile), // can ends with `.7z|.zip|.tar|.gz|...`
     resolve(sourceDirectory, '*'),
     '-bso0', '-bsp0' // mute extra output
   ]
@@ -30,7 +31,7 @@ const compressConfig = (sourceDirectory, outputFile) => ({
 const compressFileConfig = (sourceFile, outputFile) => ({
   command: getCommand(),
   argList: [
-    'a', resolve(outputFile), // can ends with `.7z` or `.zip`
+    'a', resolve(outputFile), // can ends with `.7z|.zip|.tar|.gz|...`
     resolve(sourceFile),
     '-bso0', '-bsp0' // mute extra output
   ]
@@ -61,7 +62,11 @@ const compressTgzAsync = async (sourceDirectory, outputFile) => { // for `.tgz` 
   await Promise.all([
     waitStreamStopAsync(setupStreamPipe(subProcess.stdout, createGzip(), outputStream)),
     promise
-  ])
+  ]).catch((error) => {
+    subProcess.kill()
+    outputStream.destroy()
+    throw error
+  })
 }
 
 const extractTgzAsync = async (sourceFile, outputPath) => { // for `.tgz` or `.tar.gz`
@@ -79,8 +84,16 @@ const extractTgzAsync = async (sourceFile, outputPath) => { // for `.tgz` or `.t
   await Promise.all([
     waitStreamStopAsync(setupStreamPipe(inputStream, createGunzip(), subProcess.stdin)),
     promise
-  ])
+  ]).catch((error) => {
+    subProcess.kill()
+    inputStream.destroy()
+    throw error
+  })
 }
+
+const extractTgzOrTarAsync = async (sourceFile, outputPath) => (sourceFile.endsWith('.tar') || await isFileGzip(sourceFile)) // closer to the auto gunzip of `tar`
+  ? run(extractConfig(sourceFile, outputPath)).promise
+  : extractTgzAsync(sourceFile, outputPath)
 
 export {
   getCommand, setCommand, detect,
@@ -88,5 +101,5 @@ export {
   compressConfig, compressFileConfig,
   extractConfig,
 
-  compressTgzAsync, extractTgzAsync
+  compressTgzAsync, extractTgzAsync, extractTgzOrTarAsync
 }

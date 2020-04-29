@@ -7,7 +7,7 @@
 + 📄 [source/module/Auth.js](source/module/Auth.js)
   - `AUTH_FILE`, `AUTH_FILE_GROUP`, `AUTH_SKIP`, `DEFAULT_AUTH_KEY`, `configureAuthFile`, `configureAuthFileGroup`, `configureAuthSkip`, `describeAuthFile`, `generateAuthCheckCode`, `generateAuthFile`, `loadAuthFile`, `saveAuthFile`, `verifyAuthCheckCode`
 + 📄 [source/module/Compress.js](source/module/Compress.js)
-  - `checkBloat`, `compressFile`, `compressFileList`
+  - `checkBloat`, `compressFile`, `compressFileList`, `isBufferGzip`, `isFileGzip`
 + 📄 [source/module/FactDatabase.js](source/module/FactDatabase.js)
   - `INITIAL_FACT_INFO`, `createFactDatabase`, `tryDeleteExtraCache`, `tryLoadFactInfo`
 + 📄 [source/module/FileChunkUpload.js](source/module/FileChunkUpload.js)
@@ -43,7 +43,7 @@
 + 📄 [source/module/PathAction/extraCompress.js](source/module/PathAction/extraCompress.js)
   - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
-  - `compressConfig`, `compressFileConfig`, `compressTgzAsync`, `detect`, `extractConfig`, `extractTgzAsync`, `getCommand`, `setCommand`
+  - `compressConfig`, `compressFileConfig`, `compressTgzAsync`, `detect`, `extractConfig`, `extractTgzAsync`, `extractTgzOrTarAsync`, `getCommand`, `setCommand`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
   - `createCommandWrap`, `createDetect`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)

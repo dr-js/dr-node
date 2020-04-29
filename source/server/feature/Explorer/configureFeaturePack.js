@@ -33,7 +33,7 @@ const configureFeaturePack = async ({
   IS_READ_ONLY = !mergePath, // TODO: should be decided by user permission
 
   IS_EXTRA_7Z = Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z ]),
-  IS_EXTRA_TAR = !IS_EXTRA_7Z && Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR ]) // prefer 7z
+  IS_EXTRA_TAR = Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR ])
 }) => {
   const URL_HTML = `${routePrefix}/explorer`
   const URL_PATH_ACTION = `${routePrefix}/path-action`
