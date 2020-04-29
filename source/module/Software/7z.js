@@ -1,10 +1,10 @@
-import { resolve } from 'path'
+import { resolve, dirname } from 'path'
 import { createGzip, createGunzip } from 'zlib'
 import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
 import { createReadStream, createWriteStream } from '@dr-js/core/module/node/file/function'
+import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { run } from '@dr-js/core/module/node/system/Run'
 
-import { isFileGzip } from '../Compress'
 import { createCommandWrap, createDetect } from './function'
 
 // NOTE: require 7z@>=16.00 for `-bs` switch
@@ -24,15 +24,6 @@ const compressConfig = (sourceDirectory, outputFile) => ({
   argList: [
     'a', resolve(outputFile), // can ends with `.7z|.zip|.tar|.gz|...`
     resolve(sourceDirectory, '*'),
-    '-bso0', '-bsp0' // mute extra output
-  ]
-})
-
-const compressFileConfig = (sourceFile, outputFile) => ({
-  command: getCommand(),
-  argList: [
-    'a', resolve(outputFile), // can ends with `.7z|.zip|.tar|.gz|...`
-    resolve(sourceFile),
     '-bso0', '-bsp0' // mute extra output
   ]
 })
@@ -91,15 +82,17 @@ const extractTgzAsync = async (sourceFile, outputPath) => { // for `.tgz` or `.t
   })
 }
 
-const extractTgzOrTarAsync = async (sourceFile, outputPath) => (sourceFile.endsWith('.tar') || await isFileGzip(sourceFile)) // closer to the auto gunzip of `tar`
-  ? run(extractConfig(sourceFile, outputPath)).promise
-  : extractTgzAsync(sourceFile, outputPath)
+const compressAutoAsync = async (sourceDirectory, outputFile) => (outputFile.endsWith('.tgz') || outputFile.endsWith('.tar.gz'))
+  ? createDirectory(dirname(outputFile)).then(() => compressTgzAsync(sourceDirectory, outputFile))
+  : run(compressConfig(sourceDirectory, outputFile)).promise
+
+const extractAutoAsync = async (sourceFile, outputPath) => (sourceFile.endsWith('.tgz') || sourceFile.endsWith('.tar.gz'))
+  ? extractTgzAsync(sourceFile, outputPath)
+  : run(extractConfig(sourceFile, outputPath)).promise
 
 export {
   getCommand, setCommand, detect,
-
-  compressConfig, compressFileConfig,
-  extractConfig,
-
-  compressTgzAsync, extractTgzAsync, extractTgzOrTarAsync
+  compressConfig, extractConfig,
+  compressTgzAsync, extractTgzAsync,
+  compressAutoAsync, extractAutoAsync
 }

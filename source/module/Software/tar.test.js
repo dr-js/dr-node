@@ -10,9 +10,7 @@ import {
 
 import {
   detect,
-
-  compressConfig,
-  extractConfig
+  compressConfig, extractConfig
 } from './tar'
 
 const { describe, it, before, after, info = console.log } = global

@@ -31,7 +31,5 @@ const extractConfig = (sourceFile, outputPath) => ({
 
 export {
   getCommand, setCommand, detect,
-
-  compressConfig,
-  extractConfig
+  compressConfig, extractConfig
 }

@@ -2,7 +2,7 @@ import { dirname } from 'path'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { run } from '@dr-js/core/module/node/system/Run'
 
-import { detect as detect7z, compressConfig as compressConfig7z, extractConfig as extractConfig7z, compressTgzAsync, extractTgzOrTarAsync } from 'source/module/Software/7z'
+import { detect as detect7z, compressConfig as compressConfig7z, extractConfig as extractConfig7z, compressAutoAsync, extractAutoAsync } from 'source/module/Software/7z'
 import { detect as detectTar, compressConfig as compressConfigTar, extractConfig as extractConfigTar } from 'source/module/Software/tar'
 
 const EXTRA_COMPRESS_7Z = 'extra:compress:7z'
@@ -33,11 +33,11 @@ const PATH_ACTION_MAP = { // filled based on detect result
     [ EXTRA_EXTRACT_7Z ]: async (sourceFile, outputPath) => run(extractConfig7z(sourceFile, outputPath)).promise,
     [ EXTRA_COMPRESS_TAR ]: async (sourceDirectory, outputFile) => {
       await createDirectory(dirname(outputFile))
-      return compressTgzAsync(sourceDirectory, outputFile)
+      return compressAutoAsync(sourceDirectory, outputFile)
     },
     [ EXTRA_EXTRACT_TAR ]: async (sourceFile, outputPath) => {
       await createDirectory(outputPath)
-      return extractTgzOrTarAsync(sourceFile, outputPath)
+      return extractAutoAsync(sourceFile, outputPath)
     }
   })
 }

@@ -43,7 +43,7 @@
 + 📄 [source/module/PathAction/extraCompress.js](source/module/PathAction/extraCompress.js)
   - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
-  - `compressConfig`, `compressFileConfig`, `compressTgzAsync`, `detect`, `extractConfig`, `extractTgzAsync`, `extractTgzOrTarAsync`, `getCommand`, `setCommand`
+  - `compressAutoAsync`, `compressConfig`, `compressTgzAsync`, `detect`, `extractAutoAsync`, `extractConfig`, `extractTgzAsync`, `getCommand`, `setCommand`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
   - `createCommandWrap`, `createDetect`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)

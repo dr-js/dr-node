@@ -5,17 +5,14 @@ import { run } from '@dr-js/core/module/node/system/Run'
 
 import {
   fromRoot, setupRoot, clearRoot,
-  SOURCE_FILE, SOURCE_DIRECTORY,
-  verifyOutputFile, verifyOutputDirectory
+  SOURCE_DIRECTORY, verifyOutputDirectory
 } from './compress.test/function'
 
 import {
   detect,
-
-  compressConfig, compressFileConfig,
-  extractConfig,
-
-  compressTgzAsync, extractTgzAsync, extractTgzOrTarAsync
+  compressConfig, extractConfig,
+  compressTgzAsync, extractTgzAsync,
+  compressAutoAsync, extractAutoAsync
 } from './7z'
 
 const { describe, it, before, after, info = console.log } = global
@@ -45,22 +42,6 @@ describe('Node.Module.Software.7z', () => {
     await verifyOutputDirectory(fromTemp('extractConfig/test.zip-extract/'))
   })
 
-  it('compressFileConfig()', async () => {
-    info('compressFileConfig')
-    await Promise.all([
-      run(compressFileConfig(SOURCE_FILE, fromTemp('compressFileConfig/test-file.7z'))).promise,
-      run(compressFileConfig(SOURCE_FILE, fromTemp('compressFileConfig/test-file.zip'))).promise
-    ])
-    info('extractConfig')
-    await Promise.all([
-      run(extractConfig(fromTemp('compressFileConfig/test-file.7z'), fromTemp('extractConfig/test-file.7z-extract'))).promise,
-      run(extractConfig(fromTemp('compressFileConfig/test-file.zip'), fromTemp('extractConfig/test-file.zip-extract'))).promise
-    ])
-    info('verifyOutputFile')
-    await verifyOutputFile(fromTemp('extractConfig/test-file.7z-extract', basename(SOURCE_FILE)))
-    await verifyOutputFile(fromTemp('extractConfig/test-file.zip-extract', basename(SOURCE_FILE)))
-  })
-
   it('compressTgzAsync() & extractTgzAsync()', async () => {
     info('compressTgzAsync')
     await createDirectory(fromTemp('compressTgzAsync/'))
@@ -71,16 +52,22 @@ describe('Node.Module.Software.7z', () => {
     await verifyOutputDirectory(fromTemp('extractTgzAsync/test.tgz-extract/'))
   })
 
-  it('extractTgzOrTarAsync()', async () => {
-    info('compressTgzAsync')
-    await run(compressConfig(SOURCE_DIRECTORY, fromTemp('compressTgzAsync/test.tar'))).promise
-    info('extractTgzAsync')
-    await extractTgzOrTarAsync(fromTemp('compressTgzAsync/test.tar'), fromTemp('extractTgzOrTarAsync/test.tar-extract/'))
+  it('compressAutoAsync() & extractAutoAsync()', async () => {
+    info('compressAutoAsync')
+    await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.tar.gz'))
+    await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.tgz'))
+    await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.tar'))
+    info('extractAutoAsync')
+    await extractAutoAsync(fromTemp('compressAutoAsync/test.tar.gz'), fromTemp('extractAutoAsync/test.tar.gz-extract/'))
+    await extractAutoAsync(fromTemp('compressAutoAsync/test.tgz'), fromTemp('extractAutoAsync/test.tgz-extract/'))
+    await extractAutoAsync(fromTemp('compressAutoAsync/test.tar'), fromTemp('extractAutoAsync/test.tar-extract/'))
     info('verifyOutputDirectory')
-    await verifyOutputDirectory(fromTemp('extractTgzOrTarAsync/test.tar-extract/'))
+    await verifyOutputDirectory(fromTemp('extractAutoAsync/test.tar.gz-extract/'))
+    await verifyOutputDirectory(fromTemp('extractAutoAsync/test.tgz-extract/'))
+    await verifyOutputDirectory(fromTemp('extractAutoAsync/test.tar-extract/'))
 
     await doThrowAsync(
-      async () => extractTgzAsync(fromTemp('compressTgzAsync/test.tar'), fromTemp('extractTgzOrTarAsync/test.tar-extract/')),
+      async () => extractTgzAsync(fromTemp('compressAutoAsync/test.tar'), fromTemp('extractAutoAsync/test.tar-extract-fail/')),
       'extractTgzAsync() should throw when not gzip'
     )
   })
