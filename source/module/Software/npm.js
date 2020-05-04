@@ -48,13 +48,16 @@ const findUpPackageRoot = (path = __dirname) => {
 
 let cachePathNpmExecutable // npm executable (.js or .cmd)
 const getPathNpmExecutable = () => {
-  if (cachePathNpmExecutable === undefined) cachePathNpmExecutable = realpathSync(resolveCommandName('npm'))
+  if (cachePathNpmExecutable === undefined) {
+    const command = resolveCommandName('npm')
+    cachePathNpmExecutable = command && realpathSync(command) // could be '' if npm is not found
+  }
   return cachePathNpmExecutable
 }
 
 let cachePathNpmGlobalRoot // npm global package install path
 const getPathNpmGlobalRoot = () => {
-  if (cachePathNpmGlobalRoot === undefined) cachePathNpmGlobalRoot = String(execFileSync(resolveCommandName('npm'), [ 'root', '-g' ])).trim()
+  if (cachePathNpmGlobalRoot === undefined) cachePathNpmGlobalRoot = getPathNpmExecutable() && String(execFileSync(getPathNpmExecutable(), [ 'root', '-g' ])).trim()
   return cachePathNpmGlobalRoot
 }
 const fromGlobalNodeModules = (...args) => resolve(getPathNpmGlobalRoot(), ...args) // should resolve to global installed package
@@ -76,10 +79,11 @@ const getPathNpm = () => {
     !cachePathNpm && getPathNpmExecutable().endsWith('npm-cli.js') && tryPath(getPathNpmExecutable(), '../../') // linux/darwin fast hack
     !cachePathNpm && tryPath(getPathNpmGlobalRoot(), './npm/') // global npm
     !cachePathNpm && getPathNpmExecutable().endsWith('npm.cmd') && tryPath(getPathNpmExecutable(), '../node_modules/npm/') // win32 bundled fast hack
+    if (!cachePathNpm) cachePathNpm = '' // not found, set to empty to stop repeated search
   }
   return cachePathNpm
 }
-const fromNpmNodeModules = (...args) => resolve(getPathNpm(), './node_modules/', ...args) // should resolve to npm bundled package
+const fromNpmNodeModules = (...args) => getPathNpm() && resolve(getPathNpm(), './node_modules/', ...args) // should resolve to npm bundled package
 
 export {
   parsePackageNameAndVersion,

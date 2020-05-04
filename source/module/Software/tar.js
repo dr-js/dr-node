@@ -1,5 +1,4 @@
 import { resolve } from 'path'
-
 import { createCommandWrap, createDetect } from './function'
 
 const { getCommand, setCommand } = createCommandWrap('tar')
@@ -15,7 +14,7 @@ const detect = createDetect(
 const compressConfig = (sourceDirectory, outputFile) => ({
   command: getCommand(),
   argList: [
-    '-zcf', resolve(outputFile), // should ends with `.tgz`
+    (outputFile.endsWith('gz') ? '-zcf' : '-cf'), resolve(outputFile),
     '-C', resolve(sourceDirectory),
     '.' // TODO: NOTE: the result tar will have a `./` as root folder, but this will get resolved and disappear after extract
   ]

@@ -1,11 +1,11 @@
 import { resolve } from 'path'
+import { promises as fsAsync } from 'fs'
 
 import { withTempDirectory, resetDirectory } from '@dr-js/dev/module/node/file'
 import { withRunBackground } from '@dr-js/dev/module/node/run'
 import { runMain } from '@dr-js/dev/module/main'
 
 import { stringifyEqual } from '@dr-js/core/module/common/verify'
-import { readFileAsync, writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { run } from '@dr-js/core/module/node/system/Run'
 
 import { PATH_ACTION_TYPE } from 'source/module/PathAction/base'
@@ -77,12 +77,12 @@ runMain(async ({ padLog, stepLog }) => {
     stepLog('create test directory done')
 
     padLog('create config')
-    await writeFileAsync(FILE_SERVER_PERMISSION_CONFIG, TEXT_SERVER_PERMISSION_CONFIG)
-    await writeFileAsync(FILE_SERVER_CONFIG, TEXT_SERVER_CONFIG)
-    await writeFileAsync(FILE_CLIENT_PATH_ACTION_CONFIG, TEXT_CLIENT_PATH_ACTION_CONFIG)
-    await writeFileAsync(FILE_CLIENT_FILE_UPLOAD_CONFIG, TEXT_CLIENT_FILE_UPLOAD_CONFIG)
-    await writeFileAsync(FILE_CLIENT_FILE_DOWNLOAD_CONFIG, TEXT_CLIENT_FILE_DOWNLOAD_CONFIG)
-    await writeFileAsync(FILE_TEST, await readFileAsync(fromRoot('package-lock.json')))
+    await fsAsync.writeFile(FILE_SERVER_PERMISSION_CONFIG, TEXT_SERVER_PERMISSION_CONFIG)
+    await fsAsync.writeFile(FILE_SERVER_CONFIG, TEXT_SERVER_CONFIG)
+    await fsAsync.writeFile(FILE_CLIENT_PATH_ACTION_CONFIG, TEXT_CLIENT_PATH_ACTION_CONFIG)
+    await fsAsync.writeFile(FILE_CLIENT_FILE_UPLOAD_CONFIG, TEXT_CLIENT_FILE_UPLOAD_CONFIG)
+    await fsAsync.writeFile(FILE_CLIENT_FILE_DOWNLOAD_CONFIG, TEXT_CLIENT_FILE_DOWNLOAD_CONFIG)
+    await fsAsync.writeFile(FILE_TEST, await fsAsync.readFile(fromRoot('package-lock.json')))
 
     padLog('create FILE_AUTH_KEY')
     await run({
@@ -107,7 +107,7 @@ runMain(async ({ padLog, stepLog }) => {
           console.error('[error]', error)
           console.error('[stderrString]', String(await stderrPromise))
         })
-        return JSON.parse(String(await readFileAsync(FILE_PATH_CONTENT_OUTPUT)))
+        return JSON.parse(String(await fsAsync.readFile(FILE_PATH_CONTENT_OUTPUT)))
       }
 
       padLog('test node path action')

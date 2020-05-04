@@ -1,8 +1,8 @@
 import { dirname } from 'path'
+import { promises as fsAsync } from 'fs'
 
 import { withRetryAsync } from '@dr-js/core/module/common/function'
 import { percent, binary } from '@dr-js/core/module/common/format'
-import { readFileAsync, writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 
 import { uploadFileByChunk } from 'source/module/FileChunkUpload'
@@ -19,7 +19,7 @@ const fileUpload = async ({
   authFetch, // from `module/Auth`
   log
 }) => {
-  if (fileBuffer === undefined) fileBuffer = await readFileAsync(fileInputPath)
+  if (fileBuffer === undefined) fileBuffer = await fsAsync.readFile(fileInputPath)
 
   log && log(`[Upload] key: ${key}, size: ${binary(fileBuffer.length)}B`)
 
@@ -57,7 +57,7 @@ const fileDownload = async ({
 
   if (fileOutputPath) {
     await createDirectory(dirname(fileOutputPath))
-    await writeFileAsync(fileOutputPath, fileBuffer)
+    await fsAsync.writeFile(fileOutputPath, fileBuffer)
     log && log(`[Download] done: ${fileOutputPath}`)
   }
 

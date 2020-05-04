@@ -1,14 +1,15 @@
+import { promises as fsAsync } from 'fs'
+
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
 import { time } from '@dr-js/core/module/common/format'
 import { createStepper } from '@dr-js/core/module/common/time'
 import { isBasicObject } from '@dr-js/core/module/common/check'
-import { prettyStringifyTree } from '@dr-js/core/module/common/data/Tree'
+import { prettyStringifyTreeNode } from '@dr-js/core/module/common/data/Tree'
 
 import { writeBufferToStreamAsync } from '@dr-js/core/module/node/data/Stream'
-import { writeFileAsync } from '@dr-js/core/module/node/file/function'
-import { getFileList, getDirectorySubInfoList, getDirectoryInfoTree } from '@dr-js/core/module/node/file/Directory'
-import { runSync } from '@dr-js/core/module/node/system/Run'
+import { PATH_TYPE } from '@dr-js/core/module/node/file/Path'
+import { getDirInfoList, getDirInfoTree, getFileList } from '@dr-js/core/module/node/file/Directory'
 
 import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from '@dr-js/node/module/module/Auth'
 import { PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/base'
@@ -16,8 +17,7 @@ import { PATH_ACTION_TYPE as EXTRA_COMPRESS_PATH_ACTION_TYPE } from '@dr-js/node
 
 import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/PingRace'
 
-import { detect as detect7z, compressConfig as compressConfig7z, extractConfig as extractConfig7z } from '@dr-js/node/module/module/Software/7z'
-import { detect as detectTar, compressConfig as compressConfigTar, extractConfig as extractConfigTar } from '@dr-js/node/module/module/Software/tar'
+import { compressAutoAsync, extractAutoAsync } from '@dr-js/node/module/module/Software/archive'
 import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
 
 import { getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
@@ -62,11 +62,8 @@ const ModuleFormatConfigList = parseCompactList(
   'file-list-all,ls-R,lla/AP,O/0-1|list all file: $0=path/cwd',
   'file-tree,tree/AP,O/0-1|list all file in tree: $0=path/cwd',
 
-  'compress-7z,c7z/SP,O|compress with 7zip: -O=outputFile, $0=inputDirectory',
-  'extract-7z,e7z/SP,O|extract with 7zip: -I=inputFile, $0=outputDirectory',
-
-  'compress-tar,ctar/SP,O|compress with tar: -O=outputFile, $0=inputDirectory',
-  'extract-tar,etar/SP,O|extract with tar: -I=inputFile, $0=outputDirectory',
+  'compress,a/SP,O|compress with npm/tar or 7zip: -O=outputFile, $0=inputDirectory',
+  'extract,x/SP,O|extract with npm/tar or 7zip: -I=inputFile, $0=outputDirectory',
 
   'git-branch,gb/T|print git branch',
   'git-commit-hash,gch/T|print git commit hash',
@@ -95,7 +92,7 @@ const runModule = async (optionData, modeName) => {
     : isBasicObject(value) ? JSON.stringify(value, null, 2)
       : Buffer.from(value)
   const outputAuto = async (result) => outputFile
-    ? writeFileAsync(outputFile, toBuffer(result))
+    ? fsAsync.writeFile(outputFile, toBuffer(result))
     : writeBufferToStreamAsync(process.stdout, toBuffer(result))
 
   switch (modeName) {
@@ -153,19 +150,10 @@ const runModule = async (optionData, modeName) => {
     case 'file-tree':
       return outputAuto(await collectFile(modeName, argumentList[ 0 ] || process.cwd()))
 
-    case 'compress-7z':
-      detect7z()
-      return runSync(compressConfig7z(argumentList[ 0 ], outputFile))
-    case 'extract-7z':
-      detect7z()
-      return runSync(extractConfig7z(inputFile, argumentList[ 0 ]))
-
-    case 'compress-tar':
-      detectTar()
-      return runSync(compressConfigTar(argumentList[ 0 ], outputFile))
-    case 'extract-tar':
-      detectTar()
-      return runSync(extractConfigTar(inputFile, argumentList[ 0 ]))
+    case 'compress':
+      return compressAutoAsync(argumentList[ 0 ], outputFile)
+    case 'extract':
+      return extractAutoAsync(inputFile, argumentList[ 0 ])
 
     case 'git-branch':
       detectGit()
@@ -182,19 +170,19 @@ const runModule = async (optionData, modeName) => {
 }
 
 const prettyStringifyFileTree = async (rootPath) => {
-  const { subInfoListMap } = await getDirectoryInfoTree(rootPath)
+  const { dirInfoListMap } = await getDirInfoTree(rootPath)
   const resultList = []
-  prettyStringifyTree(
-    [ [ rootPath, 'NAME' ], -1, false ],
-    ([ [ path ], level /* , hasMore */ ]) => subInfoListMap[ path ] && subInfoListMap[ path ].map(
-      ({ path: subPath, name }, subIndex, { length }) => [ [ subPath, name ], level + 1, subIndex !== length - 1 ]
+  prettyStringifyTreeNode(
+    ([ [ path ], level /* , hasMore */ ]) => dirInfoListMap[ path ] && dirInfoListMap[ path ].map(
+      ({ name, path: subPath }, subIndex, { length }) => [ [ subPath, name ], level + 1, subIndex !== length - 1 ]
     ),
+    [ [ rootPath, 'NAME' ], -1, false ],
     (prefix, [ , name ]) => resultList.push(`${prefix}${name}`)
   )
   return resultList.join('\n')
 }
 
-const collectFile = async (modeName, rootPath) => modeName === 'file-list' ? (await getDirectorySubInfoList(rootPath)).map(({ name, stat }) => stat.isDirectory() ? `${name}/` : name)
+const collectFile = async (modeName, rootPath) => modeName === 'file-list' ? (await getDirInfoList(rootPath)).map(({ type, name }) => type === PATH_TYPE.Directory ? `${name}/` : name)
   : modeName === 'file-list-all' ? getFileList(rootPath)
     : modeName === 'file-tree' ? prettyStringifyFileTree(rootPath)
       : ''

@@ -43,13 +43,17 @@
 + 📄 [source/module/PathAction/extraCompress.js](source/module/PathAction/extraCompress.js)
   - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
-  - `compressAutoAsync`, `compressConfig`, `compressTgzAsync`, `detect`, `extractAutoAsync`, `extractConfig`, `extractTgzAsync`, `getCommand`, `setCommand`
+  - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
++ 📄 [source/module/Software/archive.js](source/module/Software/archive.js)
+  - `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
   - `createCommandWrap`, `createDetect`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
   - `detect`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setCommand`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
   - `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`
++ 📄 [source/module/Software/npmTar.js](source/module/Software/npmTar.js)
+  - `REGEXP_TGZ`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `getNpmTar`
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)
   - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
 + 📄 [source/module/Stat/StatCollect.js](source/module/Stat/StatCollect.js)
@@ -168,14 +172,10 @@
 >       list all file: $0=path/cwd
 >   --file-tree --tree [OPTIONAL] [ARGUMENT=0-1]
 >       list all file in tree: $0=path/cwd
->   --compress-7z --c7z [OPTIONAL] [ARGUMENT=1]
->       compress with 7zip: -O=outputFile, $0=inputDirectory
->   --extract-7z --e7z [OPTIONAL] [ARGUMENT=1]
->       extract with 7zip: -I=inputFile, $0=outputDirectory
->   --compress-tar --ctar [OPTIONAL] [ARGUMENT=1]
->       compress with tar: -O=outputFile, $0=inputDirectory
->   --extract-tar --etar [OPTIONAL] [ARGUMENT=1]
->       extract with tar: -I=inputFile, $0=outputDirectory
+>   --compress --a -a [OPTIONAL] [ARGUMENT=1]
+>       compress with npm/tar or 7zip: -O=outputFile, $0=inputDirectory
+>   --extract --x -x [OPTIONAL] [ARGUMENT=1]
+>       extract with npm/tar or 7zip: -I=inputFile, $0=outputDirectory
 >   --git-branch --gb [OPTIONAL] [ARGUMENT=0+]
 >       print git branch
 >   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0+]
@@ -251,10 +251,8 @@
 >     export DR_NODE_FILE_LIST="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_FILE_LIST_ALL="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_FILE_TREE="[OPTIONAL] [ARGUMENT=0-1]"
->     export DR_NODE_COMPRESS_7Z="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_EXTRACT_7Z="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_COMPRESS_TAR="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_EXTRACT_TAR="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_COMPRESS="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+]"
@@ -313,10 +311,8 @@
 >     "fileList": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "fileListAll": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "fileTree": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
->     "compress7z": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "extract7z": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "compressTar": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "extractTar": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "compress": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "extract": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+]" ],

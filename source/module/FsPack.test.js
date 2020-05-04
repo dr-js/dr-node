@@ -1,7 +1,7 @@
 import { resolve } from 'path'
+import { promises as fsAsync } from 'fs'
 import { stringifyEqual } from '@dr-js/core/module/common/verify'
 import { getSampleRange } from '@dr-js/core/module/common/math/sample'
-import { writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { modifyDelete } from '@dr-js/core/module/node/file/Modify'
 import { resetDirectory } from '@dr-js/dev/module/node/file'
@@ -22,15 +22,15 @@ const fromRoot = (...args) => resolve(TEST_ROOT, ...args)
 before('prepare', async () => {
   await resetDirectory(TEST_ROOT)
   await createDirectory(fromRoot('input'))
-  await writeFileAsync(fromRoot('input/empty'), '')
-  await writeFileAsync(fromRoot('input/text'), 'input/text')
-  await writeFileAsync(fromRoot('input/binary-small'), Buffer.from(getSampleRange(0, 64 - 1)))
-  await writeFileAsync(fromRoot('input/binary-big'), Buffer.from(getSampleRange(0, 128 * 1024 - 1)))
+  await fsAsync.writeFile(fromRoot('input/empty'), '')
+  await fsAsync.writeFile(fromRoot('input/text'), 'input/text')
+  await fsAsync.writeFile(fromRoot('input/binary-small'), Buffer.from(getSampleRange(0, 64 - 1)))
+  await fsAsync.writeFile(fromRoot('input/binary-big'), Buffer.from(getSampleRange(0, 128 * 1024 - 1)))
   await createDirectory(fromRoot('input/dir0'))
-  await writeFileAsync(fromRoot('input/dir0/empty'), '')
-  await writeFileAsync(fromRoot('input/dir0/text'), 'input/dir0/text')
-  await writeFileAsync(fromRoot('input/dir0/binary-small'), Buffer.from(getSampleRange(0, 64 - 1)))
-  await writeFileAsync(fromRoot('input/dir0/binary-big'), Buffer.from(getSampleRange(0, 128 * 1024 - 1)))
+  await fsAsync.writeFile(fromRoot('input/dir0/empty'), '')
+  await fsAsync.writeFile(fromRoot('input/dir0/text'), 'input/dir0/text')
+  await fsAsync.writeFile(fromRoot('input/dir0/binary-small'), Buffer.from(getSampleRange(0, 64 - 1)))
+  await fsAsync.writeFile(fromRoot('input/dir0/binary-big'), Buffer.from(getSampleRange(0, 128 * 1024 - 1)))
   await createDirectory(fromRoot('input/dir1'))
 })
 after('clear', async () => {

@@ -1,5 +1,4 @@
 import { spawnSync } from 'child_process'
-
 import { createCommandWrap, createDetect } from './function'
 
 const { getCommand, setCommand } = createCommandWrap('git')

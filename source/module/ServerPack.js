@@ -1,6 +1,6 @@
 import { createSecureContext } from 'tls'
+import { promises as fsAsync } from 'fs'
 import { objectMap } from '@dr-js/core/module/common/immutable/Object'
-import { readFileAsync } from '@dr-js/core/module/node/file/function'
 import { createServerPack } from '@dr-js/core/module/node/server/Server'
 
 __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: single', { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined })
@@ -45,7 +45,7 @@ const loadTLS = async (
     SNICallback: Object.keys(optionMap).length >= 2 ? (hostname, callback) => callback(null, secureContextMap[ hostname ] || secureContextMap.default) : undefined
   }
 }
-const autoBuffer = async (bufferOrPath) => Buffer.isBuffer(bufferOrPath) ? bufferOrPath : readFileAsync(bufferOrPath)
+const autoBuffer = async (bufferOrPath) => Buffer.isBuffer(bufferOrPath) ? bufferOrPath : fsAsync.readFile(bufferOrPath)
 const objectMapAsync = async (object, mapFuncAsync) => {
   const result = {}
   for (const [ key, value ] of Object.entries(object)) result[ key ] = await mapFuncAsync(value, key)

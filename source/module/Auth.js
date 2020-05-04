@@ -1,3 +1,4 @@
+import { promises as fsAsync } from 'fs'
 import {
   verifyCheckCode, verifyParsedCheckCode,
   generateCheckCode, generateLookupData,
@@ -11,11 +12,10 @@ import { getEntityTagByContentHashAsync } from '@dr-js/core/module/node/module/E
 
 import { fetchLikeRequest } from '@dr-js/core/module/node/net'
 import { toArrayBuffer } from '@dr-js/core/module/node/data/Buffer'
-import { readFileAsync, writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { createPathPrefixLock } from '@dr-js/core/module/node/file/Path'
 
-const saveAuthFile = (pathFile, timedLookupData) => writeFileAsync(pathFile, Buffer.from(packDataArrayBuffer(timedLookupData)))
-const loadAuthFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await readFileAsync(pathFile)))
+const saveAuthFile = (pathFile, timedLookupData) => fsAsync.writeFile(pathFile, Buffer.from(packDataArrayBuffer(timedLookupData)))
+const loadAuthFile = async (pathFile) => parseDataArrayBuffer(toArrayBuffer(await fsAsync.readFile(pathFile)))
 const describeAuthFile = async (pathFile) => {
   const { tag, size, tokenSize, timeGap, info, dataView } = await loadAuthFile(pathFile)
   return indentList('[AuthFile]', [

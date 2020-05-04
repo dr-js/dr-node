@@ -1,16 +1,12 @@
 import { resolve, relative, /* isAbsolute, */ dirname } from 'path'
+import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
+
 import { catchAsync } from '@dr-js/core/module/common/error'
 import { setupStreamPipe, waitStreamStopAsync, bufferToReadableStream } from '@dr-js/core/module/node/data/Stream'
-import {
-  createReadStream, createWriteStream,
-  openAsync, closeAsync, readAsync, writeAsync, /* readlinkAsync, symlinkAsync, */
-  writeFileAsync,
-  statAsync
-} from '@dr-js/core/module/node/file/function'
 import { PATH_TYPE, toPosixPath } from '@dr-js/core/module/node/file/Path'
-import { getDirectoryInfoTree, walkDirectoryInfoTree, createDirectory } from '@dr-js/core/module/node/file/Directory'
+import { getDirInfoTree, walkDirInfoTreeAsync, createDirectory } from '@dr-js/core/module/node/file/Directory'
 
-// TODO: no symlink support, since getDirectoryInfoTree will follow link to target
+// TODO: no symlink support, but can add now
 
 /** fsPack
  * feature
@@ -61,31 +57,31 @@ const isExecutableToFileMode = (isExecutable) => isExecutable ? 0x755 : 0x644 //
 const toRoute = (packRoot, path) => toPosixPath(relative(packRoot, path))
 
 const autoOpenFsPack = async (asyncFunc, fsPack, openFlag, extra) => {
-  const { packPath, packFd } = fsPack
-  if (packFd) return asyncFunc(packFd, fsPack, extra)
-  const packFdAuto = await openAsync(packPath, openFlag)
-  const { result, error } = await catchAsync(asyncFunc, packFdAuto, fsPack, extra)
-  await closeAsync(packFdAuto)
+  const { packPath, packFh } = fsPack
+  if (packFh) return asyncFunc(packFh, fsPack, extra)
+  const packFhAuto = await fsAsync.open(packPath, openFlag)
+  const { result, error } = await catchAsync(asyncFunc, packFhAuto, fsPack, extra)
+  await packFhAuto.close()
   if (error) throw error
   return result
 }
 
-const readBuffer = async (packFd, offset, size, buffer = Buffer.allocUnsafe(size)) => {
-  await readAsync(packFd, buffer, 0, size, offset)
+const readBuffer = async (packFh, offset, size, buffer = Buffer.allocUnsafe(size)) => {
+  await packFh.read(buffer, 0, size, offset)
   return buffer
 }
-const readHeaderNumberList = async (packFd, offset, count = 1) => {
-  const buffer = await readBuffer(packFd, offset, count * UINT32_BYTE_SIZE)
+const readHeaderNumberList = async (packFh, offset, count = 1) => {
+  const buffer = await readBuffer(packFh, offset, count * UINT32_BYTE_SIZE)
   const numberList = []
   for (let index = 0; index < count; index++) numberList.push(buffer.readUInt32BE(index * UINT32_BYTE_SIZE))
   return numberList
 }
 
-const writeBuffer = async (packFd, offset, buffer) => writeAsync(packFd, buffer, 0, buffer.length, offset)
-const writeHeaderNumberList = async (packFd, offset, numberList) => {
+const writeBuffer = async (packFh, offset, buffer) => packFh.write(buffer, 0, buffer.length, offset)
+const writeHeaderNumberList = async (packFh, offset, numberList) => {
   const buffer = Buffer.allocUnsafe(numberList.length * UINT32_BYTE_SIZE)
   for (let index = 0; index < numberList.length; index++) buffer.writeUInt32BE(numberList[ index ], index * UINT32_BYTE_SIZE)
-  return writeBuffer(packFd, offset, buffer)
+  return writeBuffer(packFh, offset, buffer)
 }
 
 const parseHeaderJSON = (buffer) => {
@@ -140,46 +136,46 @@ const packHeaderJSON = (headerJSON) => {
   return Buffer.from(JSON.stringify({ [ KEY_CONTENT_COMPACT ]: contentCompact }))
 }
 
-const readFsPackHeader = async (packFd, fsPack) => {
+const readFsPackHeader = async (packFh, fsPack) => {
   const { offset } = fsPack
-  const [ headerVersion, headerOffset ] = await readHeaderNumberList(packFd, offset, 2)
+  const [ headerVersion, headerOffset ] = await readHeaderNumberList(packFh, offset, 2)
   if (headerVersion >> 8 !== HEADER_VERSION_UINT32 >> 8) throw new Error(`not fsPack: ${headerVersion.toString(36)}, expect: ${HEADER_VERSION_UINT32.toString(36)}`)
   if ((headerVersion & 0xff) !== (HEADER_VERSION_UINT32 & 0xff)) throw new Error(`mismatch version: ${headerVersion & 0xff}`)
   if (!(headerOffset >= 2 * UINT32_BYTE_SIZE && headerOffset <= UINT32_MAX)) throw new Error(`invalid headerOffset: ${headerOffset}`)
-  const [ headerLength ] = await readHeaderNumberList(packFd, offset + headerOffset, 1)
-  const headerJSON = parseHeaderJSON(await readBuffer(packFd, offset + headerOffset + UINT32_BYTE_SIZE, headerLength))
+  const [ headerLength ] = await readHeaderNumberList(packFh, offset + headerOffset, 1)
+  const headerJSON = parseHeaderJSON(await readBuffer(packFh, offset + headerOffset + UINT32_BYTE_SIZE, headerLength))
   fsPack.headerOffset = headerOffset
   fsPack.headerJSON = headerJSON
 }
-const writeFsPackHeader = async (packFd, fsPack) => {
+const writeFsPackHeader = async (packFh, fsPack) => {
   const { offset, headerOffset, headerJSON } = fsPack
-  await writeHeaderNumberList(packFd, offset, [ HEADER_VERSION_UINT32, headerOffset ])
+  await writeHeaderNumberList(packFh, offset, [ HEADER_VERSION_UINT32, headerOffset ])
   const headerJSONBuffer = packHeaderJSON(headerJSON)
-  await writeHeaderNumberList(packFd, offset + headerOffset, [ headerJSONBuffer.length ])
-  await writeBuffer(packFd, offset + headerOffset + UINT32_BYTE_SIZE, headerJSONBuffer)
+  await writeHeaderNumberList(packFh, offset + headerOffset, [ headerJSONBuffer.length ])
+  await writeBuffer(packFh, offset + headerOffset + UINT32_BYTE_SIZE, headerJSONBuffer)
 }
-const writeFsPackAppendFile = async (packFd, fsPack, {
+const writeFsPackAppendFile = async (packFh, fsPack, {
   path, route = toRoute(fsPack.packRoot, path), size, isExecutable,
   stat, buffer, readStream // optional
 }) => {
   if (!size || !isExecutable) {
-    if (!stat) stat = await statAsync(path)
+    if (!stat) stat = await fsAsync.stat(path)
     if (!size) size = stat.size
     if (!isExecutable) isExecutable = fileModeToIsExecutable(stat.mode)
   }
   if (!readStream) readStream = buffer ? bufferToReadableStream(buffer) : createReadStream(path)
-  const writeStream = createWriteStream(fsPack.packPath, { fd: packFd, start: fsPack.offset + fsPack.headerOffset, autoClose: false })
+  const writeStream = createWriteStream(fsPack.packPath, { fd: packFh.fd, start: fsPack.offset + fsPack.headerOffset, autoClose: false })
   await waitStreamStopAsync(setupStreamPipe(readStream, writeStream))
   fsPack.headerOffset += size
   fsPack.headerJSON.contentList.push({ type: TYPE_FILE, route, size, isExecutable })
 }
 const editFsPackAppendDirectory = async (fsPack, { path, route = toRoute(fsPack.packRoot, path) }) => { fsPack.headerJSON.contentList.push({ type: TYPE_DIRECTORY, route }) }
 // const editFsPackAppendSymlink = async (fsPack, { path, route = toRoute(fsPack.packRoot, path), target }) => {
-//   if (!target) target = await readlinkAsync(path)
+//   if (!target) target = await fsAsync.readlink(path)
 //   fsPack.headerJSON.contentList.push({ type: TYPE_SYMLINK, route, target })
 // }
 
-const unpackFsPackFile = async (packFd, fsPack, {
+const unpackFsPackFile = async (packFh, fsPack, {
   route, size, isExecutable,
   buffer, writeStream // optional
 }) => {
@@ -187,35 +183,35 @@ const unpackFsPackFile = async (packFd, fsPack, {
   const { offsetSum } = fastCache.contentMap[ route ]
   const path = resolve(unpackPath, route)
   await createDirectory(dirname(path))
-  if (buffer) await readBuffer(packFd, offsetSum, size, buffer)
+  if (buffer) await readBuffer(packFh, offsetSum, size, buffer)
   else if (writeStream || size >= 64 * 1024) {
-    const readStream = createReadStream(packPath, { fd: packFd, start: offsetSum, end: offsetSum + size - 1, autoClose: false })
+    const readStream = createReadStream(packPath, { fd: packFh.fd, start: offsetSum, end: offsetSum + size - 1, autoClose: false })
     if (!writeStream) writeStream = createWriteStream(path, { mode: isExecutableToFileMode(isExecutable) })
     await waitStreamStopAsync(setupStreamPipe(readStream, writeStream))
-  } else if (size > 0) await writeFileAsync(path, await readBuffer(packFd, offsetSum, size))
-  else await writeFileAsync(path, '')
+  } else if (size > 0) await fsAsync.writeFile(path, await readBuffer(packFh, offsetSum, size))
+  else await fsAsync.writeFile(path, '')
 }
-const unpackFsPackDirectory = async (packFd, fsPack, { route }) => {
+const unpackFsPackDirectory = async (packFh, fsPack, { route }) => {
   const { unpackPath } = fsPack
   const path = resolve(unpackPath, route)
   await createDirectory(path)
 }
-// const unpackFsPackSymlink = async (packFd, fsPack, { route, target }) => {
+// const unpackFsPackSymlink = async (packFh, fsPack, { route, target }) => {
 //   const { unpackPath } = fsPack
 //   const path = resolve(unpackPath, route)
 //   const targetPath = isAbsolute(target) ? target : resolve(unpackPath, target)
 //   await createDirectory(dirname(path))
-//   await symlinkAsync(targetPath, path)
+//   await fsAsync.symlink(targetPath, path)
 // }
 
 const collectContentListFromPath = async (inputPath) => {
   const contentList = []
   const directoryPathList = []
   const fileDirectorySet = new Set()
-  await walkDirectoryInfoTree(await getDirectoryInfoTree(inputPath), ({ path, stat, type }) => {
+  await walkDirInfoTreeAsync(await getDirInfoTree(inputPath), ({ type, path }) => {
     switch (type) {
       case PATH_TYPE.File:
-        contentList.push({ type: TYPE_FILE, path, stat })
+        contentList.push({ type: TYPE_FILE, path })
         fileDirectorySet.add(dirname(path))
         break
       case PATH_TYPE.Directory:
@@ -259,9 +255,9 @@ const verifyUnpack = (fsPack) => {
   autoFastCache(fsPack)
 }
 
-const initFsPack = async ({ packPath, packRoot = dirname(packPath), packFd = null, offset = 0 }) => {
+const initFsPack = async ({ packPath, packRoot = dirname(packPath), packFh = null, offset = 0 }) => {
   const fsPack = {
-    packPath, packRoot, packFd, offset, isReadOnly: false,
+    packPath, packRoot, packFh, offset, isReadOnly: false,
     headerOffset: 2 * UINT32_BYTE_SIZE, headerJSON: { contentList: [] },
     unpackPath: '', fastCache: null
   }
@@ -275,11 +271,11 @@ const saveFsPack = async (fsPack) => {
 }
 
 const loadFsPack = async ({
-  packPath, packRoot = dirname(packPath), packFd = null, offset = 0, isReadOnly = false,
+  packPath, packRoot = dirname(packPath), packFh = null, offset = 0, isReadOnly = false,
   unpackPath = ''
 }) => {
   const fsPack = {
-    packPath, packRoot, packFd, offset, isReadOnly,
+    packPath, packRoot, packFh, offset, isReadOnly,
     headerOffset: 0, headerJSON: null,
     unpackPath, fastCache: null
   }
@@ -316,12 +312,12 @@ const append = async (fsPack, content) => {
 }
 const appendContentList = async (fsPack, contentList) => {
   verifyEdit(fsPack)
-  await autoOpenFsPack(async (packFd, fsPack) => {
+  await autoOpenFsPack(async (packFh, fsPack) => {
     for (const content of contentList) {
       // __DEV__ && console.log(`++ ${content.type} | ${content.route}`)
       switch (content.type) {
         case TYPE_FILE:
-          await writeFsPackAppendFile(packFd, fsPack, content)
+          await writeFsPackAppendFile(packFh, fsPack, content)
           break
         case TYPE_DIRECTORY:
           await editFsPackAppendDirectory(fsPack, content)
@@ -366,18 +362,18 @@ const unpack = async (fsPack, content) => {
 }
 const unpackContentList = async (fsPack, contentList) => {
   verifyUnpack(fsPack)
-  await autoOpenFsPack(async (packFd, fsPack) => {
+  await autoOpenFsPack(async (packFh, fsPack) => {
     for (const content of contentList) {
       // __DEV__ && console.log(`-- ${content.type} | ${content.route}`)
       switch (content.type) {
         case TYPE_FILE:
-          await unpackFsPackFile(packFd, fsPack, content)
+          await unpackFsPackFile(packFh, fsPack, content)
           break
         case TYPE_DIRECTORY:
-          await unpackFsPackDirectory(packFd, fsPack, content)
+          await unpackFsPackDirectory(packFh, fsPack, content)
           break
         // case TYPE_SYMLINK:
-        //   await unpackFsPackSymlink(packFd, fsPack, content)
+        //   await unpackFsPackSymlink(packFh, fsPack, content)
         //   break
         default:
           throw new Error(`invalid content type: ${content.type}`)

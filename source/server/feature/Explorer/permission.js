@@ -1,4 +1,4 @@
-import { visibleAsync } from '@dr-js/core/module/node/file/function'
+import { STAT_ERROR, getPathLstat } from '@dr-js/core/module/node/file/Path'
 
 import { PATH_ACTION_TYPE } from 'source/module/PathAction/base'
 import { PATH_ACTION_TYPE as EXTRA_COMPRESS_PATH_ACTION_TYPE } from 'source/module/PathAction/extraCompress'
@@ -53,7 +53,7 @@ const CREATE_PERMISSION_CHECK_MAP = {
       if (IS_READ_ONLY) return false
       const permissionType = await getPermissionType(type, payload)
       if (permissionType === FULL) return true
-      if (permissionType === ADD_ONLY) return !(await visibleAsync(filePath))
+      if (permissionType === ADD_ONLY) return (STAT_ERROR === await getPathLstat(filePath))
       return false
     }
   }

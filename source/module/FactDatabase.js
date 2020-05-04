@@ -1,12 +1,13 @@
 import { join as joinPath } from 'path'
+import { createReadStream, promises as fsAsync } from 'fs'
+
 import { catchAsync } from '@dr-js/core/module/common/error'
 import { lossyAsync } from '@dr-js/core/module/common/function'
 import { tryParseJSONObject } from '@dr-js/core/module/common/data/function'
 import { createStateStore } from '@dr-js/core/module/common/immutable/StateStore'
 
 import { readlineOfStreamAsync } from '@dr-js/core/module/node/data/Stream'
-import { readFileAsync, writeFileAsync, unlinkAsync, createReadStream } from '@dr-js/core/module/node/file/function'
-import { getDirectorySubInfoList } from '@dr-js/core/module/node/file/Directory'
+import { getDirInfoList } from '@dr-js/core/module/node/file/Directory'
 import { createLogger } from '@dr-js/core/module/node/module/Logger'
 
 // lightweight log-based database
@@ -82,10 +83,10 @@ const createFactDatabase = async ({
     const fileContent = JSON.stringify({ factId, factState: getState() })
 
     __DEV__ && console.log('[saveFactCache] saving fact state:', factCacheFile)
-    await writeFileAsync(factCacheFile, fileContent) // may not always finish on progress exit
+    await fsAsync.writeFile(factCacheFile, fileContent) // may not always finish on progress exit
 
     __DEV__ && prevFactCacheFile && console.log('[saveFactCache] dropping prev fact state:', prevFactCacheFile)
-    prevFactCacheFile && await unlinkAsync(prevFactCacheFile).catch((error) => { __DEV__ && console.warn('[saveFactCache] clear failed:', prevFactCacheFile, error) })
+    prevFactCacheFile && await fsAsync.unlink(prevFactCacheFile).catch((error) => { __DEV__ && console.warn('[saveFactCache] clear failed:', prevFactCacheFile, error) })
 
     __DEV__ && console.log('[saveFactCache] done save fact state')
     prevFactCacheFile = factCacheFile
@@ -129,9 +130,9 @@ const createFactDatabase = async ({
 const tryLoadFactInfo = async (factInfo, { applyFact, decodeFact, pathFactDirectory, nameFactLogFile, nameFactCacheFile }) => {
   const factLogFileList = []
   const factCacheFileList = []
-  const { error } = await catchAsync(async () => (await getDirectorySubInfoList(pathFactDirectory)).forEach(({ path, name }) => {
-    name.startsWith(nameFactLogFile) && REGEXP_LOG_FILE.test(name) && factLogFileList.push({ fileId: parseInt(REGEXP_LOG_FILE.exec(name)[ 1 ]), path, name })
-    name.startsWith(nameFactCacheFile) && REGEXP_CACHE_FILE.test(name) && factCacheFileList.push({ fileId: parseInt(REGEXP_CACHE_FILE.exec(name)[ 1 ]), path, name })
+  const { error } = await catchAsync(async () => (await getDirInfoList(pathFactDirectory)).forEach(({ name, path }) => {
+    name.startsWith(nameFactLogFile) && REGEXP_LOG_FILE.test(name) && factLogFileList.push({ fileId: parseInt(REGEXP_LOG_FILE.exec(name)[ 1 ]), name, path })
+    name.startsWith(nameFactCacheFile) && REGEXP_CACHE_FILE.test(name) && factCacheFileList.push({ fileId: parseInt(REGEXP_CACHE_FILE.exec(name)[ 1 ]), name, path })
   }))
 
   __DEV__ && error && console.log('[tryLoadFactInfo] failed to get content at:', pathFactDirectory)
@@ -145,9 +146,9 @@ const REGEXP_CACHE_FILE = /\.(\d+)\.json$/
 
 const tryLoadFactInfoFromCache = async (factInfo, { factCacheFileList }) => { // first check if cached state is available
   factCacheFileList.sort((a, b) => b.fileId - a.fileId) // bigger id first
-  for (const { path, name } of factCacheFileList) {
+  for (const { name, path } of factCacheFileList) {
     __DEV__ && console.log('try cached fact state file:', name)
-    const { factId, factState } = tryParseJSONObject(await readFileAsync(path))
+    const { factId, factState } = tryParseJSONObject(await fsAsync.readFile(path))
     __DEV__ && console.log('load cached fact state with factId:', factId, name)
     if (factId) return { ...factInfo, factId, factState, factCacheFile: path }
   }
@@ -163,7 +164,7 @@ const tryLoadFactInfoFromLog = async (factInfo, { factLogFileList, decodeFact, a
     .sort((a, b) => a.fileId - b.fileId) // smaller id first
   __DEV__ && factLogFileList.length && console.log('found fact log file:', factLogFileList.length, 'maxFactLogId:', maxFactLogId)
 
-  for (const { path, name } of factLogFileList) {
+  for (const { name, path } of factLogFileList) {
     await readlineOfStreamAsync(createReadStream(path), (logText) => { // TODO: should check multiline log? (from non-JSON encodeFact output)
       const fact = logText && decodeFact(logText)
       if (!fact || fact.id <= factId) return
@@ -184,21 +185,21 @@ const tryDeleteExtraCache = async ({
   keepFactId = Infinity,
   keepFileCount = 2
 }) => {
-  const factCacheFileList = (await getDirectorySubInfoList(pathFactDirectory)).map(({ path, name }) => {
+  const factCacheFileList = (await getDirInfoList(pathFactDirectory)).map(({ name, path }) => {
     const fileId = name.startsWith(nameFactCacheFile) && REGEXP_CACHE_FILE.test(name) && parseInt(REGEXP_CACHE_FILE.exec(name)[ 1 ])
-    return Number.isInteger(fileId) && { fileId, path, name }
+    return Number.isInteger(fileId) && { fileId, name, path }
   }).filter(Boolean)
   if (!factCacheFileList.length) return
   factCacheFileList.sort((a, b) => b.fileId - a.fileId)
   let skippedFile = 0
-  for (const { fileId, path, name } of factCacheFileList) {
+  for (const { fileId, name, path } of factCacheFileList) {
     if (fileId >= keepFactId) continue
     if (skippedFile < keepFileCount) {
       skippedFile += 1
       continue
     }
     __DEV__ && console.log('[DeleteExtraCache] delete:', name)
-    const { error } = await catchAsync(unlinkAsync, path)
+    const { error } = await catchAsync(fsAsync.unlink, path)
     __DEV__ && error && console.warn('[DeleteExtraCache] failed to delete:', name, error)
   }
 }

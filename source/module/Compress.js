@@ -1,5 +1,6 @@
 import { createGzip } from 'zlib'
-import { createReadStream, createWriteStream, readAsync, statAsync, unlinkAsync, readableAsync } from '@dr-js/core/module/node/file/function'
+import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
+import { STAT_ERROR, getPathLstat } from '@dr-js/core/module/node/file/Path'
 
 const compressFile = (
   inputFile,
@@ -30,14 +31,14 @@ const compressFileList = async ({
     if (filePath.endsWith(fileSuffix)) continue
     __DEV__ && console.log('[compressFileList]', filePath)
     const compressFilePath = `${filePath}${fileSuffix}`
-    await readableAsync(compressFilePath) || await compressFile(filePath, compressFilePath, createCompressStream())
-    deleteBloat && await checkBloat(filePath, compressFilePath, bloatRatio) && await unlinkAsync(compressFilePath)
+    if (STAT_ERROR !== await getPathLstat(compressFilePath)) await compressFile(filePath, compressFilePath, createCompressStream())
+    deleteBloat && await checkBloat(filePath, compressFilePath, bloatRatio) && await fsAsync.unlink(compressFilePath)
   }
 }
 
 const checkBloat = async (inputFile, outputFile, bloatRatio) => {
-  const { size: inputSize } = await statAsync(inputFile)
-  const { size: outputSize } = await statAsync(outputFile)
+  const { size: inputSize } = await fsAsync.stat(inputFile)
+  const { size: outputSize } = await fsAsync.stat(outputFile)
   return (outputSize * bloatRatio) >= inputSize
 }
 
@@ -53,7 +54,7 @@ const isBufferGzip = (buffer) => (
 )
 const isFileGzip = async (file) => {
   const buffer = Buffer.allocUnsafe(3)
-  await readAsync(file, buffer, 0, 3, 0)
+  await fsAsync.read(file, buffer, 0, 3, 0)
   return isBufferGzip(buffer)
 }
 

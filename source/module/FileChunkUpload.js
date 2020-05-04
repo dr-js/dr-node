@@ -1,5 +1,6 @@
 import { resolve, dirname } from 'path'
-import { createReadStream, createWriteStream } from 'fs'
+import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
+
 import { createHash } from 'crypto'
 
 import { getRandomId } from '@dr-js/core/module/common/math/random'
@@ -10,7 +11,6 @@ import { createAsyncFuncQueue } from '@dr-js/core/module/common/module/AsyncFunc
 
 import { toArrayBuffer } from '@dr-js/core/module/node/data/Buffer'
 import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
-import { writeFileAsync } from '@dr-js/core/module/node/file/function'
 import { createPathPrefixLock } from '@dr-js/core/module/node/file/Path'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { modifyDelete, modifyDeleteForce } from '@dr-js/core/module/node/file/Modify'
@@ -70,7 +70,7 @@ const createFileChunkUpload = async ({
     }
 
     const chunkPath = resolve(chunkData.tempPath, `chunk-${chunkIndex}-${chunkTotal}`)
-    await writeFileAsync(chunkPath, chunkBuffer)
+    await fsAsync.writeFile(chunkPath, chunkBuffer)
     chunkData.chunkList[ chunkIndex ] = { chunkIndex, chunkByteLength, chunkPath }
     __DEV__ && console.log('[save chunk]', chunkData.chunkList[ chunkIndex ])
     onUploadChunk && await onUploadChunk(chunkData, chunkIndex)
@@ -79,7 +79,7 @@ const createFileChunkUpload = async ({
     if (chunkCacheCount === chunkTotal) {
       __DEV__ && console.log('[merge chunk to file]', chunkData.filePath)
       await createDirectory(dirname(chunkData.filePath))
-      await writeFileAsync(chunkData.filePath, '') // reset old file
+      await fsAsync.writeFile(chunkData.filePath, '') // reset old file
       for (const { chunkPath } of chunkData.chunkList) {
         await waitStreamStopAsync(setupStreamPipe(
           createReadStream(chunkPath),

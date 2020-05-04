@@ -1,13 +1,10 @@
-import { resolve, dirname } from 'path'
-import { createGzip, createGunzip } from 'zlib'
-import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
-import { createReadStream, createWriteStream } from '@dr-js/core/module/node/file/function'
-import { createDirectory } from '@dr-js/core/module/node/file/Directory'
-import { run } from '@dr-js/core/module/node/system/Run'
-
+import { resolve } from 'path'
 import { createCommandWrap, createDetect } from './function'
 
 // NOTE: require 7z@>=16.00 for `-bs` switch
+// TODO: NOTE:
+//   p7zip seems to stop update at 2016 (p7zip Version 16.02)
+//   using p7zip pack/unpack to `.tar` do not preserve file permission, but with `.7z|.zip` do, check: https://sourceforge.net/p/p7zip/discussion/383044/thread/d9d522d2/
 
 const { getCommand, setCommand } = createCommandWrap('7z')
 
@@ -39,60 +36,27 @@ const extractConfig = (sourceFile, outputPath) => ({
 })
 
 // require manual setup piping: https://stackoverflow.com/questions/1359793/programmatically-extract-tar-gz-in-a-single-step-on-windows-with-7-zip/14699663#14699663
-const compressTgzAsync = async (sourceDirectory, outputFile) => { // for `.tgz` or `.tar.gz`
-  const outputStream = createWriteStream(resolve(outputFile))
-  const { promise, subProcess } = run({
-    command: getCommand(),
-    argList: [
-      'a', 'placeholder-name',
-      resolve(sourceDirectory, '*'),
-      '-ttar', '-so' // mark archive type and output to stdout
-    ],
-    option: { stdio: [ 'ignore', 'pipe', 'ignore' ] }
-  })
-  await Promise.all([
-    waitStreamStopAsync(setupStreamPipe(subProcess.stdout, createGzip(), outputStream)),
-    promise
-  ]).catch((error) => {
-    subProcess.kill()
-    outputStream.destroy()
-    throw error
-  })
-}
-
-const extractTgzAsync = async (sourceFile, outputPath) => { // for `.tgz` or `.tar.gz`
-  const inputStream = createReadStream(resolve(sourceFile))
-  const { promise, subProcess } = run({
-    command: getCommand(),
-    argList: [
-      'x',
-      `-o${resolve(outputPath)}`,
-      '-aoa', // for overwrite existing
-      '-ttar', '-si' // mark archive type and input from stdin
-    ],
-    option: { stdio: [ 'pipe', 'ignore', 'ignore' ] }
-  })
-  await Promise.all([
-    waitStreamStopAsync(setupStreamPipe(inputStream, createGunzip(), subProcess.stdin)),
-    promise
-  ]).catch((error) => {
-    subProcess.kill()
-    inputStream.destroy()
-    throw error
-  })
-}
-
-const compressAutoAsync = async (sourceDirectory, outputFile) => (outputFile.endsWith('.tgz') || outputFile.endsWith('.tar.gz'))
-  ? createDirectory(dirname(outputFile)).then(() => compressTgzAsync(sourceDirectory, outputFile))
-  : run(compressConfig(sourceDirectory, outputFile)).promise
-
-const extractAutoAsync = async (sourceFile, outputPath) => (sourceFile.endsWith('.tgz') || sourceFile.endsWith('.tar.gz'))
-  ? extractTgzAsync(sourceFile, outputPath)
-  : run(extractConfig(sourceFile, outputPath)).promise
+// const runCompressStream = async (sourceDirectory, type = '7z') => run({ // subProcess.stdout will be readableStream
+//   command: getCommand(),
+//   argList: [
+//     'a', 'placeholder-name',
+//     resolve(sourceDirectory, '*'),
+//     `-t${type}`, '-so' // mark archive type and output to stdout
+//   ],
+//   option: { stdio: [ 'ignore', 'pipe', 'ignore' ] }
+// })
+// const runExtractStream = async (outputPath, type = '7z') => run({ // subProcess.stdin writableStream
+//   command: getCommand(),
+//   argList: [
+//     'x',
+//     `-o${resolve(outputPath)}`,
+//     '-aoa', // for overwrite existing
+//     `-t${type}`, '-si' // mark archive type and input from stdin
+//   ],
+//   option: { stdio: [ 'pipe', 'ignore', 'ignore' ] }
+// })
 
 export {
   getCommand, setCommand, detect,
-  compressConfig, extractConfig,
-  compressTgzAsync, extractTgzAsync,
-  compressAutoAsync, extractAutoAsync
+  compressConfig, extractConfig
 }

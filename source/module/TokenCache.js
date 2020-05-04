@@ -1,11 +1,10 @@
 import { dirname } from 'path'
-import { writeFileSync } from 'fs'
+import { writeFileSync, promises as fsAsync } from 'fs'
 
 import { catchAsync, catchSync } from '@dr-js/core/module/common/error'
 import { getTimestamp } from '@dr-js/core/module/common/time'
 import { createCacheMap } from '@dr-js/core/module/common/data/CacheMap'
 
-import { readFileAsync } from '@dr-js/core/module/node/file/function'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
 import { getRandomBufferAsync } from '@dr-js/core/module/node/data/function'
@@ -13,7 +12,7 @@ import { getRandomBufferAsync } from '@dr-js/core/module/node/data/function'
 const DEFAULT_TOKEN_KEY = 'auth-token'
 
 const loadTokenCache = async (tokenCacheMap, fileTokenCache) => {
-  tokenCacheMap.loadCacheList(JSON.parse(String(await readFileAsync(fileTokenCache))))
+  tokenCacheMap.loadCacheList(JSON.parse(String(await fsAsync.readFile(fileTokenCache))))
   __DEV__ && console.log('loaded token cache file', fileTokenCache)
 }
 
