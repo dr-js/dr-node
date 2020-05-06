@@ -17,6 +17,7 @@ import { getPermissionOption, PermissionFormatConfig } from '@dr-js/node/module/
 import { getExplorerOption, ExplorerFormatConfig } from '@dr-js/node/module/server/feature/Explorer/option'
 import { getStatCollectOption, StatCollectFormatConfig } from '@dr-js/node/module/server/feature/StatCollect/option'
 import { getStatReportOption, StatReportFormatConfig } from '@dr-js/node/module/server/feature/StatReport/option'
+import { getWebSocketTunnelOption, WebSocketTunnelFormatConfig } from '@dr-js/node/module/server/feature/WebSocketTunnel/option'
 
 import { configureSampleServer } from './sampleServer'
 
@@ -35,7 +36,9 @@ const SampleServerFormatConfig = getServerPackFormatConfig([
 
   ExplorerFormatConfig,
   StatCollectFormatConfig,
-  StatReportFormatConfig
+  StatReportFormatConfig,
+
+  WebSocketTunnelFormatConfig
 ])
 
 const runSampleServer = async (optionData) => startServer({
@@ -50,7 +53,8 @@ const runSampleServer = async (optionData) => startServer({
   ...getPermissionOption(optionData),
   ...getExplorerOption(optionData),
   ...getStatCollectOption(optionData),
-  ...getStatReportOption(optionData)
+  ...getStatReportOption(optionData),
+  ...getWebSocketTunnelOption(optionData)
 })
 
 const startServer = async (serverOption, featureOption) => {

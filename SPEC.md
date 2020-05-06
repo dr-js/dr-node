@@ -25,11 +25,11 @@
 + 📄 [source/module/PrivateAddress.js](source/module/PrivateAddress.js)
   - `isPrivateAddress`
 + 📄 [source/module/RequestCommon.js](source/module/RequestCommon.js)
-  - `getRequestBuffer`, `getRequestJSON`, `getRequestParam`
+  - `getRequestBuffer`, `getRequestJSON`, `getRequestParam`, `getWebSocketProtocolListParam`, `packWebSocketProtocolListParam`
 + 📄 [source/module/RunDetached.js](source/module/RunDetached.js)
   - `findDetachedProcessAsync`, `runDetached`
 + 📄 [source/module/ServerPack.js](source/module/ServerPack.js)
-  - `configureServerPack`
+  - `configureServerPack`, `parseHostString`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)
   - `getCommonServerStatus`
 + 📄 [source/module/TerminalColor.js](source/module/TerminalColor.js)
@@ -112,6 +112,12 @@
   - `TokenCacheFormatConfig`, `getTokenCacheOption`
 + 📄 [source/server/feature/TokenCache/responder.js](source/server/feature/TokenCache/responder.js)
   - `createResponderAssignTokenCookie`, `createResponderAssignTokenHeader`, `createResponderCheckToken`
++ 📄 [source/server/feature/WebSocketTunnel/client.js](source/server/feature/WebSocketTunnel/client.js)
+  - `setupClientWebSocketTunnel`
++ 📄 [source/server/feature/WebSocketTunnel/configureFeaturePack.js](source/server/feature/WebSocketTunnel/configureFeaturePack.js)
+  - `configureFeaturePack`
++ 📄 [source/server/feature/WebSocketTunnel/option.js](source/server/feature/WebSocketTunnel/option.js)
+  - `WebSocketTunnelFormatConfig`, `getWebSocketTunnelOption`
 + 📄 [source/server/share/option.js](source/server/share/option.js)
   - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerPackFormatConfig`, `getServerPackOption`
 + 📄 [source/server/share/HTML/LoadingMask.js](source/server/share/HTML/LoadingMask.js)
@@ -154,6 +160,8 @@
 >     --path-action-key [ARGUMENT=1]
 >     --path-action-key-to [ARGUMENT=1]
 >     --path-action-name-list [ARGUMENT=1+]
+>   --websocket-tunnel-server-url --wtsu [OPTIONAL] [ARGUMENT=1]
+>       require provide "auth-file" or "auth-file-group", and "websocket-tunnel-host"
 >   --auth-gen-tag --agt [OPTIONAL] [ARGUMENT=1]
 >       generate auth file: -O=outputFile
 >     --auth-gen-size [ARGUMENT=1]
@@ -220,6 +228,8 @@
 >       --stat-collect-url [ARGUMENT=1]
 >       --stat-collect-interval [ARGUMENT=1]
 >     --stat-report-process-tag [ARGUMENT=1]
+>     --websocket-tunnel-host [ARGUMENT=1]
+>         use format: "hostname:port", default hostname: 127.0.0.1
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
@@ -240,6 +250,7 @@
 >     export DR_NODE_PATH_ACTION_KEY="[ARGUMENT=1]"
 >     export DR_NODE_PATH_ACTION_KEY_TO="[ARGUMENT=1]"
 >     export DR_NODE_PATH_ACTION_NAME_LIST="[ARGUMENT=1+]"
+>     export DR_NODE_WEBSOCKET_TUNNEL_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_TAG="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_SIZE="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_TOKEN_SIZE="[ARGUMENT=1]"
@@ -280,6 +291,7 @@
 >     export DR_NODE_STAT_COLLECT_URL="[ARGUMENT=1]"
 >     export DR_NODE_STAT_COLLECT_INTERVAL="[ARGUMENT=1]"
 >     export DR_NODE_STAT_REPORT_PROCESS_TAG="[ARGUMENT=1]"
+>     export DR_NODE_WEBSOCKET_TUNNEL_HOST="[ARGUMENT=1]"
 >   "
 > CONFIG Usage:
 >   {
@@ -300,6 +312,7 @@
 >     "pathActionKey": [ "[ARGUMENT=1]" ],
 >     "pathActionKeyTo": [ "[ARGUMENT=1]" ],
 >     "pathActionNameList": [ "[ARGUMENT=1+]" ],
+>     "websocketTunnelServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "authGenTag": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "authGenSize": [ "[ARGUMENT=1]" ],
 >     "authGenTokenSize": [ "[ARGUMENT=1]" ],
@@ -340,5 +353,6 @@
 >     "statCollectUrl": [ "[ARGUMENT=1]" ],
 >     "statCollectInterval": [ "[ARGUMENT=1]" ],
 >     "statReportProcessTag": [ "[ARGUMENT=1]" ],
+>     "websocketTunnelHost": [ "[ARGUMENT=1]" ],
 >   }
 > ```

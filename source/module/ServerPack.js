@@ -3,6 +3,13 @@ import { promises as fsAsync } from 'fs'
 import { objectMap } from '@dr-js/core/module/common/immutable/Object'
 import { createServerPack } from '@dr-js/core/module/node/server/Server'
 
+const parseHostString = (host, defaultHostname) => { // for ipv6 should use host like: `[::]:80`
+  const hostnameList = host.split(':')
+  const port = Number(hostnameList.pop()) || undefined
+  const hostname = hostnameList.join(':') || defaultHostname || undefined
+  return { hostname, port }
+}
+
 __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: single', { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined })
 __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: multi', {
   'default': { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined }, // default hostname
@@ -52,4 +59,7 @@ const objectMapAsync = async (object, mapFuncAsync) => {
   return result
 }
 
-export { configureServerPack }
+export {
+  parseHostString,
+  configureServerPack
+}

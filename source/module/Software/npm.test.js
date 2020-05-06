@@ -57,6 +57,7 @@ describe('Node.Module.Software.npm', () => {
     strictEqual(require(fromNpmNodeModules('libnpx/package.json')).name, 'libnpx')
     strictEqual(require(fromNpmNodeModules('semver/package.json')).name, 'semver')
     strictEqual(require(fromNpmNodeModules('tar/package.json')).name, 'tar')
+    strictEqual(require(fromNpmNodeModules('https-proxy-agent/package.json')).name, 'https-proxy-agent')
 
     { // test sample usage: https://www.npmjs.com/package/semver
       const semver = require(fromNpmNodeModules('semver'))

@@ -22,6 +22,7 @@ import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node
 
 import { getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
 import { fileUpload, fileDownload, pathAction } from '@dr-js/node/module/server/feature/Explorer/client'
+import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnel/client'
 
 const { pickOneOf, parseCompactList } = Preset
 
@@ -47,6 +48,8 @@ const ModuleFormatConfigList = parseCompactList(
     'path-action-key-to/SS,O',
     'path-action-name-list/AS,O'
   ) ],
+
+  `websocket-tunnel-server-url,wtsu/SS,O|${EXPLORER_CLIENT_DESC}, and "websocket-tunnel-host"`,
 
   [ 'auth-gen-tag,agt/SS,O|generate auth file: -O=outputFile', parseCompactList(
     'auth-gen-size/SI,O',
@@ -75,7 +78,7 @@ const ModuleFormatConfigList = parseCompactList(
   // TODO: 'batch-command,bc/AS,O/1-|run batch command use placeholder like {file} {F} {...F} {directory} {D} {...D}: $@=...commands'
 )
 
-const runModule = async (optionData, modeName) => {
+const runModule = async (optionData, modeName, packageName, packageVersion) => {
   const { tryGet, getFirst, tryGetFirst } = optionData
 
   const argumentList = tryGet(modeName) || []
@@ -126,6 +129,17 @@ const runModule = async (optionData, modeName) => {
           }))
       }
       break
+    }
+
+    case 'websocket-tunnel-server-url': {
+      const { authKey, generateAuthCheckCode } = await configureAuthFile({ ...getAuthFileOption(optionData), log })
+      const { start } = setupClientWebSocketTunnel({
+        log, authKey, generateAuthCheckCode, // from `module/Auth`
+        url: argumentList[ 0 ],
+        webSocketTunnelHost: getFirst('websocket-tunnel-host'), // hostname:port
+        headers: { 'user-agent': `${packageName}@${packageVersion}` }
+      })
+      return start()
     }
 
     case 'auth-gen-tag':

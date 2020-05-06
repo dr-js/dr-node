@@ -8,7 +8,7 @@ import { name as packageName, version as packageVersion } from '../package.json'
 
 const runMode = async (modeName, optionData) => modeName === 'host'
   ? runSampleServer(optionData)
-  : runModule(optionData, modeName)
+  : runModule(optionData, modeName, packageName, packageVersion)
 
 const main = async () => {
   const optionData = await parseOption()

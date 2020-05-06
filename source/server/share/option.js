@@ -2,6 +2,8 @@ import { resolve } from 'path'
 import { isString, isBasicObject } from '@dr-js/core/module/common/check'
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
+import { parseHostString } from 'source/module/ServerPack'
+
 const { parseCompact, parseCompactList } = Preset
 
 const getServerPackFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
@@ -16,17 +18,15 @@ const getServerPackFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|
   )),
   ...extraList
 ])
+
 const getServerPackOption = ({ tryGet, tryGetFirst, pwd }, defaultHostname = '127.0.0.1') => {
   const host = tryGetFirst('host') || ''
-  const hostnameList = host.split(':')
-  const port = Number(hostnameList.pop())
-  const hostname = hostnameList.join(':') || defaultHostname
+  const { hostname, port } = parseHostString(host, defaultHostname)
   const pwdTLSSNIConfig = pwd('TLS-SNI-config') // should be the same for `TLS-dhparam`
   const autoResolve = (value) => isString(value) ? resolve(pwdTLSSNIConfig, value) : value
   return {
     protocol: tryGet('TLS-SNI-config') ? 'https:' : 'http:',
-    hostname: hostname || undefined,
-    port: Number(port) || undefined,
+    hostname, port,
     ...(pwdTLSSNIConfig && {
       TLSSNIConfig: objectMapDeep(tryGetFirst('TLS-SNI-config'), autoResolve),
       TLSDHParam: autoResolve(tryGetFirst('TLS-dhparam'))

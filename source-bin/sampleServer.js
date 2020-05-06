@@ -2,12 +2,17 @@ import { createRequestListener } from '@dr-js/core/module/node/server/Server'
 import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from '@dr-js/core/module/node/server/Responder/Common'
 import { createResponderFavicon } from '@dr-js/core/module/node/server/Responder/Send'
 import { createResponderRouter, createRouteMap, createResponderRouteListHTML } from '@dr-js/core/module/node/server/Responder/Router'
+import { enableWebSocketServer } from '@dr-js/core/module/node/server/WebSocket/WebSocketServer'
+import { createUpdateRequestListener } from '@dr-js/core/module/node/server/WebSocket/WebSocketUpgradeRequest'
 
 import { configureFeaturePack as configureFeaturePackAuth } from '@dr-js/node/module/server/feature/Auth/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackPermission } from '@dr-js/node/module/server/feature/Permission/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackExplorer } from '@dr-js/node/module/server/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatCollect } from '@dr-js/node/module/server/feature/StatCollect/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatReport } from '@dr-js/node/module/server/feature/StatReport/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnel/configureFeaturePack'
+
+const FRAME_LENGTH_LIMIT = 64 * 1024 * 1024 // 64 MiB
 
 const configureSampleServer = async ({
   serverPack: { server, option }, logger, routePrefix = '',
@@ -26,7 +31,10 @@ const configureSampleServer = async ({
   // stat collect
   statCollectPath, statCollectUrl, statCollectInterval,
   // stat report
-  statReportProcessTag
+  statReportProcessTag,
+
+  // websocket tunnel
+  webSocketTunnelHost
 }) => {
   const URL_AUTH_CHECK = '/auth'
 
@@ -56,6 +64,11 @@ const configureSampleServer = async ({
   const featureStatReport = statReportProcessTag && await configureFeaturePackStatReport({
     logger, routePrefix, featureAuth,
     statReportProcessTag
+  })
+
+  const featureWebSocketTunnel = webSocketTunnelHost && await configureFeaturePackWebSocketTunnel({
+    logger, routePrefix, featureAuth,
+    webSocketTunnelHost
   })
 
   const redirectUrl = featureExplorer ? featureExplorer.URL_HTML
@@ -88,11 +101,31 @@ const configureSampleServer = async ({
     }
   }))
 
+  let webSocketSet
+  if (featureWebSocketTunnel) { // setup WebSocket
+    const routeMap = createRouteMap([
+      ...(featureWebSocketTunnel ? featureWebSocketTunnel.webSocketRouteList : [])
+    ])
+    webSocketSet = enableWebSocketServer({
+      server,
+      frameLengthLimit: FRAME_LENGTH_LIMIT,
+      onUpgradeRequest: createUpdateRequestListener({
+        responderList: [
+          createResponderLog({ log: logger.add }),
+          createResponderRouter({ routeMap, baseUrl: option.baseUrl })
+        ]
+      })
+    })
+  }
+
   return {
     featureAuth,
     featureExplorer,
     featureStatCollect,
-    featureStatReport
+    featureStatReport,
+    featureWebSocketTunnel,
+
+    webSocketSet
   }
 }
 

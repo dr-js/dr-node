@@ -15,7 +15,7 @@ const getNpmTar = () => {
 const detect = (checkOnly) => {
   const isDetected = Boolean(getNpmTar())
   if (checkOnly) return isDetected
-  if (!isDetected) throw new Error('expect "npm" in PATH')
+  if (!isDetected) throw new Error('expect "npm/node_modules/tar"')
 }
 
 // TODO: NOTE: there'll be an empty `.` folder in the output tar for the default nameList, but will disappear after extract, replacing the file list to the output of readdirSync may solve this
