@@ -28,6 +28,8 @@
   - `getRequestBuffer`, `getRequestJSON`, `getRequestParam`, `getWebSocketProtocolListParam`, `packWebSocketProtocolListParam`
 + 📄 [source/module/RunDetached.js](source/module/RunDetached.js)
   - `findDetachedProcessAsync`, `runDetached`
++ 📄 [source/module/RuntimeDump.js](source/module/RuntimeDump.js)
+  - `dumpAsync`, `getV8Extra`, `getV8HeapSnapshotReadableStream`, `setupSIGUSR2`, `writeV8HeapSnapshot`
 + 📄 [source/module/ServerPack.js](source/module/ServerPack.js)
   - `configureServerPack`, `parseHostString`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)

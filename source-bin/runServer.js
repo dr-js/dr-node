@@ -1,6 +1,9 @@
+import { tmpdir } from 'os'
+import { resolve } from 'path'
 import { describeServerPack } from '@dr-js/core/module/node/server/Server'
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
+import { setupSIGUSR2 } from '@dr-js/node/module/module/RuntimeDump'
 import { configureLog } from '@dr-js/node/module/module/Log'
 import { configurePid } from '@dr-js/node/module/module/Pid'
 import { configureServerPack } from '@dr-js/node/module/module/ServerPack'
@@ -58,6 +61,8 @@ const runSampleServer = async (optionData) => startServer({
 })
 
 const startServer = async (serverOption, featureOption) => {
+  setupSIGUSR2(resolve(tmpdir(), `${encodeURIComponent(packageName)}@${encodeURIComponent(packageVersion)}`))
+
   await configurePid(serverOption)
   const serverPack = await configureServerPack(serverOption)
   const logger = await configureLog(serverOption)
