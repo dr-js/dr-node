@@ -24,6 +24,8 @@ import { getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option
 import { fileUpload, fileDownload, pathAction } from '@dr-js/node/module/server/feature/Explorer/client'
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnel/client'
 
+import { setupPackageSIGUSR2 } from './function'
+
 const { pickOneOf, parseCompactList } = Preset
 
 const EXPLORER_CLIENT_DESC = 'require provide "auth-file" or "auth-file-group"'
@@ -139,6 +141,7 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
         webSocketTunnelHost: getFirst('websocket-tunnel-host'), // hostname:port
         headers: { 'user-agent': `${packageName}@${packageVersion}` }
       })
+      setupPackageSIGUSR2(packageName, packageVersion)
       return start()
     }
 

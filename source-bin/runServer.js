@@ -1,9 +1,6 @@
-import { tmpdir } from 'os'
-import { resolve } from 'path'
 import { describeServerPack } from '@dr-js/core/module/node/server/Server'
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { setupSIGUSR2 } from '@dr-js/node/module/module/RuntimeDump'
 import { configureLog } from '@dr-js/node/module/module/Log'
 import { configurePid } from '@dr-js/node/module/module/Pid'
 import { configureServerPack } from '@dr-js/node/module/module/ServerPack'
@@ -23,6 +20,7 @@ import { getStatReportOption, StatReportFormatConfig } from '@dr-js/node/module/
 import { getWebSocketTunnelOption, WebSocketTunnelFormatConfig } from '@dr-js/node/module/server/feature/WebSocketTunnel/option'
 
 import { configureSampleServer } from './sampleServer'
+import { setupPackageSIGUSR2 } from './function'
 
 import { name as packageName, version as packageVersion } from '../package.json'
 
@@ -61,8 +59,6 @@ const runSampleServer = async (optionData) => startServer({
 })
 
 const startServer = async (serverOption, featureOption) => {
-  setupSIGUSR2(resolve(tmpdir(), `${encodeURIComponent(packageName)}@${encodeURIComponent(packageVersion)}`))
-
   await configurePid(serverOption)
   const serverPack = await configureServerPack(serverOption)
   const logger = await configureLog(serverOption)
@@ -73,6 +69,7 @@ const startServer = async (serverOption, featureOption) => {
     `${packageName}@${packageVersion}`,
     Object.entries(featureOption).map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
   ))
+  setupPackageSIGUSR2(packageName, packageVersion)
   return featurePack
 }
 
