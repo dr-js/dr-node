@@ -5,7 +5,7 @@
 
 #### Export Path
 + 📄 [source/module/Auth.js](source/module/Auth.js)
-  - `AUTH_FILE`, `AUTH_FILE_GROUP`, `AUTH_SKIP`, `DEFAULT_AUTH_KEY`, `configureAuthFile`, `configureAuthFileGroup`, `configureAuthSkip`, `describeAuthFile`, `generateAuthCheckCode`, `generateAuthFile`, `loadAuthFile`, `saveAuthFile`, `verifyAuthCheckCode`
+  - `AUTH_FILE`, `AUTH_FILE_GROUP`, `AUTH_SKIP`, `DEFAULT_AUTH_KEY`, `configureAuth`, `configureAuthFile`, `configureAuthFileGroup`, `configureAuthSkip`, `describeAuthFile`, `generateAuthCheckCode`, `generateAuthFile`, `loadAuthFile`, `saveAuthFile`, `verifyAuthCheckCode`
 + 📄 [source/module/Compress.js](source/module/Compress.js)
   - `checkBloat`, `compressFile`, `compressFileList`, `isBufferGzip`, `isFileGzip`
 + 📄 [source/module/FactDatabase.js](source/module/FactDatabase.js)
@@ -71,7 +71,7 @@
 + 📄 [source/server/feature/Auth/configureFeaturePack.js](source/server/feature/Auth/configureFeaturePack.js)
   - `configureFeaturePack`
 + 📄 [source/server/feature/Auth/option.js](source/server/feature/Auth/option.js)
-  - `AuthFileFormatConfig`, `AuthFileGroupFormatConfig`, `AuthSkipFormatConfig`, `getAuthFileGroupOption`, `getAuthFileOption`, `getAuthSkipOption`
+  - `AuthCommonFormatConfig`, `AuthFileFormatConfig`, `AuthFileGroupFormatConfig`, `AuthSkipFormatConfig`, `getAuthCommonOption`, `getAuthFileGroupOption`, `getAuthFileOption`, `getAuthSkipOption`
 + 📄 [source/server/feature/Auth/responder.js](source/server/feature/Auth/responder.js)
   - `createResponderCheckAuth`, `createResponderGrantAuthHeader`
 + 📄 [source/server/feature/Explorer/client.js](source/server/feature/Explorer/client.js)
@@ -212,6 +212,8 @@
 >     --pid-file [ARGUMENT=1]
 >       --pid-ignore-exist [ARGUMENT=0+]
 >           set to enable
+>     --auth-key [ARGUMENT=1]
+>         set for non-default key
 >     --auth-skip [ARGUMENT=0+]
 >         set to enable
 >     --auth-file [ARGUMENT=1]
@@ -278,6 +280,7 @@
 >     export DR_NODE_LOG_FILE_PREFIX="[ARGUMENT=1]"
 >     export DR_NODE_PID_FILE="[ARGUMENT=1]"
 >     export DR_NODE_PID_IGNORE_EXIST="[ARGUMENT=0+]"
+>     export DR_NODE_AUTH_KEY="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_SKIP="[ARGUMENT=0+]"
 >     export DR_NODE_AUTH_FILE="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_FILE_GROUP_PATH="[ARGUMENT=1]"
@@ -340,6 +343,7 @@
 >     "logFilePrefix": [ "[ARGUMENT=1]" ],
 >     "pidFile": [ "[ARGUMENT=1]" ],
 >     "pidIgnoreExist": [ "[ARGUMENT=0+]" ],
+>     "authKey": [ "[ARGUMENT=1]" ],
 >     "authSkip": [ "[ARGUMENT=0+]" ],
 >     "authFile": [ "[ARGUMENT=1]" ],
 >     "authFileGroupPath": [ "[ARGUMENT=1]" ],

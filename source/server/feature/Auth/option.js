@@ -2,6 +2,11 @@ import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
 const { parseCompact, parseCompactList } = Preset
 
+const AuthCommonFormatConfig = parseCompact('auth-key/SS,O|set for non-default key')
+const getAuthCommonOption = ({ tryGetFirst }) => ({
+  authKey: tryGetFirst('auth-key')
+})
+
 const AuthSkipFormatConfig = parseCompact('auth-skip/T')
 const getAuthSkipOption = ({ tryGetFirst }) => ({
   authSkip: tryGetFirst('auth-skip')
@@ -23,6 +28,7 @@ const getAuthFileGroupOption = ({ tryGetFirst }) => ({
 })
 
 export {
+  AuthCommonFormatConfig, getAuthCommonOption,
   AuthSkipFormatConfig, getAuthSkipOption,
   AuthFileFormatConfig, getAuthFileOption,
   AuthFileGroupFormatConfig, getAuthFileGroupOption

@@ -20,6 +20,7 @@ const configureSampleServer = async ({
   isDebugRoute,
 
   // auth
+  authKey,
   authSkip = false,
   authFile,
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
@@ -40,6 +41,7 @@ const configureSampleServer = async ({
 
   const featureAuth = await configureFeaturePackAuth({
     logger, routePrefix,
+    authKey,
     authSkip,
     authFile,
     authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,

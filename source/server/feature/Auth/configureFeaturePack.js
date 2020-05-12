@@ -2,18 +2,22 @@ import { responderEndWithStatusCode } from '@dr-js/core/module/node/server/Respo
 import { createResponderCheckRateLimit } from '@dr-js/core/module/node/server/Responder/RateLimit'
 
 import { getRequestParam } from 'source/module/RequestCommon'
-import { configureAuthSkip, configureAuthFile, configureAuthFileGroup } from 'source/module/Auth'
+import { configureAuth } from 'source/module/Auth'
 
 const configureFeaturePack = async ({
   logger: { add: log }, routePrefix = '',
+  authKey,
   authSkip = false,
   authFile,
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
   URL_AUTH_CHECK = `${routePrefix}/auth`
 }) => {
-  const authPack = authSkip ? await configureAuthSkip({ log })
-    : authFile ? await configureAuthFile({ authFile, log })
-      : await configureAuthFileGroup({ authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix, log })
+  const authPack = await configureAuth({
+    authKey, log,
+    authSkip,
+    authFile,
+    authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix
+  })
 
   const createResponderCheckAuth = ({
     responderNext,

@@ -20,7 +20,7 @@ import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/Ping
 import { compressAutoAsync, extractAutoAsync } from '@dr-js/node/module/module/Software/archive'
 import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
 
-import { getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
+import { getAuthCommonOption, getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
 import { fileUpload, fileDownload, pathAction } from '@dr-js/node/module/server/feature/Explorer/client'
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnel/client'
 
@@ -100,11 +100,13 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
     ? fsAsync.writeFile(outputFile, toBuffer(result))
     : writeBufferToStreamAsync(process.stdout, toBuffer(result))
 
+  const setupAuthFile = async () => configureAuthFile({ ...getAuthCommonOption(optionData), ...getAuthFileOption(optionData), log })
+
   switch (modeName) {
     case 'file-upload-server-url':
     case 'file-download-server-url':
     case 'path-action-server-url': {
-      const { authFetch } = await configureAuthFile({ ...getAuthFileOption(optionData), log })
+      const { authFetch } = await setupAuthFile()
       switch (modeName) {
         case 'file-upload-server-url':
           return fileUpload({
@@ -134,7 +136,7 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
     }
 
     case 'websocket-tunnel-server-url': {
-      const { authKey, generateAuthCheckCode } = await configureAuthFile({ ...getAuthFileOption(optionData), log })
+      const { authKey, generateAuthCheckCode } = await setupAuthFile()
       const { start } = setupClientWebSocketTunnel({
         log, authKey, generateAuthCheckCode, // from `module/Auth`
         url: argumentList[ 0 ],

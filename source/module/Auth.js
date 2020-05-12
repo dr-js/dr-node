@@ -134,6 +134,18 @@ const configureAuthFileGroup = async ({
   }
 }
 
+const configureAuth = async ({
+  authKey = DEFAULT_AUTH_KEY, log,
+  authSkip = false,
+  authFile,
+  authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix
+}) => {
+  if (authSkip) return configureAuthSkip({ authKey, log })
+  if (authFile) return configureAuthFile({ authFile, authKey, log })
+  if (authFileGroupPath) return configureAuthFileGroup({ authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix, authKey, log })
+  throw new Error('no auth mode option provided')
+}
+
 export {
   saveAuthFile, loadAuthFile,
   describeAuthFile, generateAuthFile,
@@ -147,5 +159,7 @@ export {
 
   configureAuthSkip,
   configureAuthFile,
-  configureAuthFileGroup
+  configureAuthFileGroup,
+
+  configureAuth
 }

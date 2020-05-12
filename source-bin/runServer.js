@@ -10,8 +10,8 @@ import {
 } from '@dr-js/node/module/server/share/option'
 
 import {
-  getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption,
-  AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig
+  getAuthCommonOption, getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption,
+  AuthCommonFormatConfig, AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig
 } from '@dr-js/node/module/server/feature/Auth/option'
 import { getPermissionOption, PermissionFormatConfig } from '@dr-js/node/module/server/feature/Permission/option'
 import { getExplorerOption, ExplorerFormatConfig } from '@dr-js/node/module/server/feature/Explorer/option'
@@ -30,9 +30,7 @@ const SampleServerFormatConfig = getServerPackFormatConfig([
   LogFormatConfig,
   PidFormatConfig,
 
-  AuthSkipFormatConfig,
-  AuthFileFormatConfig,
-  AuthFileGroupFormatConfig,
+  AuthCommonFormatConfig, AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig,
   PermissionFormatConfig,
 
   ExplorerFormatConfig,
@@ -48,9 +46,7 @@ const runSampleServer = async (optionData) => startServer({
   ...getServerPackOption(optionData)
 }, {
   isDebugRoute: optionData.tryGet('debug-route'),
-  ...getAuthSkipOption(optionData),
-  ...getAuthFileOption(optionData),
-  ...getAuthFileGroupOption(optionData),
+  ...getAuthCommonOption(optionData), ...getAuthSkipOption(optionData), ...getAuthFileOption(optionData), ...getAuthFileGroupOption(optionData),
   ...getPermissionOption(optionData),
   ...getExplorerOption(optionData),
   ...getStatCollectOption(optionData),
