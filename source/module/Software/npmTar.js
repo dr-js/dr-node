@@ -5,6 +5,7 @@ import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/da
 import { fromNpmNodeModules } from './npm'
 
 const REGEXP_TGZ = /\.t(?:ar\.)?gz$/
+const REGEXP_NPM_TAR = /\.(?:tar|tgz|tar\.gz)$/
 
 let cacheNpmTar
 const getNpmTar = () => {
@@ -38,8 +39,20 @@ const extractAsync = async (sourceFile, outputPath) => waitStreamStopAsync(setup
   createExtractStream(outputPath)
 ))
 
+const REGEXP_PACKAGE_JSON = /^[^/]+\/package\.json$/
+const extractPackageJson = async (sourceFile) => { // https://github.com/npm/node-tar/issues/181#issuecomment-492756116
+  const chunkList = []
+  await getNpmTar().list({
+    file: sourceFile,
+    onentry: (entry) => { REGEXP_PACKAGE_JSON.test(entry.path) && entry.on('data', (chunk) => chunkList.push(chunk)) }
+  })
+  if (!chunkList.length) throw new Error(`expect "${REGEXP_PACKAGE_JSON}" in ".tgz"`)
+  return JSON.parse(String(Buffer.concat(chunkList)))
+}
+
 export {
-  REGEXP_TGZ, getNpmTar, detect,
+  REGEXP_TGZ, REGEXP_NPM_TAR, getNpmTar, detect,
   createCompressStream, createExtractStream,
-  compressAsync, extractAsync // NOTE: will not auto create output path
+  compressAsync, extractAsync, // NOTE: will not auto create output path
+  extractPackageJson
 }

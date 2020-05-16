@@ -16,6 +16,8 @@ const detect = createDetect( // test for: `-bs{o|e|p}{0|1|2} : set output stream
   getCommand
 )
 
+// TODO: need specific -t for archive type?
+
 const compressConfig = (sourceDirectory, outputFile) => ({
   command: getCommand(),
   argList: [
@@ -35,6 +37,7 @@ const extractConfig = (sourceFile, outputPath) => ({
   ]
 })
 
+// TODO: need a way to correctly kill the process on stream fail
 // require manual setup piping: https://stackoverflow.com/questions/1359793/programmatically-extract-tar-gz-in-a-single-step-on-windows-with-7-zip/14699663#14699663
 // const runCompressStream = async (sourceDirectory, type = '7z') => run({ // subProcess.stdout will be readableStream
 //   command: getCommand(),

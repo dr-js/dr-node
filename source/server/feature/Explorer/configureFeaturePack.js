@@ -29,19 +29,19 @@ const configureFeaturePack = async ({
   explorerUploadMergePath: mergePath,
   explorerStatusCommandList: statusCommandList,
 
+  URL_HTML = `${routePrefix}/explorer`,
+  URL_PATH_ACTION = `${routePrefix}/path-action`,
+  URL_FILE_SERVE = `${routePrefix}/file-serve`,
+  URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`,
+  URL_STORAGE_STATUS = `${routePrefix}/storage-status`,
+  URL_TIMESTAMP = `${routePrefix}/timestamp`,
+
   IS_SKIP_AUTH = authMode === AUTH_SKIP,
   IS_READ_ONLY = !mergePath, // TODO: should be decided by user permission
 
   IS_EXTRA_7Z = Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z ]),
   IS_EXTRA_TAR = Boolean(EXTRA_COMPRESS_PATH_ACTION_MAP[ EXTRA_COMPRESS_PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR ])
 }) => {
-  const URL_HTML = `${routePrefix}/explorer`
-  const URL_PATH_ACTION = `${routePrefix}/path-action`
-  const URL_FILE_SERVE = `${routePrefix}/file-serve`
-  const URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`
-  const URL_STORAGE_STATUS = `${routePrefix}/storage-status`
-  const URL_TIMESTAMP = `${routePrefix}/timestamp`
-
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
     URL_AUTH_CHECK,
     URL_PATH_ACTION,

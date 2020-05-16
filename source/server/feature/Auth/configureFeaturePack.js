@@ -6,10 +6,12 @@ import { configureAuth } from 'source/module/Auth'
 
 const configureFeaturePack = async ({
   logger: { add: log }, routePrefix = '',
+
   authKey,
   authSkip = false,
   authFile,
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
+
   URL_AUTH_CHECK = `${routePrefix}/auth`
 }) => {
   const authPack = await configureAuth({

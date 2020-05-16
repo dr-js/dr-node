@@ -29,8 +29,13 @@ const PATH_ACTION_TYPE = { // NOTE: should always refer action type form here
 }
 
 const PATH_ACTION_MAP = { // all async
-  [ PATH_VISIBLE ]: (absolutePath) => fsAsync.access(absolutePath).then(() => ({ isVisible: true }), () => ({ isVisible: false })),
-  [ PATH_STAT ]: (absolutePath) => fsAsync.stat(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
+  [ PATH_VISIBLE ]: (absolutePath) => fsAsync.access(absolutePath)
+    .then(
+      () => ({ isVisible: true }),
+      () => ({ isVisible: false })
+    ),
+  [ PATH_STAT ]: (absolutePath) => fsAsync.stat(absolutePath)
+    .then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
   [ PATH_COPY ]: modifyCopy, // consider the result is undefined
   [ PATH_RENAME ]: modifyRename, // consider the result is undefined
   [ PATH_DELETE ]: modifyDelete, // consider the result is undefined

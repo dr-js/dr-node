@@ -6,10 +6,10 @@ const configureFeaturePack = async ({
   logger, routePrefix = '',
   featureAuth: { authPack: { authFetch }, createResponderCheckAuth },
 
-  statReportProcessTag
-}) => {
-  const URL_STAT_REPORT = `${routePrefix}/stat-report`
+  statReportProcessTag,
 
+  URL_STAT_REPORT = `${routePrefix}/stat-report`
+}) => {
   const getStatReport = createGetStatReport(statReportProcessTag)
 
   const routeList = [

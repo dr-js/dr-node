@@ -46,6 +46,8 @@ describe('Node.Module.Software.npmTar', () => {
     await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.tar.gz'))
     await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.t7z'))
     await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.tar.7z'))
+    await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.txz'))
+    await compressAutoAsync(SOURCE_DIRECTORY, fromTemp('compressAutoAsync/test.tar.xz'))
     info('extractAutoAsync')
     await extractAutoAsync(fromTemp('compressAutoAsync/test.7z'), fromTemp('extractAutoAsync/test.7z-extract/'))
     await extractAutoAsync(fromTemp('compressAutoAsync/test.zip'), fromTemp('extractAutoAsync/test.zip-extract/'))
@@ -54,6 +56,8 @@ describe('Node.Module.Software.npmTar', () => {
     await extractAutoAsync(fromTemp('compressAutoAsync/test.tar.gz'), fromTemp('extractAutoAsync/test.tar.gz-extract/'))
     await extractAutoAsync(fromTemp('compressAutoAsync/test.t7z'), fromTemp('extractAutoAsync/test.t7z-extract/'))
     await extractAutoAsync(fromTemp('compressAutoAsync/test.tar.7z'), fromTemp('extractAutoAsync/test.tar.7z-extract/'))
+    await extractAutoAsync(fromTemp('compressAutoAsync/test.txz'), fromTemp('extractAutoAsync/test.txz-extract/'))
+    await extractAutoAsync(fromTemp('compressAutoAsync/test.tar.xz'), fromTemp('extractAutoAsync/test.tar.xz-extract/'))
     info('verifyOutputDirectory')
     await verifyOutputDirectory(fromTemp('extractAutoAsync/test.7z-extract/'))
     await verifyOutputDirectory(fromTemp('extractAutoAsync/test.zip-extract/'))
@@ -62,6 +66,8 @@ describe('Node.Module.Software.npmTar', () => {
     await verifyOutputDirectory(fromTemp('extractAutoAsync/test.tar.gz-extract/'))
     await verifyOutputDirectory(fromTemp('extractAutoAsync/test.t7z-extract/'))
     await verifyOutputDirectory(fromTemp('extractAutoAsync/test.tar.7z-extract/'))
+    await verifyOutputDirectory(fromTemp('extractAutoAsync/test.txz-extract/'))
+    await verifyOutputDirectory(fromTemp('extractAutoAsync/test.tar.xz-extract/'))
   })
 
   it('repackAsync()', async () => {

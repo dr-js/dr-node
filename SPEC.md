@@ -47,15 +47,15 @@
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
   - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
 + 📄 [source/module/Software/archive.js](source/module/Software/archive.js)
-  - `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`
+  - `REGEXP_AUTO`, `REGEXP_T7Z`, `REGEXP_TXZ`, `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
   - `createCommandWrap`, `createDetect`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
   - `detect`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setCommand`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
-  - `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`
+  - `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
 + 📄 [source/module/Software/npmTar.js](source/module/Software/npmTar.js)
-  - `REGEXP_TGZ`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `getNpmTar`
+  - `REGEXP_NPM_TAR`, `REGEXP_TGZ`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `extractPackageJson`, `getNpmTar`
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)
   - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
 + 📄 [source/module/Stat/StatCollect.js](source/module/Stat/StatCollect.js)

@@ -44,7 +44,7 @@ const createResponderServeFile = ({
   rootPath
 }) => {
   const getPath = createPathPrefixLock(rootPath)
-  const responderServeStatic = createResponderServeStatic({ expireTime: 1000 }) // 1000 ms expire
+  const responderServeStatic = createResponderServeStatic({ expireTime: 10000 }) // 10sec expire
   return (store, relativePath) => responderServeStatic(store, getPath(relativePath))
 }
 

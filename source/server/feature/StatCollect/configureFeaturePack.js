@@ -12,12 +12,12 @@ const configureFeaturePack = async ({
 
   statCollectPath,
   statCollectUrl,
-  statCollectInterval
-}) => {
-  const URL_HTML = `${routePrefix}/stat-visualize`
-  const URL_STAT_STATE = `${routePrefix}/stat-state`
-  const URL_STAT_COLLECT = `${routePrefix}/stat-collect`
+  statCollectInterval,
 
+  URL_HTML = `${routePrefix}/stat-visualize`,
+  URL_STAT_STATE = `${routePrefix}/stat-state`,
+  URL_STAT_COLLECT = `${routePrefix}/stat-collect`
+}) => {
   const { factDatabase, timer, collectStat } = await configureStatCollect({
     collectPath: statCollectPath,
     collectUrl: statCollectUrl,

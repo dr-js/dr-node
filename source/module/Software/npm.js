@@ -23,6 +23,13 @@ const findUpPackageRoot = (path = __dirname) => {
   }
 }
 
+// check: https://github.com/npm/cli/blob/v6.14.5/lib/pack.js#L67-L71
+const toPackageTgzName = (name, version) => `${
+  name[ 0 ] === '@' ? name.substr(1).replace(/\//g, '-') : name
+}-${
+  version
+}.tgz`
+
 // TODO: NOTE:
 //   the location for npm itself and npm global install can be different normally, with `npm list -g --depth=0` we see npm it self get listed
 //   but by changing `NPM_CONFIG_PREFIX` env we can move where npm put the global install and cache
@@ -88,6 +95,8 @@ const fromNpmNodeModules = (...args) => getPathNpm() && resolve(getPathNpm(), '.
 export {
   parsePackageNameAndVersion,
   findUpPackageRoot,
+  toPackageTgzName,
+
   getPathNpmExecutable,
   getPathNpmGlobalRoot, fromGlobalNodeModules,
   getPathNpm, fromNpmNodeModules
