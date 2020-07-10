@@ -22,7 +22,7 @@ import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node
 
 import { getAuthCommonOption, getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
 import { fileUpload, fileDownload, pathAction } from '@dr-js/node/module/server/feature/Explorer/client'
-import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnel/client'
+import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
 

@@ -10,7 +10,7 @@ import { configureFeaturePack as configureFeaturePackPermission } from '@dr-js/n
 import { configureFeaturePack as configureFeaturePackExplorer } from '@dr-js/node/module/server/feature/Explorer/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatCollect } from '@dr-js/node/module/server/feature/StatCollect/configureFeaturePack'
 import { configureFeaturePack as configureFeaturePackStatReport } from '@dr-js/node/module/server/feature/StatReport/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnel/configureFeaturePack'
+import { configureFeaturePack as configureFeaturePackWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/configureFeaturePack'
 
 const FRAME_LENGTH_LIMIT = 64 * 1024 * 1024 // 64 MiB
 

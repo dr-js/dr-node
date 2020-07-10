@@ -5,8 +5,9 @@ import { createServerPack } from '@dr-js/core/module/node/server/Server'
 import { parseHostString } from 'source/module/ServerPack'
 import { packWebSocketProtocolListParam } from 'source/module/RequestCommon'
 
+// TODO: under DEV
 // TODO: add Permission support
-// TODO: change to multi socket on single WS to reduce WS count
+// TODO: change to multi/many socket on single/few WS to reduce WS count
 
 const setupClientWebSocketTunnel = ({
   url, // like: 'wss://127.0.0.1:3000/websocket-tunnel'

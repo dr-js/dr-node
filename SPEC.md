@@ -114,11 +114,11 @@
   - `TokenCacheFormatConfig`, `getTokenCacheOption`
 + 📄 [source/server/feature/TokenCache/responder.js](source/server/feature/TokenCache/responder.js)
   - `createResponderAssignTokenCookie`, `createResponderAssignTokenHeader`, `createResponderCheckToken`
-+ 📄 [source/server/feature/WebSocketTunnel/client.js](source/server/feature/WebSocketTunnel/client.js)
++ 📄 [source/server/feature/WebSocketTunnelDev/client.js](source/server/feature/WebSocketTunnelDev/client.js)
   - `setupClientWebSocketTunnel`
-+ 📄 [source/server/feature/WebSocketTunnel/configureFeaturePack.js](source/server/feature/WebSocketTunnel/configureFeaturePack.js)
++ 📄 [source/server/feature/WebSocketTunnelDev/configureFeaturePack.js](source/server/feature/WebSocketTunnelDev/configureFeaturePack.js)
   - `configureFeaturePack`
-+ 📄 [source/server/feature/WebSocketTunnel/option.js](source/server/feature/WebSocketTunnel/option.js)
++ 📄 [source/server/feature/WebSocketTunnelDev/option.js](source/server/feature/WebSocketTunnelDev/option.js)
   - `WebSocketTunnelFormatConfig`, `getWebSocketTunnelOption`
 + 📄 [source/server/share/option.js](source/server/share/option.js)
   - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerPackFormatConfig`, `getServerPackOption`
@@ -233,7 +233,7 @@
 >       --stat-collect-interval [ARGUMENT=1]
 >     --stat-report-process-tag [ARGUMENT=1]
 >     --websocket-tunnel-host [ARGUMENT=1]
->         use format: "hostname:port", default hostname: 127.0.0.1
+>         [under DEV] use format: "hostname:port", default hostname: 127.0.0.1
 > ENV Usage:
 >   "
 >     #!/usr/bin/env bash
