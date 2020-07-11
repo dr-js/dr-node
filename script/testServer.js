@@ -8,7 +8,7 @@ import { runMain } from '@dr-js/dev/module/main'
 import { stringifyEqual } from '@dr-js/core/module/common/verify'
 import { run } from '@dr-js/core/module/node/system/Run'
 
-import { PATH_ACTION_TYPE } from 'source/module/PathAction/base'
+import { ACTION_TYPE } from 'source/module/ActionJSON/path'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_TEMP = resolve(__dirname, '../.temp-gitignore/test-server')
@@ -40,15 +40,16 @@ const TEXT_SERVER_CONFIG = JSON.stringify({
   permissionType: 'file',
   permissionFile: './server-permission.config.js',
   authFile: FILE_AUTH_KEY,
-  explorerRootPath: './path-upload',
-  explorerUploadMergePath: './path-upload.merge'
+  fileRootPath: './path-upload',
+  fileUploadMergePath: './path-upload.merge',
+  explorer: true
 })
 
 const FILE_CLIENT_PATH_ACTION_CONFIG = fromTemp('client-path-action.config.json')
 const TEXT_CLIENT_PATH_ACTION_CONFIG = JSON.stringify({
   authFile: FILE_AUTH_KEY,
-  pathActionServerUrl: 'http://127.0.0.1:8000/path-action',
-  pathActionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT,
+  pathActionServerUrl: 'http://127.0.0.1:8000/action-json',
+  pathActionType: ACTION_TYPE.PATH_DIRECTORY_CONTENT,
   pathActionKey: ''
 })
 
@@ -84,25 +85,18 @@ runMain(async ({ padLog, stepLog }) => {
     await fsAsync.writeFile(FILE_CLIENT_FILE_DOWNLOAD_CONFIG, TEXT_CLIENT_FILE_DOWNLOAD_CONFIG)
     await fsAsync.writeFile(FILE_TEST, await fsAsync.readFile(fromRoot('package-lock.json')))
 
+    const command = process.execPath // node bin path
+
     padLog('create FILE_AUTH_KEY')
-    await run({
-      command: 'node',
-      argList: [ fromOutput('bin/index.js'), '-O', FILE_AUTH_KEY, '--auth-gen-tag', 'TEST_SERVER_AUTH' ]
-    }).promise
+    await run({ command, argList: [ fromOutput('bin/index.js'), '-O', FILE_AUTH_KEY, '--auth-gen-tag', 'TEST_SERVER_AUTH' ] }).promise
 
     padLog('start server')
-    await withRunBackground({
-      command: 'node',
-      argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ]
-    }, async () => {
+    await withRunBackground({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ] }, async () => {
       stepLog('start server done')
 
       const FILE_PATH_CONTENT_OUTPUT = fromTemp('path-content.json')
       const getPathContentJSON = async () => {
-        const { promise, stderrPromise } = run({
-          command: 'node',
-          argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_PATH_ACTION_CONFIG, '-O', FILE_PATH_CONTENT_OUTPUT ]
-        })
+        const { promise, stderrPromise } = run({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_PATH_ACTION_CONFIG, '-O', FILE_PATH_CONTENT_OUTPUT ] })
         await promise.catch(async (error) => {
           console.error('[error]', error)
           console.error('[stderrString]', String(await stderrPromise))
@@ -113,29 +107,23 @@ runMain(async ({ padLog, stepLog }) => {
       padLog('test node path action')
       const pathContentPre = await getPathContentJSON()
       console.log(JSON.stringify(pathContentPre))
-      stringifyEqual(pathContentPre.resultList[ 0 ].actionType, PATH_ACTION_TYPE.DIRECTORY_CONTENT)
+      stringifyEqual(pathContentPre.resultList[ 0 ].actionType, ACTION_TYPE.PATH_DIRECTORY_CONTENT)
       stringifyEqual(pathContentPre.resultList[ 0 ].directoryList, [])
       stringifyEqual(pathContentPre.resultList[ 0 ].fileList, [])
       stepLog('test node path action done')
 
       padLog('test node file upload')
-      await run({
-        command: 'node',
-        argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_FILE_UPLOAD_CONFIG ]
-      }).promise
+      await run({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_FILE_UPLOAD_CONFIG ] }).promise
       stepLog('test node file upload done')
 
       padLog('test node file download')
-      await run({
-        command: 'node',
-        argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_FILE_DOWNLOAD_CONFIG ]
-      }).promise
+      await run({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_FILE_DOWNLOAD_CONFIG ] }).promise
       stepLog('test node file download done')
 
       padLog('test node path action')
       const pathContentPost = await getPathContentJSON()
       console.log(JSON.stringify(pathContentPost))
-      stringifyEqual(pathContentPost.resultList[ 0 ].actionType, PATH_ACTION_TYPE.DIRECTORY_CONTENT)
+      stringifyEqual(pathContentPost.resultList[ 0 ].actionType, ACTION_TYPE.PATH_DIRECTORY_CONTENT)
       stringifyEqual(pathContentPost.resultList[ 0 ].directoryList, [])
       stringifyEqual(pathContentPost.resultList[ 0 ].fileList.map(([ name ]) => name).sort(), [ 'test-file.download', 'test-file.upload' ])
       stepLog('test node path action done')

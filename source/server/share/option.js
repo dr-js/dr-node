@@ -2,11 +2,11 @@ import { resolve } from 'path'
 import { isString, isBasicObject } from '@dr-js/core/module/common/check'
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { parseHostString } from 'source/module/ServerPack'
+import { parseHostString } from 'source/module/ServerExot'
 
 const { parseCompact, parseCompactList } = Preset
 
-const getServerPackFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
+const getServerExotFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|set "hostname:port"', [
   parseCompact(`TLS-SNI-config/SO,O|TLS SNI config map, set to enable https:\n  ${[
     'multi config: { [hostname]: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer } }, default to special hostname "default", or the first config',
     'single config: { key: pathOrBuffer, cert: pathOrBuffer, ca: pathOrBuffer }',
@@ -19,7 +19,7 @@ const getServerPackFormatConfig = (extraList = []) => parseCompact('host,H/SS,O|
   ...extraList
 ])
 
-const getServerPackOption = ({ tryGet, tryGetFirst, pwd }, defaultHostname = '127.0.0.1') => {
+const getServerExotOption = ({ tryGet, tryGetFirst, pwd }, defaultHostname = '127.0.0.1') => {
   const host = tryGetFirst('host') || ''
   const { hostname, port } = parseHostString(host, defaultHostname)
   const pwdTLSSNIConfig = pwd('TLS-SNI-config') // should be the same for `TLS-dhparam`
@@ -56,7 +56,7 @@ const getPidOption = ({ tryGet, tryGetFirst }) => ({
 })
 
 export {
-  getServerPackFormatConfig, getServerPackOption,
+  getServerExotFormatConfig, getServerExotOption,
 
   LogFormatConfig, getLogOption,
   PidFormatConfig, getPidOption

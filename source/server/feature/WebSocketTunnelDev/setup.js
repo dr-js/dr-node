@@ -2,7 +2,7 @@ import { createConnection } from 'net'
 import { createInsideOutPromise } from '@dr-js/core/module/common/function'
 import { WEBSOCKET_EVENT } from '@dr-js/core/module/node/server/WebSocket/function'
 
-import { parseHostString } from 'source/module/ServerPack'
+import { parseHostString } from 'source/module/ServerExot'
 
 // TODO: under DEV
 
@@ -38,7 +38,8 @@ const setupTunnel = async ({
   webSocket.on(WEBSOCKET_EVENT.FRAME, async ({ dataBuffer }) => { socket.writable && socket.write(dataBuffer) })
 }
 
-const configureFeaturePack = async ({
+const setup = async ({
+  name = 'feature:websocket-tunnel',
   logger, routePrefix = '',
   featureAuth: { createResponderCheckAuth },
   webSocketTunnelHost, // hostname:port
@@ -56,8 +57,9 @@ const configureFeaturePack = async ({
 
   return {
     URL_WEBSOCKET_TUNNEL,
-    webSocketRouteList
+    webSocketRouteList,
+    name
   }
 }
 
-export { configureFeaturePack }
+export { setup }

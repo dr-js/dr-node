@@ -1,15 +1,18 @@
-const { startServer } = require('../output-gitignore/bin/runServer')
+const { setupServer, setupServerExotGroup } = require('../output-gitignore/bin/runServer')
 
 const SERVER_TAG = 'explorer'
 
-startServer({
+setupServer({
+  hostname: '0.0.0.0',
   port: 8001,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
 }, {
   isDebugRoute: true,
   permissionType: 'allow',
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
-  explorerRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
-  explorerUploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`
+  fileRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
+  fileUploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`,
+  explorer: true
 })
+  .then(setupServerExotGroup)
   .catch(console.error)

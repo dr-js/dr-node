@@ -1,8 +1,9 @@
 import { responderSendJSON } from '@dr-js/core/module/node/server/Responder/Send'
 
-import { createGetStatReport } from 'source/module/Stat/StatReport'
+import { createGetStatReport } from 'source/module/Stat/StatReport' // TODO: move to ActionJSON?
 
-const configureFeaturePack = async ({
+const setup = async ({
+  name = 'feature:stat-report',
   logger, routePrefix = '',
   featureAuth: { authPack: { authFetch }, createResponderCheckAuth },
 
@@ -24,10 +25,12 @@ const configureFeaturePack = async ({
   }
 
   return {
+    reportStat,
+
     URL_STAT_REPORT,
     routeList,
-    reportStat
+    name
   }
 }
 
-export { configureFeaturePack }
+export { setup }

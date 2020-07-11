@@ -5,7 +5,7 @@ const initAuthMask = ({
   authKey = 'auth-check-code' // TODO: NOTE: should match 'DEFAULT_AUTH_KEY' from `module/Auth.js`
 }) => {
   const {
-    fetch, location, URL,
+    document, fetch, location, URL,
     cE,
     Dr: {
       Common: {
@@ -23,15 +23,6 @@ const initAuthMask = ({
 
   const authRevoke = () => catchAsync(clearTimedLookupData)
 
-  const getAuthFetch = (timedLookupData) => async (url, option = {}) => {
-    const response = await fetch(url, IS_SKIP_AUTH
-      ? option
-      : { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } }
-    )
-    if (!response.ok) throw new Error(`[authFetch] status: ${response.status}, url: ${url}`)
-    return response
-  }
-
   const authPass = (timedLookupData) => {
     const authUrl = (url) => {
       const urlObject = new URL(url, location.origin)
@@ -42,7 +33,14 @@ const initAuthMask = ({
       IS_SKIP_AUTH,
       authRevoke, // should reload after
       authUrl,
-      authFetch: getAuthFetch(timedLookupData),
+      authFetch: async (url, option = {}) => {
+        const response = await fetch(url, IS_SKIP_AUTH
+          ? option
+          : { ...option, headers: { [ authKey ]: generateCheckCode(timedLookupData), ...option.headers } }
+        )
+        if (!response.ok) throw new Error(`[authFetch] status: ${response.status}, url: ${url}`)
+        return response
+      },
       authDownload: (url, fileName) => createDownload(fileName, authUrl(url))
     })
   }
@@ -55,18 +53,11 @@ const initAuthMask = ({
   const loadTimedLookupData = async () => parseDataArrayBuffer(await loadArrayBufferCache(CACHE_BUCKET, CACHE_KEY))
   const clearTimedLookupData = async () => deleteArrayBufferCache(CACHE_BUCKET, CACHE_KEY)
 
-  const authCheck = async (timedLookupData) => {
-    const checkCode = generateCheckCode(timedLookupData)
-    const { ok, status } = await fetch(URL_AUTH_CHECK, { headers: { [ authKey ]: checkCode } })
-    if (!ok) throw new Error(`[authCheck] status: ${status}`)
-    return timedLookupData
-  }
-
   const PRE_TEXT = 'drop the auth file here, or select file below'
   const authInfoDiv = cE('div', { innerText: PRE_TEXT, style: 'flex: 1;' })
   const authKeyInput = cE('input', { type: 'file' })
   const authSaveInput = cE('input', { type: 'checkbox' })
-  const authSaveLabel = cE('label', {}, [ authSaveInput, document.createTextNode('save auth in CacheStorage') ])
+  const authSaveLabel = cE('label', {}, [ authSaveInput, document.createTextNode('save auth to CacheStorage (HTTPS only)') ]) // check: https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage
   const authMainDiv = cE('div', {
     style: 'display: flex; flex-flow: column; margin: 8px; padding: 8px; width: 480px; height: 480px; max-width: 92vw; max-height: 64vh; line-height: 2em; box-shadow: 0 0 2px 0 #888;'
   }, [ authInfoDiv, authKeyInput, authSaveLabel ])
@@ -74,15 +65,17 @@ const initAuthMask = ({
     style: 'position: fixed; display: flex; align-items: center; justify-content: center; top: 0px; left: 0px; width: 100vw; height: 100vh; z-index: 256;'
   }, [ authMainDiv ])
 
+  const authCheck = async (timedLookupData) => {
+    const { ok, status } = await fetch(URL_AUTH_CHECK, { method: 'HEAD', headers: { [ authKey ]: generateCheckCode(timedLookupData) } })
+    if (!ok) throw new Error(`[authCheck] status: ${status}`)
+    return timedLookupData
+  }
+
   const tryAuthCheck = lossyAsync(async () => {
     const fileBlob = authKeyInput.files[ 0 ]
     authInfoDiv.innerText = fileBlob ? fileBlob.name : PRE_TEXT
     if (!fileBlob) return
-    const { result: timedLookupData, error } = await catchAsync(async () => {
-      const timedLookupData = await parseDataArrayBuffer(await parseBlobAsArrayBuffer(fileBlob))
-      await getAuthFetch(timedLookupData)(URL_AUTH_CHECK)
-      return timedLookupData
-    })
+    const { result: timedLookupData, error } = await catchAsync(async () => authCheck(await parseDataArrayBuffer(await parseBlobAsArrayBuffer(fileBlob))))
     if (error) authInfoDiv.innerText = `auth invalid for file: ${fileBlob.name}`
     else {
       authMaskDiv.remove()

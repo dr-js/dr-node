@@ -1,8 +1,8 @@
-const { startServer } = require('../output-gitignore/bin/runServer')
+const { setupServer, setupServerExotGroup } = require('../output-gitignore/bin/runServer')
 
 const SERVER_TAG = 'stat-collect'
 
-startServer({
+setupServer({
   port: 8002,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
 }, {
@@ -10,8 +10,11 @@ startServer({
   permissionType: 'allow',
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
   statCollectPath: `${__dirname}/fact-${SERVER_TAG}-gitignore`,
-  statCollectUrl: `http://127.0.0.1:8003/stat-report`
+  statCollectUrl: 'http://127.0.0.1:8003/stat-report'
   // statCollectInterval: 2 * 1000,
 })
-  .then(({ featureStatCollect }) => featureStatCollect.timer.start())
+  .then(async ({ exotGroup, serverExot }) => {
+    await setupServerExotGroup({ exotGroup })
+    return serverExot.featureMap.get('feature:stat-collect').exotList[ 0 ].timer.start()
+  })
   .catch(console.error)

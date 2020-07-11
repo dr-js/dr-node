@@ -4,7 +4,7 @@ import { getFileList } from '@dr-js/core/module/node/file/Directory'
 import { modifyDelete } from '@dr-js/core/module/node/file/Modify'
 
 import {
-  createFactDatabase,
+  createFactDatabaseExot,
   tryDeleteExtraCache
 } from './FactDatabase'
 
@@ -15,7 +15,8 @@ const TEST_ROOT = resolve(__dirname, './test-fact-database-gitignore/')
 const TEST_TEXT = String(new Date())
 
 const basicTest = async (pathFactDirectory) => {
-  const factDB = await createFactDatabase({ pathFactDirectory, onError: console.error })
+  const factDB = createFactDatabaseExot({ pathFactDirectory })
+  await factDB.up(console.error)
 
   stringifyEqual(factDB.getState(), { id: 0 })
 
@@ -53,8 +54,7 @@ const basicTest = async (pathFactDirectory) => {
   factDB.add({ key1: 1, key2: 2, key3: 3 })
   stringifyEqual(factDB.getState(), { id: 10, key1: 1, key2: 2, key3: 3, textKey: TEST_TEXT, [ TEST_TEXT ]: 'testValue' })
 
-  factDB.end()
-  await factDB.getSaveFactCachePromise() // wait for file to write
+  await factDB.down() // wait for file to write
 
   const fileList = await getFileList(pathFactDirectory)
   // console.log(fileList)
@@ -66,14 +66,15 @@ const basicTest = async (pathFactDirectory) => {
 after('clear', () => modifyDelete(TEST_ROOT))
 
 describe('Node.Module.FactDatabase', () => {
-  it('createFactDatabase()', async () => {
+  it('createFactDatabaseExot()', async () => {
     const pathFactDirectory = resolve(TEST_ROOT, 'test-1')
 
     const resultState = await basicTest(pathFactDirectory)
 
-    const factDBVerify = await createFactDatabase({ pathFactDirectory, onError: console.error })
+    const factDBVerify = createFactDatabaseExot({ pathFactDirectory })
+    await factDBVerify.up(console.error)
     stringifyEqual(factDBVerify.getState(), resultState)
-    factDBVerify.end()
+    factDBVerify.down()
   })
 
   it('tryDeleteExtraCache()', async () => {
@@ -81,7 +82,8 @@ describe('Node.Module.FactDatabase', () => {
 
     await basicTest(pathFactDirectory)
 
-    const factDB = await createFactDatabase({ pathFactDirectory, onError: console.error })
+    const factDB = createFactDatabaseExot({ pathFactDirectory })
+    await factDB.up(console.error)
 
     factDB.add({})
     factDB.save()
@@ -92,8 +94,7 @@ describe('Node.Module.FactDatabase', () => {
     factDB.add({})
     factDB.save()
 
-    factDB.end()
-    await factDB.getSaveFactCachePromise() // wait for file to write
+    await factDB.down() // wait for file to write
 
     const fileList = await getFileList(pathFactDirectory)
     // console.log(fileList)

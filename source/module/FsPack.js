@@ -1,19 +1,19 @@
-import { resolve, relative, /* isAbsolute, */ dirname } from 'path'
+import { resolve, relative, dirname } from 'path'
 import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
 
 import { catchAsync } from '@dr-js/core/module/common/error'
-import { setupStreamPipe, waitStreamStopAsync, bufferToReadableStream } from '@dr-js/core/module/node/data/Stream'
+import { bufferToReadableStream, quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { PATH_TYPE, toPosixPath } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoTree, walkDirInfoTreeAsync, createDirectory } from '@dr-js/core/module/node/file/Directory'
 
-// TODO: no symlink support, but can add now
+// TODO: block symlink with error on win32 since it by default cannot be created?
 
-/** fsPack
+/** fsPack (suggest `.fsp` extension)
  * feature
- *   support file mode, currently record executable only
- *   // TODO: support symbolic link (on *nux)
- *   // TODO: the compact form for headerJSON do not support route with `\r` or `\n`
- *   // TODO: consider support reorder with http://man7.org/linux/man-pages/man2/copy_file_range.2.html
+ *   support file mode, currently record isExecutable only, like Git
+ *   // TODO: should support concat multiple FsPack and unpack? how have offset, but no auto unpack multiple yet
+ *   // TODO: should support pack to a writableStream? but this is conflict with how headerOffset is set at last
+ *   // TODO: consider add faster binary in-place reorder with http://man7.org/linux/man-pages/man2/copy_file_range.2.html
  *
  * structure
  *   binary layout
@@ -23,15 +23,15 @@ import { getDirInfoTree, walkDirInfoTreeAsync, createDirectory } from '@dr-js/co
  *     fileBuffer#1
  *     fileBuffer#2
  *     ...
- *     headerLength (4byte|number) this allows pack to easily append
+ *     headerLength (4byte|number) this allows pack to easily append, just add file from here and then seal with new headerJSON
  *     headerJSON (string)
  *
  *   headerJSON
  *     {
- *       contentList: [ // ordered
- *         { type: TYPE_FILE, route: 'a/b/c', size: 10, isExecutable: false }, // offset start can be calc from size
- *         { type: TYPE_DIRECTORY, route: 'a/b/d' },
- *         // TODO: { type: TYPE_SYMLINK, route: 'a/b/s', target: 'relative/or/absolute/path' },
+ *       contentList: [ // ordered list
+ *         { type: TYPE_FILE, route: 'a/b/file', size: 10, isExecutable: false }, // offset start can be calc from size, so not saved in header
+ *         { type: TYPE_DIRECTORY, route: 'a/b/dir' },
+ *         { type: TYPE_SYMLINK, route: 'a/b/symlink', target: 'relative/or/absolute/path' },
  *       ]
  *     }
  */
@@ -39,20 +39,21 @@ import { getDirInfoTree, walkDirInfoTreeAsync, createDirectory } from '@dr-js/co
 const UINT32_MAX = 0xffffffff // 4GiB
 const UINT32_BYTE_SIZE = 4 // Math.ceil(Math.log2(UINT32_MAX) / 8)
 
-const HEADER_VERSION_UINT32 = 0x46535000 // `0x${Buffer.from('FSP\x00').readUInt32BE(0).toString(16)}`
+const HEADER_VERSION_UINT32 = 0x46535001 // `0x${Buffer.from('FSP\x01').readUInt32BE(0).toString(16)}`
+// ver1: add symlink, use JSON for route/target string so `\n`, `\r` will be properly escaped.
 
 const KEY_CONTENT_COMPACT = 'cc'
 
 const TYPE_FILE = 'f'
 const TYPE_DIRECTORY = 'd'
-// const TYPE_SYMLINK = 's'
+const TYPE_SYMLINK = 's'
 
 const FILE_FLAG_READ_ONLY = 'r'
 const FILE_FLAG_EDIT = 'r+' // fail if not exist
 const FILE_FLAG_CREATE = 'w+' // will reset existing
 
 const fileModeToIsExecutable = (mode) => Boolean(mode & 0o111)
-const isExecutableToFileMode = (isExecutable) => isExecutable ? 0x755 : 0x644 // same as git
+const isExecutableToFileMode = (isExecutable) => isExecutable ? 0o755 : 0o644 // same as git
 
 const toRoute = (packRoot, path) => toPosixPath(relative(packRoot, path))
 
@@ -91,20 +92,20 @@ const parseHeaderJSON = (buffer) => {
     const typeCompactList = contentCompactList[ 0 ].split(' ')
     switch (typeCompactList[ 0 ]) {
       case TYPE_FILE: {
-        const [ , route ] = contentCompactList
-        const [ type, size, isExecutable ] = typeCompactList
-        return { type, route, size: parseInt(size, 36), isExecutable: isExecutable === 'E' }
+        const [ , routeJSON ] = contentCompactList
+        const [ type, sizeBase36, isExecutableMark ] = typeCompactList
+        return { type, route: JSON.parse(routeJSON), size: parseInt(sizeBase36, 36), isExecutable: isExecutableMark === 'E' }
       }
       case TYPE_DIRECTORY: {
-        const [ , route ] = contentCompactList
+        const [ , routeJSON ] = contentCompactList
         const [ type ] = typeCompactList
-        return { type, route }
+        return { type, route: JSON.parse(routeJSON) }
       }
-      // case TYPE_SYMLINK: {
-      //   const [ , route, target ] = contentCompactList
-      //   const [ type ] = typeCompactList
-      //   return { type, route, target }
-      // }
+      case TYPE_SYMLINK: {
+        const [ , routeJSON, targetJSON ] = contentCompactList
+        const [ type ] = typeCompactList
+        return { type, route: JSON.parse(routeJSON), target: JSON.parse(targetJSON) }
+      }
       default:
         throw new Error(`unsupported content type: ${typeCompactList[ 0 ]} ${JSON.stringify({ contentCompactList, typeCompactList })}`)
     }
@@ -118,21 +119,21 @@ const packHeaderJSON = (headerJSON) => {
     switch (content.type) {
       case TYPE_FILE: {
         const { type, route, size, isExecutable } = content
-        return [ [ type, Number(size).toString(36), isExecutable ? 'E' : '' ].join(' ').trim(), route ].join('\n')
+        return [ [ type, size.toString(36), isExecutable ? 'E' : '' ].join(' ').trim(), JSON.stringify(route) ].join('\n')
       }
       case TYPE_DIRECTORY: {
         const { type, route } = content
-        return [ type, route ].join('\n')
+        return [ type, JSON.stringify(route) ].join('\n')
       }
-      // case TYPE_SYMLINK: {
-      //   const { type, route, target } = content
-      //   return [ type, route, target ].join('\n')
-      // }
+      case TYPE_SYMLINK: {
+        const { type, route, target } = content
+        return [ type, JSON.stringify(route), JSON.stringify(target) ].join('\n')
+      }
       default:
         throw new Error(`unsupported content type: ${content.type}`)
     }
   }).join('\r')
-  __DEV__ && console.log(JSON.stringify({ [ KEY_CONTENT_COMPACT ]: contentCompact }))
+  // __DEV__ && console.log(JSON.stringify({ [ KEY_CONTENT_COMPACT ]: contentCompact }))
   return Buffer.from(JSON.stringify({ [ KEY_CONTENT_COMPACT ]: contentCompact }))
 }
 
@@ -165,15 +166,15 @@ const writeFsPackAppendFile = async (packFh, fsPack, {
   }
   if (!readStream) readStream = buffer ? bufferToReadableStream(buffer) : createReadStream(path)
   const writeStream = createWriteStream(fsPack.packPath, { fd: packFh.fd, start: fsPack.offset + fsPack.headerOffset, autoClose: false })
-  await waitStreamStopAsync(setupStreamPipe(readStream, writeStream))
+  await quickRunletFromStream(readStream, writeStream)
   fsPack.headerOffset += size
   fsPack.headerJSON.contentList.push({ type: TYPE_FILE, route, size, isExecutable })
 }
 const editFsPackAppendDirectory = async (fsPack, { path, route = toRoute(fsPack.packRoot, path) }) => { fsPack.headerJSON.contentList.push({ type: TYPE_DIRECTORY, route }) }
-// const editFsPackAppendSymlink = async (fsPack, { path, route = toRoute(fsPack.packRoot, path), target }) => {
-//   if (!target) target = await fsAsync.readlink(path)
-//   fsPack.headerJSON.contentList.push({ type: TYPE_SYMLINK, route, target })
-// }
+const editFsPackAppendSymlink = async (fsPack, { path, route = toRoute(fsPack.packRoot, path), target }) => {
+  if (!target) target = await fsAsync.readlink(path)
+  fsPack.headerJSON.contentList.push({ type: TYPE_SYMLINK, route, target })
+}
 
 const unpackFsPackFile = async (packFh, fsPack, {
   route, size, isExecutable,
@@ -184,25 +185,24 @@ const unpackFsPackFile = async (packFh, fsPack, {
   const path = resolve(unpackPath, route)
   await createDirectory(dirname(path))
   if (buffer) await readBuffer(packFh, offsetSum, size, buffer)
-  else if (writeStream || size >= 64 * 1024) {
-    const readStream = createReadStream(packPath, { fd: packFh.fd, start: offsetSum, end: offsetSum + size - 1, autoClose: false })
-    if (!writeStream) writeStream = createWriteStream(path, { mode: isExecutableToFileMode(isExecutable) })
-    await waitStreamStopAsync(setupStreamPipe(readStream, writeStream))
-  } else if (size > 0) await fsAsync.writeFile(path, await readBuffer(packFh, offsetSum, size))
-  else await fsAsync.writeFile(path, '')
+  else {
+    const option = { mode: isExecutableToFileMode(isExecutable) }
+    if (writeStream || size >= 64 * 1024) await quickRunletFromStream(createReadStream(packPath, { fd: packFh.fd, start: offsetSum, end: offsetSum + size - 1, autoClose: false }), writeStream || createWriteStream(path, option))
+    else if (size > 0) await fsAsync.writeFile(path, await readBuffer(packFh, offsetSum, size), option)
+    else await fsAsync.writeFile(path, '', option)
+  }
 }
 const unpackFsPackDirectory = async (packFh, fsPack, { route }) => {
   const { unpackPath } = fsPack
   const path = resolve(unpackPath, route)
   await createDirectory(path)
 }
-// const unpackFsPackSymlink = async (packFh, fsPack, { route, target }) => {
-//   const { unpackPath } = fsPack
-//   const path = resolve(unpackPath, route)
-//   const targetPath = isAbsolute(target) ? target : resolve(unpackPath, target)
-//   await createDirectory(dirname(path))
-//   await fsAsync.symlink(targetPath, path)
-// }
+const unpackFsPackSymlink = async (packFh, fsPack, { route, target }) => {
+  const { unpackPath } = fsPack
+  const path = resolve(unpackPath, route)
+  await createDirectory(dirname(path))
+  await fsAsync.symlink(target, path)
+}
 
 const collectContentListFromPath = async (inputPath) => {
   const contentList = []
@@ -216,6 +216,10 @@ const collectContentListFromPath = async (inputPath) => {
         break
       case PATH_TYPE.Directory:
         directoryPathList.push(path)
+        break
+      case PATH_TYPE.Symlink:
+        contentList.push({ type: TYPE_SYMLINK, path })
+        fileDirectorySet.add(dirname(path))
         break
       default:
         throw new Error(`unsupported content type: ${type}, from: ${path}`)
@@ -255,7 +259,9 @@ const verifyUnpack = (fsPack) => {
   autoFastCache(fsPack)
 }
 
-const initFsPack = async ({ packPath, packRoot = dirname(packPath), packFh = null, offset = 0 }) => {
+const initFsPack = async ({
+  packPath, packRoot = dirname(packPath), packFh = null, offset = 0
+}) => {
   const fsPack = {
     packPath, packRoot, packFh, offset, isReadOnly: false,
     headerOffset: 2 * UINT32_BYTE_SIZE, headerJSON: { contentList: [] },
@@ -294,18 +300,18 @@ const appendDirectory = async (fsPack, content) => {
   verifyEdit(fsPack)
   await editFsPackAppendDirectory(fsPack, content)
 }
-// const appendSymlink = async (fsPack, content) => {
-//   verifyEdit(fsPack)
-//   await editFsPackAppendSymlink(fsPack, content)
-// }
+const appendSymlink = async (fsPack, content) => {
+  verifyEdit(fsPack)
+  await editFsPackAppendSymlink(fsPack, content)
+}
 const append = async (fsPack, content) => {
   switch (content.type) {
     case TYPE_FILE:
       return appendFile(fsPack, content)
     case TYPE_DIRECTORY:
       return appendDirectory(fsPack, content)
-    // case TYPE_SYMLINK:
-    //   return appendSymlink(fsPack, content)
+    case TYPE_SYMLINK:
+      return appendSymlink(fsPack, content)
     default:
       throw new Error(`invalid content type: ${content.type}`)
   }
@@ -322,9 +328,9 @@ const appendContentList = async (fsPack, contentList) => {
         case TYPE_DIRECTORY:
           await editFsPackAppendDirectory(fsPack, content)
           break
-        // case TYPE_SYMLINK:
-        //   await editFsPackAppendSymlink(fsPack, content)
-        //   break
+        case TYPE_SYMLINK:
+          await editFsPackAppendSymlink(fsPack, content)
+          break
         default:
           throw new Error(`invalid content type: ${content.type}`)
       }
@@ -344,18 +350,18 @@ const unpackDirectory = async (fsPack, content) => {
   verifyUnpack(fsPack)
   await autoOpenFsPack(unpackFsPackDirectory, fsPack, FILE_FLAG_EDIT, content)
 }
-// const unpackSymlink = async (fsPack, content) => {
-//   verifyUnpack(fsPack)
-//   await autoOpenFsPack(unpackFsPackSymlink, fsPack, FILE_FLAG_EDIT, content)
-// }
+const unpackSymlink = async (fsPack, content) => {
+  verifyUnpack(fsPack)
+  await autoOpenFsPack(unpackFsPackSymlink, fsPack, FILE_FLAG_EDIT, content)
+}
 const unpack = async (fsPack, content) => {
   switch (content.type) {
     case TYPE_FILE:
       return unpackFile(fsPack, content)
     case TYPE_DIRECTORY:
       return unpackDirectory(fsPack, content)
-    // case TYPE_SYMLINK:
-    //   return unpackSymlink(fsPack, content)
+    case TYPE_SYMLINK:
+      return unpackSymlink(fsPack, content)
     default:
       throw new Error(`invalid content type: ${content.type}`)
   }
@@ -372,9 +378,9 @@ const unpackContentList = async (fsPack, contentList) => {
         case TYPE_DIRECTORY:
           await unpackFsPackDirectory(packFh, fsPack, content)
           break
-        // case TYPE_SYMLINK:
-        //   await unpackFsPackSymlink(packFh, fsPack, content)
-        //   break
+        case TYPE_SYMLINK:
+          await unpackFsPackSymlink(packFh, fsPack, content)
+          break
         default:
           throw new Error(`invalid content type: ${content.type}`)
       }
@@ -387,9 +393,9 @@ const unpackToPath = async (fsPack, unpackPath) => {
 }
 
 export {
-  TYPE_FILE, TYPE_DIRECTORY, /* TYPE_SYMLINK, */
+  TYPE_FILE, TYPE_DIRECTORY, TYPE_SYMLINK,
   initFsPack, saveFsPack, loadFsPack,
   setFsPackPackRoot, setFsPackUnpackPath,
-  appendFile, appendDirectory, /* appendSymlink, */ append, appendContentList, appendFromPath,
-  unpackFile, unpackDirectory, /* unpackSymlink, */ unpack, unpackContentList, unpackToPath
+  appendFile, appendDirectory, appendSymlink, append, appendContentList, appendFromPath,
+  unpackFile, unpackDirectory, unpackSymlink, unpack, unpackContentList, unpackToPath
 }

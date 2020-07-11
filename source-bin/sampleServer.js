@@ -1,3 +1,4 @@
+import { objectPickKey } from '@dr-js/core/module/common/immutable/Object'
 import { createRequestListener } from '@dr-js/core/module/node/server/Server'
 import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from '@dr-js/core/module/node/server/Responder/Common'
 import { createResponderFavicon } from '@dr-js/core/module/node/server/Responder/Send'
@@ -5,17 +6,21 @@ import { createResponderRouter, createRouteMap, createResponderRouteListHTML } f
 import { enableWebSocketServer } from '@dr-js/core/module/node/server/WebSocket/WebSocketServer'
 import { createUpdateRequestListener } from '@dr-js/core/module/node/server/WebSocket/WebSocketUpgradeRequest'
 
-import { configureFeaturePack as configureFeaturePackAuth } from '@dr-js/node/module/server/feature/Auth/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackPermission } from '@dr-js/node/module/server/feature/Permission/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackExplorer } from '@dr-js/node/module/server/feature/Explorer/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackStatCollect } from '@dr-js/node/module/server/feature/StatCollect/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackStatReport } from '@dr-js/node/module/server/feature/StatReport/configureFeaturePack'
-import { configureFeaturePack as configureFeaturePackWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/configureFeaturePack'
+import { setupActionMap as setupActionMapStatus, ACTION_CORE_MAP as ACTION_CORE_MAP_STATUS, ACTION_TYPE as ACTION_TYPE_STATUS } from '@dr-js/node/module/module/ActionJSON/status'
+import { setupActionMap as setupActionMapPath, ACTION_CORE_MAP as ACTION_CORE_MAP_PATH } from '@dr-js/node/module/module/ActionJSON/path'
+import { ACTION_CORE_MAP as ACTION_CORE_MAP_PATH_EXTRA_ARCHIVE } from '@dr-js/node/module/module/ActionJSON/pathExtraArchive'
 
-const FRAME_LENGTH_LIMIT = 64 * 1024 * 1024 // 64 MiB
+import { setup as setupAuth } from '@dr-js/node/module/server/feature/Auth/setup'
+import { setup as setupPermission } from '@dr-js/node/module/server/feature/Permission/setup'
+import { setup as setupActionJSON } from '@dr-js/node/module/server/feature/ActionJSON/setup'
+import { setup as setupFile } from '@dr-js/node/module/server/feature/File/setup'
+import { setup as setupExplorer } from '@dr-js/node/module/server/feature/Explorer/setup'
+import { setup as setupStatCollect } from '@dr-js/node/module/server/feature/StatCollect/setup'
+import { setup as setupStatReport } from '@dr-js/node/module/server/feature/StatReport/setup'
+import { setup as setupWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/setup'
 
 const configureSampleServer = async ({
-  serverPack: { server, option }, logger, routePrefix = '',
+  serverExot, logger, routePrefix = '',
 
   isDebugRoute,
 
@@ -26,9 +31,10 @@ const configureSampleServer = async ({
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
   // permission
   permissionType, permissionFunc, permissionFile,
-
+  // file
+  fileRootPath: rootPath, fileUploadMergePath,
   // explorer
-  explorerRootPath, explorerUploadMergePath, explorerStatusCommandList,
+  explorer,
   // stat collect
   statCollectPath, statCollectUrl, statCollectInterval,
   // stat report
@@ -37,65 +43,82 @@ const configureSampleServer = async ({
   // websocket tunnel
   webSocketTunnelHost
 }) => {
-  const URL_AUTH_CHECK = '/auth'
-
-  const featureAuth = await configureFeaturePackAuth({
+  const featureAuth = await setupAuth({
     logger, routePrefix,
     authKey,
     authSkip,
     authFile,
-    authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
-    URL_AUTH_CHECK
+    authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix
   })
-
-  const featurePermission = await configureFeaturePackPermission({
+  const featurePermission = await setupPermission({
     logger, routePrefix,
     permissionType, permissionFunc, permissionFile
   })
-
-  const featureExplorer = explorerRootPath && await configureFeaturePackExplorer({
+  const featureActionJSON = rootPath && await setupActionJSON({
     logger, routePrefix, featureAuth, featurePermission,
-    explorerRootPath, explorerUploadMergePath, explorerStatusCommandList
+    actionMap: {
+      ...setupActionMapStatus({ rootPath, logger }),
+      ...setupActionMapPath({ rootPath, logger, actionCoreMap: { ...ACTION_CORE_MAP_PATH, ...ACTION_CORE_MAP_PATH_EXTRA_ARCHIVE } })
+    },
+    actionMapPublic: {
+      ...setupActionMapStatus({ rootPath, logger, actionCoreMap: objectPickKey(ACTION_CORE_MAP_STATUS, [ ACTION_TYPE_STATUS.STATUS_TIMESTAMP, ACTION_TYPE_STATUS.STATUS_TIME_ISO ]) })
+    }
   })
-
-  const featureStatCollect = statCollectPath && await configureFeaturePackStatCollect({
+  const featureFile = rootPath && await setupFile({
+    logger, routePrefix, featureAuth, featurePermission,
+    fileRootPath: rootPath, fileUploadMergePath
+  })
+  const featureExplorer = explorer && await setupExplorer({
+    logger, routePrefix, featureAuth, featurePermission, featureActionJSON, featureFile
+  })
+  const featureStatCollect = statCollectPath && await setupStatCollect({
     logger, routePrefix, featureAuth,
     statCollectPath, statCollectUrl, statCollectInterval
   })
-
-  const featureStatReport = statReportProcessTag && await configureFeaturePackStatReport({
+  const featureStatReport = statReportProcessTag && await setupStatReport({
     logger, routePrefix, featureAuth,
     statReportProcessTag
   })
-
-  const featureWebSocketTunnel = webSocketTunnelHost && await configureFeaturePackWebSocketTunnel({
+  const featureWebSocketTunnel = webSocketTunnelHost && await setupWebSocketTunnel({
     logger, routePrefix, featureAuth,
     webSocketTunnelHost
   })
 
-  const redirectUrl = featureExplorer ? featureExplorer.URL_HTML
-    : featureStatCollect ? featureStatCollect.URL_HTML
-      : featureStatReport ? featureStatReport.URL_HTML
-        : ''
+  serverExot.featureMap = new Map() // fill serverExot.featureMap
+  let featureUrl
+  const featureRouteList = []
+  const featureWebSocketRouteList = []
+  const appendFeature = (feature) => {
+    if (!feature) return
+    serverExot.featureMap.set(feature.name, feature)
+    if (!featureUrl) featureUrl = feature.URL_HTML
+    if (feature.routeList) featureRouteList.push(...feature.routeList)
+    if (feature.webSocketRouteList) featureWebSocketRouteList.push(...feature.webSocketRouteList)
+  }
+  appendFeature(featureAuth)
+  appendFeature(featurePermission)
+  appendFeature(featureActionJSON)
+  appendFeature(featureFile)
+  appendFeature(featureExplorer)
+  appendFeature(featureStatCollect)
+  appendFeature(featureStatReport)
+  appendFeature(featureWebSocketTunnel)
 
   const responderLogEnd = createResponderLogEnd({ log: logger.add })
 
   const routeMap = createRouteMap([
-    ...featureAuth.routeList,
-    ...(featureExplorer ? featureExplorer.routeList : []),
-    ...(featureStatCollect ? featureStatCollect.routeList : []),
-    ...(featureStatReport ? featureStatReport.routeList : []),
+    ...featureRouteList,
     [ '/', 'GET', isDebugRoute ? createResponderRouteListHTML({ getRouteMap: () => routeMap })
-      : redirectUrl ? (store) => responderEndWithRedirect(store, { redirectUrl })
+      : featureUrl ? (store) => responderEndWithRedirect(store, { redirectUrl: featureUrl })
         : (store) => responderEndWithStatusCode(store, { statusCode: 400 })
     ],
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ].filter(Boolean))
 
-  server.on('request', createRequestListener({
+  serverExot.server.on('request', createRequestListener({
     responderList: [
       createResponderLog({ log: logger.add }),
-      createResponderRouter({ routeMap, baseUrl: option.baseUrl })
+      createResponderRouter({ routeMap, baseUrl: serverExot.option.baseUrl })
     ],
     responderEnd: (store) => {
       responderEnd(store)
@@ -103,31 +126,19 @@ const configureSampleServer = async ({
     }
   }))
 
-  let webSocketSet
   if (featureWebSocketTunnel) { // setup WebSocket
     const routeMap = createRouteMap([
-      ...(featureWebSocketTunnel ? featureWebSocketTunnel.webSocketRouteList : [])
+      ...featureWebSocketRouteList
     ])
-    webSocketSet = enableWebSocketServer({
-      server,
-      frameLengthLimit: FRAME_LENGTH_LIMIT,
+    serverExot.webSocketSet = enableWebSocketServer({ // fill `serverExot.webSocketSet`
+      server: serverExot.server,
       onUpgradeRequest: createUpdateRequestListener({
         responderList: [
           createResponderLog({ log: logger.add }),
-          createResponderRouter({ routeMap, baseUrl: option.baseUrl })
+          createResponderRouter({ routeMap, baseUrl: serverExot.option.baseUrl })
         ]
       })
     })
-  }
-
-  return {
-    featureAuth,
-    featureExplorer,
-    featureStatCollect,
-    featureStatReport,
-    featureWebSocketTunnel,
-
-    webSocketSet
   }
 }
 

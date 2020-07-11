@@ -1,62 +1,19 @@
-const initFileUpload = (
+const initUploader = (
   URL_FILE_UPLOAD,
   authFetch
 ) => {
   const {
-    crypto, isSecureContext,
-    Dr: {
-      Common: {
-        Function: { withRetryAsync },
-        Data: { ArrayBuffer: { fromString }, ArrayBufferPacket: { packChainArrayBufferPacket } }
-      },
-      Browser: { Data: { Blob: { parseBlobAsArrayBuffer } } }
-    }
-  } = window
-
-  const CHUNK_SIZE_MAX = 1024 * 1024 // 1MB max
-  const uploadFileByChunk = async (fileBlob, key, onProgress) => {
-    const fileSize = fileBlob.size
-    let chunkIndex = 0
-    const chunkTotal = Math.ceil(fileSize / CHUNK_SIZE_MAX) || 1
-    onProgress(0, fileSize)
-
-    while (chunkIndex < chunkTotal) {
-      const chunkSize = (chunkIndex < chunkTotal - 1)
-        ? CHUNK_SIZE_MAX
-        : fileSize % CHUNK_SIZE_MAX
-      const chunkArrayBuffer = await parseBlobAsArrayBuffer(fileBlob.slice(chunkIndex * CHUNK_SIZE_MAX, chunkIndex * CHUNK_SIZE_MAX + chunkSize))
-      const chunkByteLength = chunkArrayBuffer.byteLength
-      const chainArrayBufferPacket = packChainArrayBufferPacket([
-        fromString(JSON.stringify({ key, chunkByteLength, chunkIndex, chunkTotal })),
-        isSecureContext ? await crypto.subtle.digest('SHA-256', chunkArrayBuffer) : new ArrayBuffer(0), // TODO: non-https site can not access window.crypto.subtle
-        chunkArrayBuffer
-      ])
-      onProgress(chunkIndex * CHUNK_SIZE_MAX, fileSize)
-      await withRetryAsync(
-        () => authFetch(URL_FILE_UPLOAD, { method: 'POST', body: chainArrayBufferPacket }),
-        4,
-        1000
-      )
-      chunkIndex += 1
-    }
-    onProgress(fileSize, fileSize)
-  }
-
-  return { uploadFileByChunk }
-}
-
-const initUploader = (
-  uploadFileByChunk
-) => {
-  const {
+    document,
     qS, cE,
     Dr: {
       Common: {
         Format,
         Time: { createStepper },
         Error: { catchAsync },
+        Function: { withRetryAsync },
         Immutable: { Object: { objectSet, objectDelete, objectPickKey } }
-      }
+      },
+      Browser: { Module: { FileChunkUpload: { uploadFileByChunk } } }
     }
   } = window
 
@@ -76,7 +33,16 @@ const initUploader = (
       const onProgress = (current, total) => uploaderStore.setState({
         uploadProgress: objectSet(uploaderStore.getState().uploadProgress, key, total ? (current / total) : 1)
       })
-      const { error } = await catchAsync(uploadFileByChunk, fileBlob, key, onProgress)
+      const { error } = await catchAsync(uploadFileByChunk, {
+        fileBlob,
+        key,
+        onProgress,
+        uploadFileChunk: async (chainArrayBufferPacket, { key, chunkByteLength, chunkIndex, chunkTotal }) => withRetryAsync(
+          async () => authFetch(URL_FILE_UPLOAD, { method: 'POST', body: chainArrayBufferPacket }),
+          4, // maxRetry,
+          1000 // wait
+        )
+      })
       error && uploadStatusList.push(`Error upload '${key}': ${error.stack || (error.target && error.target.error) || error}`)
     }
     uploadStatusList.push(`Done in ${Format.time(stepper())} for ${fileList.length} file`)
@@ -155,4 +121,4 @@ const initUploader = (
   }
 }
 
-export { initFileUpload, initUploader }
+export { initUploader }

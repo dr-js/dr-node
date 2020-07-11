@@ -29,7 +29,7 @@ const createResponderAssignTokenCookie = ({
   responder,
   extra = 'path=/; HttpOnly'
 }) => async (store, tokenObject = {}) => {
-  const baseCookie = `${tokenKey}=${encodeURIComponent(await generateToken(tokenObject))}; expires=${(new Date(Date.now() + tokenExpireTime)).toISOString()}`
+  const baseCookie = `${tokenKey}=${encodeURIComponent(await generateToken(tokenObject))}; Max-Age=${Math.floor(tokenExpireTime * 0.001)}` // `Max-Age=<number>`: Number of seconds until the cookie expires.
   store.response.setHeader('set-cookie', extra ? `${baseCookie}; ${extra}` : baseCookie)
   return responder(store)
 }

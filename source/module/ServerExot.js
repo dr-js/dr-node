@@ -1,7 +1,7 @@
 import { createSecureContext } from 'tls'
 import { promises as fsAsync } from 'fs'
 import { objectMap } from '@dr-js/core/module/common/immutable/Object'
-import { createServerPack } from '@dr-js/core/module/node/server/Server'
+import { createServerExot } from '@dr-js/core/module/node/server/Server'
 
 const parseHostString = (host, defaultHostname) => { // for ipv6 should use host like: `[::]:80`
   const hostnameList = host.split(':')
@@ -17,11 +17,11 @@ __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: multi', {
   '1.domain.domain': { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined } // buffer or load from file
 })
 
-const configureServerPack = async ({
+const configureServerExot = async ({
   protocol = 'http:', hostname = '127.0.0.1', port,
   TLSSNIConfig, TLSDHParam, // accept Buffer or String (absolute path)
   ...extraOption
-}) => createServerPack({
+}) => createServerExot({
   protocol, hostname, port,
   ...(protocol === 'https:' && await loadTLS(TLSSNIConfig, TLSDHParam)),
   ...extraOption
@@ -61,5 +61,5 @@ const objectMapAsync = async (object, mapFuncAsync) => {
 
 export {
   parseHostString,
-  configureServerPack
+  configureServerExot
 }

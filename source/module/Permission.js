@@ -1,36 +1,45 @@
 import { tryRequire } from '@dr-js/core/module/env/tryRequire'
-import { catchAsync } from '@dr-js/core/module/common/error'
 import { isBasicFunction } from '@dr-js/core/module/common/check'
 
-// const PERMISSION_SAMPLE = {
-//   checkPermission: (type, { store }) => true
+// About permission:
+//   This provide a basic pattern to inject custom check code,
+//     to conditionally deny/allow some operation.
+//   The pattern try to behave like how I18N is done in code,
+//     so an async check function is all there is,
+//     the checkpoint will passing in the permission type & payload,
+//     await and get a Boolean result.
+//   For more complex permission check, more code can fit in side the `permissionFunc/File`,
+//     or if really needed, just hard code the check point in place.
+
+// const PERMISSION_PACK_SAMPLE = {
+//   checkPermission: async (type, { store }) => true
 // }
 
 const DENY_ALL = () => false
 const ALLOW_ALL = () => true
 
 const configurePermission = async ({
-  permissionType, // deny allow func file
-  permissionFunc,
-  permissionFile,
+  permissionType, // check below switch case for types
+  permissionFunc, // configurePermissionFunc
+  permissionFile, // full path to JS file exporting function with name `configurePermission`
   logger
 }) => {
   let configurePermissionFunc
   switch (permissionType) {
+    // fast return
     case 'deny':
       logger.add('use permission: deny-all')
       return { checkPermission: DENY_ALL }
-
     case 'allow':
       logger.add('use permission: allow-all')
       return { checkPermission: ALLOW_ALL }
 
+    // slow config
     case 'func':
       configurePermissionFunc = permissionFunc
       if (!isBasicFunction(configurePermissionFunc)) throw new Error('invalid permissionFunc')
       logger.add('use permissionFunc')
       break
-
     case 'file' :
       configurePermissionFunc = (tryRequire(permissionFile) || { configurePermission: null }).configurePermission
       if (!isBasicFunction(configurePermissionFunc)) throw new Error(`failed to load permissionFile: ${permissionFile}`)
@@ -41,11 +50,9 @@ const configurePermission = async ({
       throw new Error(`invalid permissionType: ${permissionType}`)
   }
 
-  const { result, error } = await catchAsync(configurePermissionFunc, { logger })
-  if (error) throw error
-  if (!isBasicFunction(result.checkPermission)) throw new Error('expect generated checkPermission function')
-
-  return result
+  const permissionPack = await configurePermissionFunc({ logger })
+  if (!isBasicFunction(permissionPack.checkPermission)) throw new Error('expect permissionPack.checkPermission to be function')
+  return permissionPack
 }
 
 export { configurePermission }

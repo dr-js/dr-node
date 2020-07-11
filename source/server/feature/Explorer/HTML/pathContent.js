@@ -10,20 +10,15 @@ h2, h6 { margin: 0.5em 4px; }
 // TODO: add drag selection
 
 const initPathContent = (
-  URL_PATH_ACTION,
-  URL_FILE_SERVE,
-  IS_READ_ONLY = true,
-  IS_EXTRA_7Z = false,
-  IS_EXTRA_TAR = false,
-  PATH_ACTION_TYPE,
-  authFetch,
-  withConfirmModal,
-  withPromptModal
+  URL_ACTION_JSON_ABBR, URL_FILE_SERVE,
+  IS_READ_ONLY = true, IS_EXTRA_TAR = false, IS_EXTRA_AUTO = false,
+  ACTION_TYPE,
+  authFetch, withConfirmModal, withPromptModal
 ) => {
   const {
     open,
     qS, cE, aCL,
-    Dr: { Common: { Format, Compare: { compareStringWithNumber } } }
+    Dr: { Common: { Format, String: { lazyEncodeURI }, Compare: { compareStringWithNumber } } }
   } = window
 
   const SORT_FUNC = { // ([ nameA, sizeA, mtimeMsA ], [ nameB, sizeB, mtimeMsB ]) => 0,
@@ -47,7 +42,7 @@ const initPathContent = (
     }
   }
 
-  const authFetchPathAction = async (bodyObject) => (await authFetch(URL_PATH_ACTION, { method: 'POST', body: JSON.stringify(bodyObject) })).json()
+  const authFetchActionJSON = async (actionType, actionPayload = {}) => (await authFetch(`${URL_ACTION_JSON_ABBR}/${encodeURIComponent(actionType)}`, { method: 'POST', body: JSON.stringify(actionPayload) })).json()
 
   const cyclePathSortType = (pathContentStore, pathSortType = pathContentStore.getState().pathSortType) => {
     const nextSortIndex = (SORT_TYPE_LIST.indexOf(pathSortType) + 1) % SORT_TYPE_LIST.length
@@ -55,26 +50,26 @@ const initPathContent = (
   }
 
   const doLoadPath = async (pathContentStore, relativePath = pathContentStore.getState().pathContent.relativePath) => {
-    const { resultList: [ { key: nextRelativePath, directoryList, fileList } ] } = await authFetchPathAction({
-      nameList: [ '' ], actionType: PATH_ACTION_TYPE.DIRECTORY_CONTENT, key: relativePath || PATH_ROOT
-    })
+    const { resultList: [ { key: nextRelativePath, directoryList, fileList } ] } = await authFetchActionJSON(ACTION_TYPE.PATH_DIRECTORY_CONTENT, { key: relativePath || PATH_ROOT })
     pathContentStore.setState({ pathContent: { relativePath: nextRelativePath || PATH_ROOT, directoryList, fileList } })
   }
 
   const getLoadPathAsync = (pathContentStore) => async (relativePath) => doLoadPath(pathContentStore, relativePath)
-  const getPathActionAsync = (pathContentStore) => async (nameList, actionType, key, keyTo) => {
+  const getPathActionAsync = (pathContentStore) => async (batchList, actionType, key, keyTo) => {
     if (
-      (actionType === PATH_ACTION_TYPE.PATH_COPY || actionType === PATH_ACTION_TYPE.PATH_RENAME) &&
-      (!keyTo || keyTo === key)
+      !key || // need at least one path
+      keyTo === null || // canceled move or copy action
+      ((actionType === ACTION_TYPE.PATH_COPY || actionType === ACTION_TYPE.PATH_RENAME) && (keyTo === key)) // skip noop
     ) return
-    await authFetchPathAction({ nameList, actionType, key, keyTo })
+    const output = await authFetchActionJSON(actionType, { key, keyTo, batchList })
+    __DEV__ && console.log('output', output)
     await doLoadPath(pathContentStore)
   }
   const getPreviewFile = (pathContentStore, authUrl) => async (relativePath, fileName) => open(authUrl(
-    `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`
+    `${URL_FILE_SERVE}/${lazyEncodeURI(pathPush(relativePath, fileName))}`
   ))
   const getDownloadFile = (pathContentStore, authDownload) => async (relativePath, fileName) => authDownload(
-    `${URL_FILE_SERVE}/${encodeURIComponent(pathPush(relativePath, fileName))}`,
+    `${URL_FILE_SERVE}/${lazyEncodeURI(pathPush(relativePath, fileName))}`,
     fileName
   )
 
@@ -105,15 +100,18 @@ const initPathContent = (
     const TEXT_COMPRESS = '📥'
     const TEXT_EXTRACT = '📤'
 
+    const selectPathPop = cE('button', { className: 'edit', innerText: '🔙..', onclick: () => loadPath(pathPop(relativePath)) })
+
     const selectEditSelectNone = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_NONE), onclick: doSelectRemaining })
     const selectEditSelectSome = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_SOME), onclick: doSelectRemaining })
     const selectEditSelectAll = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_SELECT_ALL), onclick: doSelectNone })
 
-    const selectEditCopy = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_COPY), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
-    const selectEditRename = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_RENAME), onclick: async () => pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_RENAME, relativePath, await withPromptModal(`Batch Rename ${selectNameSet.size} Path To`, relativePath)) })
-    const selectEditDelete = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_DELETE), onclick: async () => (await withConfirmModal(`Batch Delete ${selectNameSet.size} Path In: ${pathName(relativePath)}?`)) && pathAction([ ...selectNameSet ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
+    const selectEditCopy = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_COPY), onclick: async () => pathAction([ ...selectNameSet ], ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal(`Batch Copy ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditRename = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_RENAME), onclick: async () => pathAction([ ...selectNameSet ], ACTION_TYPE.PATH_RENAME, relativePath, await withPromptModal(`Batch Rename ${selectNameSet.size} Path To`, relativePath)) })
+    const selectEditDelete = cE('button', { className: 'edit', innerText: TEXT_BATCH(TEXT_DELETE), onclick: async () => (await withConfirmModal(`Batch Delete ${selectNameSet.size} Path In: ${pathName(relativePath)}?`)) && pathAction([ ...selectNameSet ], ACTION_TYPE.PATH_DELETE, relativePath) })
 
     const updateSelectStatus = () => aCL(qS('.select', ''), [
+      relativePath !== PATH_ROOT && selectPathPop,
       !selectNameSet.size ? selectEditSelectNone : (selectNameSet.size < (directoryList.length + fileList.length)) ? selectEditSelectSome : selectEditSelectAll,
       selectNameSet.size && selectEditCopy,
       selectNameSet.size && selectEditRename,
@@ -140,49 +138,45 @@ const initPathContent = (
       return element
     }
 
-    const isWideL = window.innerWidth >= 800
+    // const isWideL = window.innerWidth >= 800
     const editBlocker = (IS_READ_ONLY || window.innerWidth < 480) && []
     const wideMBlocker = (window.innerWidth < 640) && []
     const renderCommonEditList = (relativePath) => [
-      cE('button', { className: 'edit', innerText: TEXT_COPY, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal('Copy To', relativePath)) }),
-      cE('button', { className: 'edit', innerText: TEXT_RENAME, onclick: async () => pathAction([ '' ], PATH_ACTION_TYPE.PATH_RENAME, relativePath, await withPromptModal('Rename To', relativePath)) }),
-      cE('button', { className: 'edit', innerText: TEXT_DELETE, onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && pathAction([ '' ], PATH_ACTION_TYPE.PATH_DELETE, relativePath) })
+      cE('button', { className: 'edit', innerText: TEXT_COPY, onclick: async () => pathAction([ '' ], ACTION_TYPE.PATH_COPY, relativePath, await withPromptModal('Copy To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: TEXT_RENAME, onclick: async () => pathAction([ '' ], ACTION_TYPE.PATH_RENAME, relativePath, await withPromptModal('Rename To', relativePath)) }),
+      cE('button', { className: 'edit', innerText: TEXT_DELETE, onclick: async () => (await withConfirmModal(`Delete path: ${relativePath}?`)) && pathAction([ '' ], ACTION_TYPE.PATH_DELETE, relativePath) })
     ]
-    const renderExtraCompressEditList = (relativePath) => [
-      [ IS_EXTRA_7Z, PATH_ACTION_TYPE.EXTRA_COMPRESS_7Z, '7z', ' (also support .zip|tar)' ],
-      [ IS_EXTRA_TAR, PATH_ACTION_TYPE.EXTRA_COMPRESS_TAR, 'tgz' ]
-    ].map(([ isEnable, actionType, defaultExtension, extraMessage = '' ]) => isEnable && cE('button', {
-      className: 'edit', innerText: isWideL ? `${TEXT_COMPRESS}${defaultExtension}` : defaultExtension,
-      onclick: async () => pathAction([ '' ], actionType, relativePath, await withPromptModal(`Compress To${extraMessage}`, `${relativePath}.${defaultExtension}`))
-    }))
-    const renderExtraExtractEditList = (relativePath) => {
+    const createCompressButton = (relativePath, actionType, defaultExtension, extraMessage = '') => cE('button', {
+      className: 'edit', innerText: TEXT_COMPRESS, // innerText: isWideL ? `${TEXT_COMPRESS}${defaultExtension}` : defaultExtension,
+      onclick: async () => pathAction([ '' ], actionType, relativePath, await withPromptModal(`Compress To ${extraMessage}`, `${relativePath}.${defaultExtension}`))
+    })
+    const renderExtraCompressEdit = (relativePath) => IS_EXTRA_AUTO ? createCompressButton(relativePath, ACTION_TYPE.PATH_COMPRESS_AUTO, '7z', '(support 7z|xz|tar|fsp)')
+      : IS_EXTRA_TAR ? createCompressButton(relativePath, ACTION_TYPE.PATH_COMPRESS_TAR, 'tgz')
+        : null
+    const renderExtraExtractEdit = (relativePath) => {
       let actionType
-      if (IS_EXTRA_7Z && REGEXP_EXTRACT_7Z.test(relativePath)) actionType = PATH_ACTION_TYPE.EXTRA_EXTRACT_7Z
-      if (IS_EXTRA_TAR && REGEXP_EXTRACT_TAR.test(relativePath)) actionType = PATH_ACTION_TYPE.EXTRA_EXTRACT_TAR
-      return !actionType ? [] : [ cE('button', {
-        className: 'edit', innerText: TEXT_EXTRACT,
-        // className: 'edit', innerText: isWideL ? `${TEXT_EXTRACT}${relativePath.split('.').pop()}` : TEXT_EXTRACT,
+      if (IS_EXTRA_AUTO && REGEXP_EXTRACT_AUTO.test(relativePath)) actionType = ACTION_TYPE.PATH_EXTRACT_AUTO
+      else if (IS_EXTRA_TAR && REGEXP_EXTRACT_TAR.test(relativePath)) actionType = ACTION_TYPE.PATH_EXTRACT_TAR
+      return actionType && cE('button', {
+        className: 'edit', innerText: TEXT_EXTRACT, // innerText: isWideL ? `${TEXT_EXTRACT}${relativePath.split('.').pop()}` : TEXT_EXTRACT,
         onclick: async () => pathAction([ '' ], actionType, relativePath, await withPromptModal('Extract To', `${relativePath}.content/`))
-      }) ]
+      })
     }
-    const REGEXP_EXTRACT_7Z = /\.(7z|zip|tbz2?|txz|tar(\.bz2?|\.xz))$/
-    const REGEXP_EXTRACT_TAR = /\.(tgz|tar(\.gz)?)$/
+    const REGEXP_EXTRACT_AUTO = /\.(?:tar|tgz|tar\.gz|t7z|tar\.7z|txz|tar\.xz|7z|zip|fsp|fsp\.gz)$/
+    const REGEXP_EXTRACT_TAR = /\.(?:tar|tgz|tar\.gz)$/
 
     parentElement.innerHTML = ''
 
     aCL(parentElement, [
       cE('h2', { innerText: pathName(relativePath) }),
       cE('h6', { innerText: `${directoryList.length} directory, ${fileList.length} file (${Format.binary(fileList.reduce((o, [ , size ]) => o + size, 0))}B)` }),
-      relativePath !== PATH_ROOT && cE('div', { className: 'directory' }, [
-        cE('button', { className: 'name', innerText: '🔙|..', onclick: () => loadPath(pathPop(relativePath)) })
-      ]),
-      !IS_READ_ONLY && cE('div', { className: 'select' }),
+      cE('div', { className: 'select' }), // update later
       ...directoryList
         .sort((nameA, nameB) => SORT_FUNC[ pathSortType ]([ nameA ], [ nameB ]))
         .map((name) => cE('div', { className: 'directory' }, [
           !IS_READ_ONLY && renderSelectButton(name),
           cE('button', { className: 'name', innerText: `📁|${name}/`, onclick: () => loadPath(pathPush(relativePath, name)) }),
-          ...(editBlocker || wideMBlocker || renderExtraCompressEditList(pathPush(relativePath, name))),
+          editBlocker || wideMBlocker || renderExtraCompressEdit(pathPush(relativePath, name)),
           ...(editBlocker || renderCommonEditList(pathPush(relativePath, name)))
         ])),
       ...fileList
@@ -191,7 +185,7 @@ const initPathContent = (
           !IS_READ_ONLY && renderSelectButton(name),
           cE('span', { className: 'name button', innerText: `📄|${name} - ${new Date(mtimeMs).toLocaleString()}` }),
           cE('button', { className: 'edit', innerText: `${Format.binary(size)}B|💾`, onclick: () => downloadFile(relativePath, name) }),
-          ...(editBlocker || wideMBlocker || renderExtraExtractEditList(pathPush(relativePath, name))),
+          editBlocker || wideMBlocker || renderExtraExtractEdit(pathPush(relativePath, name)),
           cE('button', { className: 'edit', innerText: '🔍', onclick: () => previewFile(relativePath, name) }),
           ...(editBlocker || renderCommonEditList(pathPush(relativePath, name)))
         ]))
@@ -202,6 +196,7 @@ const initPathContent = (
 
   return {
     initialPathContentState,
+    authFetchActionJSON,
     cyclePathSortType,
     getLoadPathAsync,
     getPathActionAsync,

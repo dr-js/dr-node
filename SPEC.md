@@ -9,11 +9,9 @@
 + 📄 [source/module/Compress.js](source/module/Compress.js)
   - `checkBloat`, `compressFile`, `compressFileList`, `isBufferGzip`, `isFileGzip`
 + 📄 [source/module/FactDatabase.js](source/module/FactDatabase.js)
-  - `INITIAL_FACT_INFO`, `createFactDatabase`, `tryDeleteExtraCache`, `tryLoadFactInfo`
-+ 📄 [source/module/FileChunkUpload.js](source/module/FileChunkUpload.js)
-  - `createFileChunkUpload`, `uploadFileByChunk`
+  - `INITIAL_FACT_INFO`, `createFactDatabaseExot`, `tryDeleteExtraCache`, `tryLoadFactInfo`
 + 📄 [source/module/FsPack.js](source/module/FsPack.js)
-  - `TYPE_DIRECTORY`, `TYPE_FILE`, `append`, `appendContentList`, `appendDirectory`, `appendFile`, `appendFromPath`, `initFsPack`, `loadFsPack`, `saveFsPack`, `setFsPackPackRoot`, `setFsPackUnpackPath`, `unpack`, `unpackContentList`, `unpackDirectory`, `unpackFile`, `unpackToPath`
+  - `TYPE_DIRECTORY`, `TYPE_FILE`, `TYPE_SYMLINK`, `append`, `appendContentList`, `appendDirectory`, `appendFile`, `appendFromPath`, `appendSymlink`, `initFsPack`, `loadFsPack`, `saveFsPack`, `setFsPackPackRoot`, `setFsPackUnpackPath`, `unpack`, `unpackContentList`, `unpackDirectory`, `unpackFile`, `unpackSymlink`, `unpackToPath`
 + 📄 [source/module/Log.js](source/module/Log.js)
   - `configureLog`
 + 📄 [source/module/Permission.js](source/module/Permission.js)
@@ -30,26 +28,30 @@
   - `findDetachedProcessAsync`, `runDetached`
 + 📄 [source/module/RuntimeDump.js](source/module/RuntimeDump.js)
   - `dumpAsync`, `getV8Extra`, `getV8HeapSnapshotReadableStream`, `setupSIGUSR2`, `writeV8HeapSnapshot`
-+ 📄 [source/module/ServerPack.js](source/module/ServerPack.js)
-  - `configureServerPack`, `parseHostString`
++ 📄 [source/module/ServerExot.js](source/module/ServerExot.js)
+  - `configureServerExot`, `parseHostString`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)
-  - `getCommonServerStatus`
+  - `COMMON_SERVER_STATUS_COMMAND_LIST`, `getCommonServerStatus`
 + 📄 [source/module/TerminalColor.js](source/module/TerminalColor.js)
   - `configureTerminalColor`
 + 📄 [source/module/TerminalStatusBar.js](source/module/TerminalStatusBar.js)
   - `createStatusBar`
 + 📄 [source/module/TokenCache.js](source/module/TokenCache.js)
-  - `DEFAULT_TOKEN_KEY`, `configureTokenCache`
-+ 📄 [source/module/PathAction/base.js](source/module/PathAction/base.js)
-  - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`, `createPathActionTask`
-+ 📄 [source/module/PathAction/extraCompress.js](source/module/PathAction/extraCompress.js)
-  - `PATH_ACTION_MAP`, `PATH_ACTION_TYPE`
+  - `DEFAULT_TOKEN_KEY`, `createTokenCacheExot`
++ 📄 [source/module/ActionJSON/path.js](source/module/ActionJSON/path.js)
+  - `ACTION_CORE_MAP`, `ACTION_TYPE`, `setupActionMap`
++ 📄 [source/module/ActionJSON/pathExtraArchive.js](source/module/ActionJSON/pathExtraArchive.js)
+  - `ACTION_CORE_MAP`, `ACTION_TYPE`
++ 📄 [source/module/ActionJSON/status.js](source/module/ActionJSON/status.js)
+  - `ACTION_CORE_MAP`, `ACTION_TYPE`, `setupActionMap`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
   - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
 + 📄 [source/module/Software/archive.js](source/module/Software/archive.js)
   - `REGEXP_AUTO`, `REGEXP_T7Z`, `REGEXP_TXZ`, `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`
++ 📄 [source/module/Software/fspTar.js](source/module/Software/fspTar.js)
+  - `REGEXP_FSP_TAR`, `compressAsync`, `compressFspAsync`, `compressFspGzAsync`, `extractAsync`, `extractFspAsync`, `extractFspGzAsync`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
-  - `createCommandWrap`, `createDetect`
+  - `createCommandWrap`, `createDetect`, `withTempPath`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
   - `detect`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setCommand`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
@@ -59,69 +61,73 @@
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)
   - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
 + 📄 [source/module/Stat/StatCollect.js](source/module/Stat/StatCollect.js)
-  - `configureStatCollect`
+  - `createStatCollectExot`
 + 📄 [source/module/Stat/StatReport.js](source/module/Stat/StatReport.js)
   - `createGetStatReport`
 + 📄 [source/module/Stat/module/applyStatFact.js](source/module/Stat/module/applyStatFact.js)
   - `applyStatFact`
 + 📄 [source/module/Stat/module/combineStat.js](source/module/Stat/module/combineStat.js)
   - `combineStat`, `combineStatRaw`, `setRangeRaw`, `setSumRaw`
++ 📄 [source/server/feature/ActionJSON/client.js](source/server/feature/ActionJSON/client.js)
+  - `actionJson`
++ 📄 [source/server/feature/ActionJSON/setup.js](source/server/feature/ActionJSON/setup.js)
+  - `PERMISSION_CHECK_ACTION_JSON`, `PERMISSION_CHECK_ACTION_JSON_PUBLIC`, `setup`
 + 📄 [source/server/feature/Auth/HTML.js](source/server/feature/Auth/HTML.js)
   - `initAuthMask`
-+ 📄 [source/server/feature/Auth/configureFeaturePack.js](source/server/feature/Auth/configureFeaturePack.js)
-  - `configureFeaturePack`
 + 📄 [source/server/feature/Auth/option.js](source/server/feature/Auth/option.js)
   - `AuthCommonFormatConfig`, `AuthFileFormatConfig`, `AuthFileGroupFormatConfig`, `AuthSkipFormatConfig`, `getAuthCommonOption`, `getAuthFileGroupOption`, `getAuthFileOption`, `getAuthSkipOption`
-+ 📄 [source/server/feature/Auth/responder.js](source/server/feature/Auth/responder.js)
-  - `createResponderCheckAuth`, `createResponderGrantAuthHeader`
-+ 📄 [source/server/feature/Explorer/client.js](source/server/feature/Explorer/client.js)
-  - `fileDownload`, `fileUpload`, `pathAction`
-+ 📄 [source/server/feature/Explorer/configureFeaturePack.js](source/server/feature/Explorer/configureFeaturePack.js)
-  - `configureFeaturePack`
++ 📄 [source/server/feature/Auth/setup.js](source/server/feature/Auth/setup.js)
+  - `setup`
 + 📄 [source/server/feature/Explorer/option.js](source/server/feature/Explorer/option.js)
   - `ExplorerFormatConfig`, `getExplorerOption`
-+ 📄 [source/server/feature/Explorer/permission.js](source/server/feature/Explorer/permission.js)
-  - `CREATE_PERMISSION_CHECK_MAP`, `PERMISSION_EXPLORER_FILE_UPLOAD_START`, `PERMISSION_EXPLORER_PATH_ACTION`, `PERMISSION_TYPE`
-+ 📄 [source/server/feature/Explorer/responder.js](source/server/feature/Explorer/responder.js)
-  - `createResponderFileChunkUpload`, `createResponderPathAction`, `createResponderServeFile`, `createResponderStorageStatus`
++ 📄 [source/server/feature/Explorer/setup.js](source/server/feature/Explorer/setup.js)
+  - `setup`
 + 📄 [source/server/feature/Explorer/HTML/main.js](source/server/feature/Explorer/HTML/main.js)
   - `getHTML`
 + 📄 [source/server/feature/Explorer/HTML/pathContent.js](source/server/feature/Explorer/HTML/pathContent.js)
   - `initPathContent`, `pathContentStyle`
 + 📄 [source/server/feature/Explorer/HTML/uploader.js](source/server/feature/Explorer/HTML/uploader.js)
-  - `initFileUpload`, `initUploader`
-+ 📄 [source/server/feature/Permission/configureFeaturePack.js](source/server/feature/Permission/configureFeaturePack.js)
-  - `configureFeaturePack`
+  - `initUploader`
++ 📄 [source/server/feature/File/client.js](source/server/feature/File/client.js)
+  - `fileDownload`, `fileUpload`
++ 📄 [source/server/feature/File/option.js](source/server/feature/File/option.js)
+  - `FileFormatConfig`, `getFileOption`
++ 📄 [source/server/feature/File/responder.js](source/server/feature/File/responder.js)
+  - `createResponderFileChunkUpload`, `createResponderServeFile`
++ 📄 [source/server/feature/File/setup.js](source/server/feature/File/setup.js)
+  - `PERMISSION_CHECK_FILE_UPLOAD_START`, `setup`
 + 📄 [source/server/feature/Permission/option.js](source/server/feature/Permission/option.js)
   - `PermissionFormatConfig`, `getPermissionOption`
++ 📄 [source/server/feature/Permission/setup.js](source/server/feature/Permission/setup.js)
+  - `setup`
 + 📄 [source/server/feature/ServerFetch/HTML.js](source/server/feature/ServerFetch/HTML.js)
   - `initServerFetch`
 + 📄 [source/server/feature/ServerFetch/responder.js](source/server/feature/ServerFetch/responder.js)
   - `responderServerFetch`
 + 📄 [source/server/feature/StatCollect/HTML.js](source/server/feature/StatCollect/HTML.js)
   - `getHTML`
-+ 📄 [source/server/feature/StatCollect/configureFeaturePack.js](source/server/feature/StatCollect/configureFeaturePack.js)
-  - `configureFeaturePack`
 + 📄 [source/server/feature/StatCollect/option.js](source/server/feature/StatCollect/option.js)
   - `StatCollectFormatConfig`, `getStatCollectOption`
 + 📄 [source/server/feature/StatCollect/responder.js](source/server/feature/StatCollect/responder.js)
   - `createResponderStatCollect`, `createResponderStatState`
-+ 📄 [source/server/feature/StatReport/configureFeaturePack.js](source/server/feature/StatReport/configureFeaturePack.js)
-  - `configureFeaturePack`
++ 📄 [source/server/feature/StatCollect/setup.js](source/server/feature/StatCollect/setup.js)
+  - `setup`
 + 📄 [source/server/feature/StatReport/option.js](source/server/feature/StatReport/option.js)
   - `StatReportFormatConfig`, `getStatReportOption`
++ 📄 [source/server/feature/StatReport/setup.js](source/server/feature/StatReport/setup.js)
+  - `setup`
 + 📄 [source/server/feature/TokenCache/option.js](source/server/feature/TokenCache/option.js)
   - `TokenCacheFormatConfig`, `getTokenCacheOption`
 + 📄 [source/server/feature/TokenCache/responder.js](source/server/feature/TokenCache/responder.js)
   - `createResponderAssignTokenCookie`, `createResponderAssignTokenHeader`, `createResponderCheckToken`
 + 📄 [source/server/feature/WebSocketTunnelDev/client.js](source/server/feature/WebSocketTunnelDev/client.js)
   - `setupClientWebSocketTunnel`
-+ 📄 [source/server/feature/WebSocketTunnelDev/configureFeaturePack.js](source/server/feature/WebSocketTunnelDev/configureFeaturePack.js)
-  - `configureFeaturePack`
 + 📄 [source/server/feature/WebSocketTunnelDev/option.js](source/server/feature/WebSocketTunnelDev/option.js)
   - `WebSocketTunnelFormatConfig`, `getWebSocketTunnelOption`
++ 📄 [source/server/feature/WebSocketTunnelDev/setup.js](source/server/feature/WebSocketTunnelDev/setup.js)
+  - `setup`
 + 📄 [source/server/share/option.js](source/server/share/option.js)
-  - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerPackFormatConfig`, `getServerPackOption`
+  - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerExotFormatConfig`, `getServerExotOption`
 + 📄 [source/server/share/HTML/LoadingMask.js](source/server/share/HTML/LoadingMask.js)
   - `initLoadingMask`
 + 📄 [source/server/share/HTML/Modal.js](source/server/share/HTML/Modal.js)
@@ -156,9 +162,9 @@
 >       require provide "auth-file" or "auth-file-group"
 >     --path-action-type [ARGUMENT=1]
 >         one of:
->           path:visible path:stat path:copy path:rename
->           path:delete directory:create directory:content directory:all-file-list
->           extra:compress:7z extra:extract:7z extra:compress:tar extra:extract:tar
+>           path.visible path.stat path.copy path.rename
+>           path.delete path.dir.create path.dir.content path.dir.all-file-list
+>           path.compress-tar path.extract-tar path.compress-auto path.extract-auto
 >     --path-action-key [ARGUMENT=1]
 >     --path-action-key-to [ARGUMENT=1]
 >     --path-action-name-list [ARGUMENT=1+]
@@ -182,10 +188,10 @@
 >       list all file: $0=path/cwd
 >   --file-tree --tree [OPTIONAL] [ARGUMENT=0-1]
 >       list all file in tree: $0=path/cwd
->   --compress --a -a [OPTIONAL] [ARGUMENT=1]
->       compress with npm/tar or 7zip: -O=outputFile, $0=inputDirectory
->   --extract --x -x [OPTIONAL] [ARGUMENT=1]
->       extract with npm/tar or 7zip: -I=inputFile, $0=outputDirectory
+>   --compress --a -a [OPTIONAL] [ARGUMENT=0+]
+>       compress tar/zip/7z/fsp: -I=inputDirectory, -O=outputFile
+>   --extract --x -x [OPTIONAL] [ARGUMENT=0+]
+>       extract tar/zip/7z/fsp: -I=inputFile, -O=outputPath
 >   --git-branch --gb [OPTIONAL] [ARGUMENT=0+]
 >       print git branch
 >   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0+]
@@ -225,9 +231,10 @@
 >           allow deny func file
 >       --permission-func [ARGUMENT=1]
 >       --permission-file [ARGUMENT=1]
->     --explorer-root-path [ARGUMENT=1]
->       --explorer-upload-merge-path [ARGUMENT=1]
->       --explorer-status-command-list
+>     --file-root-path [ARGUMENT=1]
+>       --file-upload-merge-path [ARGUMENT=1]
+>     --explorer [ARGUMENT=0+]
+>         set to enable
 >     --stat-collect-path [ARGUMENT=1]
 >       --stat-collect-url [ARGUMENT=1]
 >       --stat-collect-interval [ARGUMENT=1]
@@ -266,8 +273,8 @@
 >     export DR_NODE_FILE_LIST="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_FILE_LIST_ALL="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_FILE_TREE="[OPTIONAL] [ARGUMENT=0-1]"
->     export DR_NODE_COMPRESS="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_COMPRESS="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+]"
@@ -289,9 +296,9 @@
 >     export DR_NODE_PERMISSION_TYPE="[ARGUMENT=1]"
 >     export DR_NODE_PERMISSION_FUNC="[ARGUMENT=1]"
 >     export DR_NODE_PERMISSION_FILE="[ARGUMENT=1]"
->     export DR_NODE_EXPLORER_ROOT_PATH="[ARGUMENT=1]"
->     export DR_NODE_EXPLORER_UPLOAD_MERGE_PATH="[ARGUMENT=1]"
->     export DR_NODE_EXPLORER_STATUS_COMMAND_LIST=""
+>     export DR_NODE_FILE_ROOT_PATH="[ARGUMENT=1]"
+>     export DR_NODE_FILE_UPLOAD_MERGE_PATH="[ARGUMENT=1]"
+>     export DR_NODE_EXPLORER="[ARGUMENT=0+]"
 >     export DR_NODE_STAT_COLLECT_PATH="[ARGUMENT=1]"
 >     export DR_NODE_STAT_COLLECT_URL="[ARGUMENT=1]"
 >     export DR_NODE_STAT_COLLECT_INTERVAL="[ARGUMENT=1]"
@@ -329,8 +336,8 @@
 >     "fileList": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "fileListAll": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "fileTree": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
->     "compress": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "extract": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "compress": [ "[OPTIONAL] [ARGUMENT=0+]" ],
+>     "extract": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+]" ],
@@ -352,9 +359,9 @@
 >     "permissionType": [ "[ARGUMENT=1]" ],
 >     "permissionFunc": [ "[ARGUMENT=1]" ],
 >     "permissionFile": [ "[ARGUMENT=1]" ],
->     "explorerRootPath": [ "[ARGUMENT=1]" ],
->     "explorerUploadMergePath": [ "[ARGUMENT=1]" ],
->     "explorerStatusCommandList": [ "" ],
+>     "fileRootPath": [ "[ARGUMENT=1]" ],
+>     "fileUploadMergePath": [ "[ARGUMENT=1]" ],
+>     "explorer": [ "[ARGUMENT=0+]" ],
 >     "statCollectPath": [ "[ARGUMENT=1]" ],
 >     "statCollectUrl": [ "[ARGUMENT=1]" ],
 >     "statCollectInterval": [ "[ARGUMENT=1]" ],

@@ -1,4 +1,8 @@
 import { spawnSync } from 'child_process'
+import { tmpdir } from 'os'
+import { resolve } from 'path'
+import { getRandomId } from '@dr-js/core/module/common/math/random'
+import { createDirectory, deleteDirectory } from '@dr-js/core/module/node/file/Directory'
 
 // JSON.stringify(String(child_process.spawnSync('7z').stdout))
 // JSON.stringify(String(child_process.spawnSync('tar', ['--version']).stdout))
@@ -18,7 +22,18 @@ const createDetect = (expect, message, getCommand, ...argList) => {
   }
 }
 
+const withTempPath = async (
+  pathTemp = resolve(tmpdir(), getRandomId()),
+  asyncFunc,
+  pathFrom, pathTo
+) => {
+  await createDirectory(pathTemp)
+  await asyncFunc(resolve(pathFrom), resolve(pathTo), pathTemp)
+  await deleteDirectory(pathTemp)
+}
+
 export {
   createCommandWrap,
-  createDetect
+  createDetect,
+  withTempPath
 }

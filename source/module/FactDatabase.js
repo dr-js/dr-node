@@ -8,7 +8,7 @@ import { createStateStore } from '@dr-js/core/module/common/immutable/StateStore
 
 import { readlineOfStreamAsync } from '@dr-js/core/module/node/data/Stream'
 import { getDirInfoList } from '@dr-js/core/module/node/file/Directory'
-import { createLogger } from '@dr-js/core/module/node/module/Logger'
+import { createLoggerExot } from '@dr-js/core/module/node/module/Logger'
 
 // lightweight log-based database
 //
@@ -43,7 +43,8 @@ const INITIAL_FACT_INFO = {
 // TODO: consider use [ base36, base36 ] for Id?
 // TODO: consider explicit support for drop leading log and only use cache + part of log?
 
-const createFactDatabase = async ({
+const createFactDatabaseExot = ({
+  id = 'exot:fact-database',
   initialFactInfo,
   initialState = INITIAL_STATE,
   applyFact = (state, fact) => ({ ...state, ...fact }), // (state, fact) => nextState
@@ -52,52 +53,67 @@ const createFactDatabase = async ({
   pathFactDirectory,
   nameFactLogFile = DEFAULT_LOG_FILE_NAME,
   nameFactCacheFile = DEFAULT_CACHE_FILE_NAME,
-  onError,
   ...extraOption
 }) => {
-  if (initialFactInfo === undefined) {
-    initialFactInfo = await tryLoadFactInfo(
-      { ...INITIAL_FACT_INFO, factState: initialState },
-      { applyFact, decodeFact, pathFactDirectory, nameFactLogFile, nameFactCacheFile }
-    )
-    __DEV__ && console.log('loaded initialFactInfo:', initialFactInfo)
-  }
-
-  let isActive = true
-  let factId = initialFactInfo.factId || 0
-  let prevFactCacheFile = initialFactInfo.factCacheFile || ''
-
-  const { getState, setState, subscribe, unsubscribe } = createStateStore(initialFactInfo.factState)
-
-  const factLogger = await createLogger({
-    ...extraOption,
-    pathLogDirectory: pathFactDirectory,
-    getLogFileName: () => `${nameFactLogFile}.${factId + 1}.log`,
-    onError
-  })
-
-  const { trigger: saveFactCache, getRunningPromise: getSaveFactCachePromise } = lossyAsync(async () => {
-    const factCacheFile = joinPath(pathFactDirectory, `${nameFactCacheFile}.${factId}.json`)
-    if (prevFactCacheFile === factCacheFile) return // skip save
-
-    const fileContent = JSON.stringify({ factId, factState: getState() })
-
-    __DEV__ && console.log('[saveFactCache] saving fact state:', factCacheFile)
-    await fsAsync.writeFile(factCacheFile, fileContent) // may not always finish on progress exit
-
-    __DEV__ && prevFactCacheFile && console.log('[saveFactCache] dropping prev fact state:', prevFactCacheFile)
-    prevFactCacheFile && await fsAsync.unlink(prevFactCacheFile).catch((error) => { __DEV__ && console.warn('[saveFactCache] clear failed:', prevFactCacheFile, error) })
-
-    __DEV__ && console.log('[saveFactCache] done save fact state')
-    prevFactCacheFile = factCacheFile
-  }, onError)
+  let isActive
+  let factId
+  let factLogger
+  let lossySaveFactCache
+  const { getState, setState, subscribe, unsubscribe } = createStateStore(INITIAL_STATE) // put empty state an wait up to fill the actual state
 
   return {
-    getState,
-    getIsActive: () => isActive,
-    getSaveFactCachePromise, // maybe a promise or undefined
-    subscribe,
-    unsubscribe,
+    id,
+    up: async (onExotError = extraOption.onError) => {
+      if (initialFactInfo === undefined) {
+        initialFactInfo = await tryLoadFactInfo(
+          { ...INITIAL_FACT_INFO, factState: initialState },
+          { applyFact, decodeFact, pathFactDirectory, nameFactLogFile, nameFactCacheFile }
+        )
+        __DEV__ && console.log('loaded initialFactInfo:', initialFactInfo)
+      }
+      setState(initialFactInfo.factState) // reset state to actual fact data
+      factId = initialFactInfo.factId || 0
+      factLogger = createLoggerExot({
+        ...extraOption,
+        pathLogDirectory: pathFactDirectory,
+        getLogFileName: () => `${nameFactLogFile}.${factId + 1}.log`
+      })
+      await factLogger.up(onExotError)
+
+      let prevFactCacheFile = initialFactInfo.factCacheFile || ''
+      lossySaveFactCache = lossyAsync(async () => {
+        const factCacheFile = joinPath(pathFactDirectory, `${nameFactCacheFile}.${factId}.json`)
+        if (prevFactCacheFile === factCacheFile) return // skip save
+
+        const fileContent = JSON.stringify({ factId, factState: getState() })
+
+        __DEV__ && console.log('[saveFactCache] saving fact state:', factCacheFile)
+        await fsAsync.writeFile(factCacheFile, fileContent) // may not always finish on progress exit
+
+        __DEV__ && prevFactCacheFile && console.log('[saveFactCache] dropping prev fact state:', prevFactCacheFile)
+        prevFactCacheFile && await fsAsync.unlink(prevFactCacheFile).catch((error) => { __DEV__ && console.warn('[saveFactCache] clear failed:', prevFactCacheFile, error) })
+
+        __DEV__ && console.log('[saveFactCache] done save fact state')
+        prevFactCacheFile = factCacheFile
+      }, onExotError)
+      isActive = true
+    },
+    down: () => {
+      if (!isActive) return
+      __DEV__ && console.log('[end]', factId)
+      isActive = false
+      factLogger.down()
+      lossySaveFactCache.trigger()
+      const runningPromise = lossySaveFactCache.getRunningPromise()
+      factId = undefined
+      factLogger = undefined
+      lossySaveFactCache = undefined
+      return runningPromise // outer code can wait this, or not
+    },
+    isUp: () => isActive,
+
+    getState, subscribe, unsubscribe,
+    getSaveFactCachePromise: () => lossySaveFactCache && lossySaveFactCache.getRunningPromise(), // maybe a promise or undefined
     add: (fact) => {
       if (!isActive) return
       if (factId >= Number.MAX_SAFE_INTEGER) throw new Error(`factId is too big: ${factId}`) // TODO: handle Integer explode
@@ -115,14 +131,7 @@ const createFactDatabase = async ({
       if (!isActive) return
       __DEV__ && console.log('[split]', factId)
       factLogger.split()
-      saveFactCache()
-    },
-    end: () => {
-      if (!isActive) return
-      __DEV__ && console.log('[end]', factId)
-      isActive = false
-      factLogger.end()
-      saveFactCache()
+      lossySaveFactCache.trigger()
     }
   }
 }
@@ -206,7 +215,7 @@ const tryDeleteExtraCache = async ({
 
 export {
   INITIAL_FACT_INFO,
-  createFactDatabase,
+  createFactDatabaseExot,
   tryLoadFactInfo,
   tryDeleteExtraCache
 }

@@ -1,13 +1,45 @@
 import { createInsideOutPromise, withTimeoutPromise } from '@dr-js/core/module/common/function'
 import { clock } from '@dr-js/core/module/common/time'
 import { requestHttp } from '@dr-js/core/module/node/net'
+import { run } from '@dr-js/core/module/node/system/Run'
 
-// TODO: currently `ping` is actually `tcp-ping`
+// TODO: currently `ping` is actually `tcp-ping`,
+
+// HACK NOTE
+//   Pending DNS resolve may block node exit on win32 for up to 10sec for the use of `dns.lookup()`,
+//     but the `dns.resolve*()` will not use custom defined system HOSTS file.
+//   This hack use another node process to get system dns,
+//     it's much heavier, but as a separate process it's stoppable and quite fast.
+//   check: https://nodejs.org/api/dns.html#dns_implementation_considerations
+//   check: https://github.com/nodejs/node/blob/v14.13.1/lib/net.js#L1038-L1040
+const getHackLookupDNS = (subProcessSet) => (hostname, option, callback) => {
+  __DEV__ && console.log('[getHackLookupDNS]', { hostname, option, callback })
+  const { subProcess, promise, stdoutPromise } = run({
+    quiet: true,
+    command: process.execPath,
+    argList: [ '-e', `require('dns').lookup(${JSON.stringify(hostname)}, ${JSON.stringify(option)}, (...args) => console.log(JSON.stringify(args)))` ]
+  })
+  promise
+    .then(() => stdoutPromise)
+    .then((stdoutBuffer) => {
+      const args = JSON.parse(String(stdoutBuffer))
+      __DEV__ && console.log('[getHackLookupDNS]', { hostname, args })
+      callback(...args)
+    })
+    .catch((error) => {
+      __DEV__ && console.log('[getHackLookupDNS]', { hostname, error })
+      callback(error)
+    })
+    .then(() => subProcessSet.delete(subProcess))
+  subProcessSet.add(subProcess)
+}
 
 const DEFAULT_PING_TIMEOUT = 5 * 1000
 
 const batchRequestUrlList = (onResponse, urlList, option, body) => {
   const requestSet = new Set()
+  const subProcessSet = new Set()
+  if (option.lookup === undefined) option.lookup = getHackLookupDNS(subProcessSet)
   const promise = Promise.all(urlList.map((url) => {
     const { request, promise } = requestHttp(url, option, body)
     requestSet.add(request)
@@ -18,11 +50,13 @@ const batchRequestUrlList = (onResponse, urlList, option, body) => {
       onResponse(url)
     }, (error) => { // skip error
       requestSet.delete(request)
-      __DEV__ && console.log('[batchRequestUrlList] miss', url, error)
+      __DEV__ && console.log('[batchRequestUrlList] miss', url, String(error))
     })
   }))
   const clear = () => {
+    __DEV__ && console.log('[batchRequestUrlList] clear', requestSet.size, subProcessSet.size)
     for (const request of requestSet) request.destroy()
+    for (const subProcess of subProcessSet) subProcess.kill()
     return promise
   }
   return { requestSet, promise, clear }
@@ -37,7 +71,7 @@ const pingRaceUrlList = async (urlList = [], {
   const { promise, resolve } = createInsideOutPromise()
   const batchRequest = batchRequestUrlList(resolve, urlList, { timeout, ...option }, body)
   const resultUrl = await withTimeoutPromise(promise, timeout).catch((error) => {
-    __DEV__ && console.log('[pingStatUrlList] timeout:', error)
+    __DEV__ && console.log('[pingStatUrlList] timeout:', String(error))
     return urlList[ 0 ] // default to first url
   })
   __DEV__ && console.log('[pingRaceUrlList] requestSet size:', batchRequest.requestSet.size)

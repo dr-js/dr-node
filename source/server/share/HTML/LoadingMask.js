@@ -1,5 +1,6 @@
 const initLoadingMask = () => {
   const {
+    document,
     qS, cE,
     Dr: { Common: { Error: { catchAsync }, Function: { lossyAsync } } }
   } = window

@@ -13,7 +13,7 @@ const getRequestParam = (store, key) => {
 
 const getRequestBuffer = (store) => readableStreamToBufferAsync(store.request)
 
-const getRequestJSON = (store) => getRequestBuffer(store).then(JSON.parse)
+const getRequestJSON = (store) => getRequestBuffer(store).then((buffer) => buffer.length === 0 ? undefined : JSON.parse(String(buffer))) // NOTE: support no body with out error
 
 const getWebSocketProtocolListParam = (protocolList = [], key) => { // to get value from format: `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
   const header = `${encodeURIComponent(key)}=`

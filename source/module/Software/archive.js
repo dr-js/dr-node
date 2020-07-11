@@ -1,28 +1,18 @@
-import { tmpdir } from 'os'
 import { resolve, dirname } from 'path'
 import { createGzip } from 'zlib'
 import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
-import { getRandomId } from '@dr-js/core/module/common/math/random'
-import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
-import { createDirectory, deleteDirectory } from '@dr-js/core/module/node/file/Directory'
+import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
+import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { run } from '@dr-js/core/module/node/system/Run'
 
 import { detect as detect7z, compressConfig, extractConfig } from './7z'
 import { REGEXP_TGZ, REGEXP_NPM_TAR, detect as detectNpmTar, compressAsync as compressNpmTarAsync, extractAsync as extractNpmTarAsync } from './npmTar'
+import { REGEXP_FSP_TAR, compressAsync as compressFspTarAsync, extractAsync as extractFspTarAsync } from './fspTar'
+import { withTempPath } from './function'
 
 const REGEXP_T7Z = /\.t(?:ar\.)?7z$/
 const REGEXP_TXZ = /\.t(?:ar\.)?xz$/
-const REGEXP_AUTO = /\.(?:tar|tgz|tar\.gz|t7z|tar\.7z|txz|tar\.xz|7z|zip)$/ // common supported extension
-
-const withTempPath = async (
-  pathTemp = resolve(tmpdir(), getRandomId()),
-  asyncFunc,
-  pathFrom, pathTo
-) => {
-  await createDirectory(pathTemp)
-  await asyncFunc(resolve(pathFrom), resolve(pathTo), pathTemp)
-  await deleteDirectory(pathTemp)
-}
+const REGEXP_AUTO = /\.(?:tar|tgz|tar\.gz|t7z|tar\.7z|txz|tar\.xz|7z|zip|fsp|fsp\.gz)$/ // common supported extension
 
 const detect = (checkOnly) => detect7z(checkOnly) && detectNpmTar(checkOnly)
 
@@ -48,11 +38,13 @@ const __extractT7zAsync = async (sourceFile, outputPath, pathTemp) => {
 
 const compressAutoAsync = async (sourceDirectory, outputFile, pathTemp) => (REGEXP_T7Z.test(outputFile) || REGEXP_TXZ.test(outputFile)) ? compressT7zAsync(sourceDirectory, outputFile, pathTemp)
   : REGEXP_NPM_TAR.test(outputFile) ? createDirectory(dirname(outputFile)).then(() => compressNpmTarAsync(sourceDirectory, outputFile))
-    : compress7zAsync(sourceDirectory, outputFile)
+    : REGEXP_FSP_TAR.test(outputFile) ? createDirectory(dirname(outputFile)).then(() => compressFspTarAsync(sourceDirectory, outputFile))
+      : compress7zAsync(sourceDirectory, outputFile)
 
 const extractAutoAsync = async (sourceFile, outputPath, pathTemp) => (REGEXP_T7Z.test(sourceFile) || REGEXP_TXZ.test(sourceFile)) ? extractT7zAsync(sourceFile, outputPath, pathTemp)
   : REGEXP_NPM_TAR.test(sourceFile) ? createDirectory(outputPath).then(() => extractNpmTarAsync(sourceFile, outputPath))
-    : extract7zAsync(sourceFile, outputPath)
+    : REGEXP_FSP_TAR.test(sourceFile) ? createDirectory(outputPath).then(() => extractFspTarAsync(sourceFile, outputPath))
+      : extract7zAsync(sourceFile, outputPath)
 
 // not all archive info may be preserved, especially when repack on win32
 const repackAsync = async (fileFrom, fileTo, pathTemp) => withTempPath(pathTemp, __repackAsync, fileFrom, fileTo)
@@ -69,7 +61,7 @@ const __repackTarAsync = async (fileFrom, fileTo, pathTemp) => {
     const nameList = await fsAsync.readdir(pathTemp)
     const tarName = nameList.find((name) => name.endsWith('.tar'))
     if (!tarName) throw new Error(`expect tar in archive, get: ${nameList.join(', ')}`)
-    await waitStreamStopAsync(setupStreamPipe(createReadStream(resolve(pathTemp, tarName)), createGzip(), createWriteStream(fileTo)))
+    await quickRunletFromStream(createReadStream(resolve(pathTemp, tarName)), createGzip(), createWriteStream(fileTo))
   } else await compress7zAsync(pathTemp, fileTo) // `.t7z|.tar.7z` should cause 7zip to use default 7z type
 }
 

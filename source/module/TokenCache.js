@@ -1,47 +1,42 @@
 import { dirname } from 'path'
 import { writeFileSync, promises as fsAsync } from 'fs'
 
-import { catchAsync, catchSync } from '@dr-js/core/module/common/error'
 import { getTimestamp } from '@dr-js/core/module/common/time'
 import { createCacheMap } from '@dr-js/core/module/common/data/CacheMap'
 
+import { getRandomBufferAsync } from '@dr-js/core/module/node/data/Buffer'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
-import { addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
-import { getRandomBufferAsync } from '@dr-js/core/module/node/data/function'
 
 const DEFAULT_TOKEN_KEY = 'auth-token'
-
-const loadTokenCache = async (tokenCacheMap, fileTokenCache) => {
-  tokenCacheMap.loadCacheList(JSON.parse(String(await fsAsync.readFile(fileTokenCache))))
-  __DEV__ && console.log('loaded token cache file', fileTokenCache)
-}
-
-const saveTokenCache = (tokenCacheMap, fileTokenCache) => {
-  const tokenPackString = JSON.stringify(tokenCacheMap.saveCacheList())
-  writeFileSync(fileTokenCache, tokenPackString)
-}
-
 const TOKEN_SIZE = 128 // in byte, big to prevent conflict, and safer for auth token
 const TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000 // in msec, 30day
 const TOKEN_SIZE_SUM_MAX = 4 * 1024 // token count, old token will be dropped, with default setting should use 128*4*1024 = 512KiB memory
 
 // TODO: not used in sample yet
-
-const configureTokenCache = async ({
+const createTokenCacheExot = ({
+  id = 'exot:token-cache',
   fileTokenCache,
   tokenKey = DEFAULT_TOKEN_KEY,
   tokenSize = TOKEN_SIZE, // in bytes
-  tokenExpireTime = TOKEN_EXPIRE_TIME,
+  tokenExpireTime = TOKEN_EXPIRE_TIME, // in msec
   tokenSizeSumMax = TOKEN_SIZE_SUM_MAX,
   tokenCacheMap = createCacheMap({ valueSizeSumMax: tokenSizeSumMax, valueSizeSingleMax: 1, eventHub: null })
 }) => {
-  await createDirectory(dirname(fileTokenCache))
-  await catchAsync(loadTokenCache, tokenCacheMap, fileTokenCache)
+  let _isUp = false
 
-  addExitListenerSync((exitState) => {
-    catchSync(saveTokenCache, tokenCacheMap, fileTokenCache)
-    __DEV__ && console.log('saved to fileTokenCache', fileTokenCache, exitState)
-  })
+  const up = async (onExotError) => {
+    await createDirectory(dirname(fileTokenCache))
+    try { // allow fail
+      tokenCacheMap.loadCacheList(JSON.parse(String(await fsAsync.readFile(fileTokenCache))))
+    } catch (error) { __DEV__ && console.log(error) }
+    _isUp = true
+  }
+  const down = () => {
+    _isUp = false
+    try { // allow fail
+      writeFileSync(fileTokenCache, JSON.stringify(tokenCacheMap.saveCacheList()))
+    } catch (error) { __DEV__ && console.log(error) }
+  }
 
   const tryGetToken = (token) => tokenCacheMap.get(token)
   const generateToken = async (tokenObject) => {
@@ -53,9 +48,9 @@ const configureTokenCache = async ({
   }
 
   return {
+    id, up, down, isUp: () => _isUp,
     tokenKey,
     tokenExpireTime,
-
     tryGetToken,
     generateToken
   }
@@ -63,6 +58,5 @@ const configureTokenCache = async ({
 
 export {
   DEFAULT_TOKEN_KEY,
-
-  configureTokenCache
+  createTokenCacheExot
 }

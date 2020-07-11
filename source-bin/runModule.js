@@ -12,8 +12,8 @@ import { PATH_TYPE } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoList, getDirInfoTree, getFileList } from '@dr-js/core/module/node/file/Directory'
 
 import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from '@dr-js/node/module/module/Auth'
-import { PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/base'
-import { PATH_ACTION_TYPE as EXTRA_COMPRESS_PATH_ACTION_TYPE } from '@dr-js/node/module/module/PathAction/extraCompress'
+import { ACTION_TYPE as ACTION_TYPE_PATH } from '@dr-js/node/module/module/ActionJSON/path'
+import { ACTION_TYPE as ACTION_TYPE_PATH_EXTRA_ARCHIVE } from '@dr-js/node/module/module/ActionJSON/pathExtraArchive'
 
 import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/PingRace'
 
@@ -21,7 +21,8 @@ import { compressAutoAsync, extractAutoAsync } from '@dr-js/node/module/module/S
 import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
 
 import { getAuthCommonOption, getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
-import { fileUpload, fileDownload, pathAction } from '@dr-js/node/module/server/feature/Explorer/client'
+import { actionJson } from '@dr-js/node/module/server/feature/ActionJSON/client'
+import { fileUpload, fileDownload } from '@dr-js/node/module/server/feature/File/client'
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
@@ -45,7 +46,7 @@ const ModuleFormatConfigList = parseCompactList(
     'file-download-path/SP'
   ) ],
   [ `path-action-server-url,pasu/SS,O|${EXPLORER_CLIENT_DESC}`, parseCompactList(
-    [ 'path-action-type', pickOneOf(Object.values({ ...PATH_ACTION_TYPE, ...EXTRA_COMPRESS_PATH_ACTION_TYPE })) ],
+    [ 'path-action-type', pickOneOf(Object.values({ ...ACTION_TYPE_PATH, ...ACTION_TYPE_PATH_EXTRA_ARCHIVE })) ],
     'path-action-key/SS,O',
     'path-action-key-to/SS,O',
     'path-action-name-list/AS,O'
@@ -67,13 +68,13 @@ const ModuleFormatConfigList = parseCompactList(
   'file-list-all,ls-R,lla/AP,O/0-1|list all file: $0=path/cwd',
   'file-tree,tree/AP,O/0-1|list all file in tree: $0=path/cwd',
 
-  'compress,a/SP,O|compress with npm/tar or 7zip: -O=outputFile, $0=inputDirectory',
-  'extract,x/SP,O|extract with npm/tar or 7zip: -I=inputFile, $0=outputDirectory',
+  'compress,a/T|compress tar/zip/7z/fsp: -I=inputDirectory, -O=outputFile',
+  'extract,x/T|extract tar/zip/7z/fsp: -I=inputFile, -O=outputPath',
 
   'git-branch,gb/T|print git branch',
   'git-commit-hash,gch/T|print git commit hash',
 
-  // TODO: currently timeout can not change
+  // TODO: currently timeout can not change, all lock to 5sec
   'ping-race,pr/AS,O|tcp-ping list of url to find the fastest',
   'ping-stat,ps/AS,O|tcp-ping list of url and print result'
 
@@ -123,13 +124,15 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
             key: getFirst('file-download-key')
           })
         case 'path-action-server-url':
-          return outputAuto(await pathAction({
+          return outputAuto(await actionJson({
             log, authFetch,
-            urlPathAction: argumentList[ 0 ],
-            nameList: tryGet('path-action-name-list'),
+            urlActionJSON: argumentList[ 0 ],
             actionType: getFirst('path-action-type'),
-            key: tryGetFirst('path-action-key'),
-            keyTo: tryGetFirst('path-action-key-to')
+            actionPayload: {
+              key: tryGetFirst('path-action-key'),
+              keyTo: tryGetFirst('path-action-key-to'),
+              batchList: tryGet('path-action-batch-list')
+            }
           }))
       }
       break
@@ -170,9 +173,9 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
       return outputAuto(await collectFile(modeName, argumentList[ 0 ] || process.cwd()))
 
     case 'compress':
-      return compressAutoAsync(argumentList[ 0 ], outputFile)
+      return compressAutoAsync(inputFile, outputFile)
     case 'extract':
-      return extractAutoAsync(inputFile, argumentList[ 0 ])
+      return extractAutoAsync(inputFile, outputFile)
 
     case 'git-branch':
       detectGit()

@@ -1,8 +1,8 @@
 import { WEBSOCKET_EVENT } from '@dr-js/core/module/node/server/WebSocket/function'
 import { createWebSocketClient } from '@dr-js/core/module/node/server/WebSocket/WebSocketClient'
-import { createServerPack } from '@dr-js/core/module/node/server/Server'
+import { createServerExot } from '@dr-js/core/module/node/server/Server'
 
-import { parseHostString } from 'source/module/ServerPack'
+import { parseHostString } from 'source/module/ServerExot'
 import { packWebSocketProtocolListParam } from 'source/module/RequestCommon'
 
 // TODO: under DEV
@@ -20,10 +20,10 @@ const setupClientWebSocketTunnel = ({
 
   // setup tcp tunnel server
   const { hostname, port } = parseHostString(webSocketTunnelHost, '127.0.0.1')
-  const serverPack = createServerPack({ protocol: 'tcp:', hostname, port })
+  const serverExot = createServerExot({ protocol: 'tcp:', hostname, port })
 
-  serverPack.server.on('connection', async (socket) => {
-    log && log(`- tcp connection (${serverPack.socketSet.size} total)`)
+  serverExot.server.on('connection', async (socket) => {
+    log && log(`- tcp connection (${serverExot.socketSet.size} total)`)
 
     let tunnelWebSocket
     const pendingBuffer = []
@@ -69,7 +69,7 @@ const setupClientWebSocketTunnel = ({
     })
   })
 
-  return serverPack
+  return serverExot
 }
 
 export { setupClientWebSocketTunnel }

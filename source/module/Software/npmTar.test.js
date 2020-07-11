@@ -1,7 +1,7 @@
 import { resolve, basename } from 'path'
 import { createReadStream, createWriteStream } from 'fs'
 import { doThrowAsync } from '@dr-js/core/module/common/verify'
-import { setupStreamPipe, waitStreamStopAsync } from '@dr-js/core/module/node/data/Stream'
+import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 
 import {
@@ -30,25 +30,25 @@ describe('Node.Module.Software.npmTar', () => {
   it('createCompressStream() & createExtractStream()', async () => {
     info('createCompressStream')
     await createDirectory(fromTemp('createCompressStream/'))
-    await waitStreamStopAsync(setupStreamPipe(
+    await quickRunletFromStream(
       createCompressStream(SOURCE_DIRECTORY),
       createWriteStream(fromTemp('createCompressStream/test.tgz'))
-    ))
-    await waitStreamStopAsync(setupStreamPipe(
+    )
+    await quickRunletFromStream(
       createCompressStream(SOURCE_DIRECTORY, { gzip: false }),
       createWriteStream(fromTemp('createCompressStream/test.tar'))
-    ))
+    )
     info('createExtractStream')
     await createDirectory(fromTemp('createExtractStream/test.tgz-extract/'))
     await createDirectory(fromTemp('createExtractStream/test.tar-extract/'))
-    await waitStreamStopAsync(setupStreamPipe(
+    await quickRunletFromStream(
       createReadStream(fromTemp('createCompressStream/test.tgz')),
       createExtractStream(fromTemp('createExtractStream/test.tgz-extract/'))
-    ))
-    await waitStreamStopAsync(setupStreamPipe(
+    )
+    await quickRunletFromStream(
       createReadStream(fromTemp('createCompressStream/test.tar')),
       createExtractStream(fromTemp('createExtractStream/test.tar-extract/'))
-    ))
+    )
     info('verifyOutputDirectory')
     await verifyOutputDirectory(fromTemp('createExtractStream/test.tgz-extract/'))
     await verifyOutputDirectory(fromTemp('createExtractStream/test.tar-extract/'))

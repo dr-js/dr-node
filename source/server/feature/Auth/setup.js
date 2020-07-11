@@ -4,8 +4,11 @@ import { createResponderCheckRateLimit } from '@dr-js/core/module/node/server/Re
 import { getRequestParam } from 'source/module/RequestCommon'
 import { configureAuth } from 'source/module/Auth'
 
-const configureFeaturePack = async ({
+const setup = async ({
+  name = 'feature:auth',
   logger: { add: log }, routePrefix = '',
+
+  // TODO: support `featureTokenCache` here, so `createResponderGrantAuthTokenHeader` can be supported
 
   authKey,
   authSkip = false,
@@ -21,7 +24,7 @@ const configureFeaturePack = async ({
     authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix
   })
 
-  const createResponderCheckAuth = ({
+  const createResponderCheckAuth = ({ // wrap a responder to add auth check before passing the request down
     responderNext,
     responderDeny // optional
   }) => createResponderCheckRateLimit({
@@ -34,23 +37,18 @@ const configureFeaturePack = async ({
     responderDeny
   })
 
-  const createResponderGrantAuthHeader = ({ responder }) => async (store, requestTag) => {
-    store.response.setHeader(authPack.authKey, await authPack.generateAuthCheckCode(requestTag))
-    return responder(store)
-  }
-
   const routeList = [
-    [ URL_AUTH_CHECK, 'GET', createResponderCheckAuth({ responderNext: (store) => responderEndWithStatusCode(store, { statusCode: 200 }) }) ]
+    [ URL_AUTH_CHECK, 'HEAD', createResponderCheckAuth({ responderNext: (store) => responderEndWithStatusCode(store, { statusCode: 200 }) }) ]
   ]
 
   return {
     authPack,
     createResponderCheckAuth,
-    createResponderGrantAuthHeader,
 
     URL_AUTH_CHECK,
-    routeList
+    routeList,
+    name
   }
 }
 
-export { configureFeaturePack }
+export { setup }

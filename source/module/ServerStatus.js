@@ -23,20 +23,23 @@ const COMMON_SERVER_STATUS_COMMAND_LIST = [
     }
   } ],
   !IS_WIN32 && [ 'Network', 'vnstat -s' ],
-  [ 'System', IS_DARWIN ? 'top -l1 -n0' : 'top -bn1 | head -n5', describeSystemStatus ],
+  [ 'System', IS_DARWIN ? 'top -l1 -n0' : 'top -bn1 | head -n5', () => describeSystemStatus() ],
   [ 'Time', () => new Date().toISOString() ]
 ].filter(Boolean)
+
 const runQuick = async (command, rootPath) => {
   const { promise, stdoutPromise } = run({ command, option: { cwd: rootPath, shell: true }, quiet: true })
   await promise
   return String(await stdoutPromise)
 }
+
 const runStatusCommand = async (statusCommand, rootPath) => {
   let output = ''
   if (isString(statusCommand)) output = await runQuick(statusCommand, rootPath)
   else if (isBasicFunction(statusCommand)) output = await statusCommand(rootPath)
   return output
 }
+
 const getCommonServerStatus = async (rootPath, statusCommandList = COMMON_SERVER_STATUS_COMMAND_LIST) => {
   const resultList = []
   for (const [ title, ...tryList ] of statusCommandList) {
@@ -50,4 +53,7 @@ const getCommonServerStatus = async (rootPath, statusCommandList = COMMON_SERVER
   return resultList
 }
 
-export { getCommonServerStatus }
+export {
+  COMMON_SERVER_STATUS_COMMAND_LIST,
+  getCommonServerStatus
+}

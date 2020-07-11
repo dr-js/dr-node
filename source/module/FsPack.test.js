@@ -1,13 +1,16 @@
 import { resolve } from 'path'
-import { promises as fsAsync } from 'fs'
+import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
+import { createGzip } from 'zlib'
 import { stringifyEqual } from '@dr-js/core/module/common/verify'
 import { getSampleRange } from '@dr-js/core/module/common/math/sample'
+import { compareString } from '@dr-js/core/module/common/compare'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { modifyDelete } from '@dr-js/core/module/node/file/Modify'
+import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { resetDirectory } from '@dr-js/dev/module/node/file'
 
 import {
-  TYPE_FILE, TYPE_DIRECTORY, /* TYPE_SYMLINK, */
+  TYPE_FILE, TYPE_DIRECTORY, TYPE_SYMLINK,
   initFsPack, saveFsPack, loadFsPack,
   setFsPackPackRoot,
   appendFromPath,
@@ -32,6 +35,12 @@ before('prepare', async () => {
   await fsAsync.writeFile(fromRoot('input/dir0/binary-small'), Buffer.from(getSampleRange(0, 64 - 1)))
   await fsAsync.writeFile(fromRoot('input/dir0/binary-big'), Buffer.from(getSampleRange(0, 128 * 1024 - 1)))
   await createDirectory(fromRoot('input/dir1'))
+  if (process.platform !== 'win32') {
+    await createDirectory(fromRoot('input/dir2'))
+    await fsAsync.writeFile(fromRoot('input/dir2/file-executable'), 'input/dir2/file-executable', { mode: 0o755 })
+    await fsAsync.symlink('relative/path', fromRoot('input/dir2/symlink-relative'))
+    await fsAsync.symlink('/absolute/path', fromRoot('input/dir2/symlink-absolute'))
+  }
 })
 after('clear', async () => {
   await modifyDelete(TEST_ROOT)
@@ -47,7 +56,12 @@ const HEADER_JSON_INPUT = {
     { type: TYPE_FILE, route: 'input/dir0/binary-small', size: 64, isExecutable: false },
     { type: TYPE_FILE, route: 'input/dir0/empty', size: 0, isExecutable: false },
     { type: TYPE_FILE, route: 'input/dir0/text', size: 15, isExecutable: false },
-    { type: TYPE_DIRECTORY, route: 'input/dir1' }
+    { type: TYPE_DIRECTORY, route: 'input/dir1' },
+    ...(process.platform !== 'win32' ? [
+      { type: TYPE_FILE, route: 'input/dir2/file-executable', size: 26, isExecutable: true },
+      { type: TYPE_SYMLINK, route: 'input/dir2/symlink-relative', target: 'relative/path' },
+      { type: TYPE_SYMLINK, route: 'input/dir2/symlink-absolute', target: '/absolute/path' }
+    ] : [])
   ]
 }
 
@@ -61,8 +75,18 @@ const HEADER_JSON_INPUT_ROOT = {
     { type: TYPE_FILE, route: 'dir0/binary-small', size: 64, isExecutable: false },
     { type: TYPE_FILE, route: 'dir0/empty', size: 0, isExecutable: false },
     { type: TYPE_FILE, route: 'dir0/text', size: 15, isExecutable: false },
-    { type: TYPE_DIRECTORY, route: 'dir1' }
+    { type: TYPE_DIRECTORY, route: 'dir1' },
+    ...(process.platform !== 'win32' ? [
+      { type: TYPE_FILE, route: 'dir2/file-executable', size: 26, isExecutable: true },
+      { type: TYPE_SYMLINK, route: 'dir2/symlink-relative', target: 'relative/path' },
+      { type: TYPE_SYMLINK, route: 'dir2/symlink-absolute', target: '/absolute/path' }
+    ] : [])
   ]
+}
+
+const sortHeaderJSON = (headerJSON) => {
+  headerJSON.contentList.sort((a, b) => compareString(a.route, b.route))
+  return headerJSON
 }
 
 describe('Node.Module.FsPack', () => {
@@ -90,7 +114,7 @@ describe('Node.Module.FsPack', () => {
     const fsPack = await initFsPack({ packPath: fromRoot('test-appendFromPath.fsp') })
     await appendFromPath(fsPack, fromRoot('input'))
     await saveFsPack(fsPack)
-    stringifyEqual(fsPack.headerJSON, HEADER_JSON_INPUT)
+    stringifyEqual(sortHeaderJSON(fsPack.headerJSON), sortHeaderJSON(HEADER_JSON_INPUT))
   })
 
   it('setFsPackPackRoot()', async () => {
@@ -98,7 +122,7 @@ describe('Node.Module.FsPack', () => {
     setFsPackPackRoot(fsPack, fromRoot('input'))
     await appendFromPath(fsPack, fromRoot('input'))
     await saveFsPack(fsPack)
-    stringifyEqual(fsPack.headerJSON, HEADER_JSON_INPUT_ROOT)
+    stringifyEqual(sortHeaderJSON(fsPack.headerJSON), sortHeaderJSON(HEADER_JSON_INPUT_ROOT))
   })
 
   it('unpackToPath()', async () => {
@@ -109,7 +133,7 @@ describe('Node.Module.FsPack', () => {
 
     const loadedFsPack = await loadFsPack(fsPack)
     await unpackToPath(loadedFsPack, fromRoot('test-unpack'))
-    stringifyEqual(loadedFsPack.headerJSON, HEADER_JSON_INPUT_ROOT)
+    stringifyEqual(sortHeaderJSON(loadedFsPack.headerJSON), sortHeaderJSON(HEADER_JSON_INPUT_ROOT))
   })
 
   it('stressSmall', async () => {
@@ -120,17 +144,31 @@ describe('Node.Module.FsPack', () => {
 
     const loadedFsPack = await loadFsPack(fsPack)
     await unpackToPath(loadedFsPack, fromRoot('test-stressSmall'))
-    // stringifyEqual(loadedFsPack.headerJSON, HEADER_JSON_INPUT_ROOT)
+
+    await quickRunletFromStream(
+      createReadStream(fromRoot('test-stressSmall.fsp')),
+      createGzip(),
+      createWriteStream(fromRoot('test-stressSmall.fsp.gz'))
+    )
+    // console.log('==========================================')
+    // console.log(JSON.stringify(sortHeaderJSON(loadedFsPack.headerJSON)))
   })
 
-  // __DEV__ && it('stressLarge', async () => {
-  //   const fsPack = await initFsPack({ packPath: fromRoot('test-stressLarge.fsp') })
-  //   setFsPackPackRoot(fsPack, fromRoot('../../../node_modules'))
-  //   await appendFromPath(fsPack, fromRoot('../../../node_modules'))
-  //   await saveFsPack(fsPack)
-  //
-  //   // const loadedFsPack = await loadFsPack(fsPack)
-  //   // await unpackToPath(loadedFsPack, fromRoot('test-stressLarge'))
-  //   // stringifyEqual(loadedFsPack.headerJSON, HEADER_JSON_INPUT_ROOT)
-  // })
+  __DEV__ && it('stressLarge', async () => {
+    const fsPack = await initFsPack({ packPath: fromRoot('test-stressLarge.fsp') })
+    setFsPackPackRoot(fsPack, fromRoot('../../../node_modules'))
+    await appendFromPath(fsPack, fromRoot('../../../node_modules'))
+    await saveFsPack(fsPack)
+
+    const loadedFsPack = await loadFsPack(fsPack)
+    await unpackToPath(loadedFsPack, fromRoot('test-stressLarge'))
+
+    await quickRunletFromStream( // this is smaller than normal zip
+      createReadStream(fromRoot('test-stressLarge.fsp')),
+      createGzip(),
+      createWriteStream(fromRoot('test-stressLarge.fsp.gz'))
+    )
+    // console.log('==========================================')
+    // console.log(JSON.stringify(sortHeaderJSON(loadedFsPack.headerJSON))) // NOTE: very long
+  })
 })
