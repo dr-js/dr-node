@@ -15,7 +15,8 @@ const setup = async ({
   authFile,
   authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix,
 
-  URL_AUTH_CHECK = `${routePrefix}/auth`
+  URL_AUTH_CHECK = `${routePrefix}/auth`,
+  URL_AUTH_CHECK_ABBR = `${routePrefix}/a`
 }) => {
   const authPack = await configureAuth({
     authKey, log,
@@ -38,7 +39,7 @@ const setup = async ({
   })
 
   const routeList = [
-    [ URL_AUTH_CHECK, 'HEAD', createResponderCheckAuth({ responderNext: (store) => responderEndWithStatusCode(store, { statusCode: 200 }) }) ]
+    [ [ URL_AUTH_CHECK, URL_AUTH_CHECK_ABBR ], 'HEAD', createResponderCheckAuth({ responderNext: (store) => responderEndWithStatusCode(store, { statusCode: 200 }) }) ]
   ]
 
   return {
@@ -46,6 +47,7 @@ const setup = async ({
     createResponderCheckAuth,
 
     URL_AUTH_CHECK,
+    URL_AUTH_CHECK_ABBR,
     routeList,
     name
   }

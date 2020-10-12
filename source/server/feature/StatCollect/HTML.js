@@ -4,7 +4,7 @@ import { DR_BROWSER_SCRIPT_TAG } from '@dr-js/core/module/node/resource'
 import { initAuthMask } from 'source/server/feature/Auth/HTML'
 
 const getHTML = ({
-  URL_AUTH_CHECK,
+  URL_AUTH_CHECK_ABBR,
   URL_STAT_STATE,
   CONFIG_RENDER_PRESET
 }) => COMMON_LAYOUT([
@@ -16,7 +16,7 @@ const getHTML = ({
   '<div id="chart-panel" style="overflow: auto; flex: 1; min-height: 0;"></div>',
   COMMON_SCRIPT({
     INIT: [ // NOTE: shorter after minify
-      URL_AUTH_CHECK, URL_STAT_STATE,
+      URL_AUTH_CHECK_ABBR, URL_STAT_STATE,
       CONFIG_RENDER_PRESET
     ],
     initAuthMask,
@@ -50,7 +50,7 @@ const onLoadFunc = () => {
     alert, location,
     qS, cE,
     INIT: [
-      URL_AUTH_CHECK, URL_STAT_STATE,
+      URL_AUTH_CHECK_ABBR, URL_STAT_STATE,
       CONFIG_RENDER_PRESET
     ],
     initAuthMask,
@@ -312,7 +312,7 @@ const onLoadFunc = () => {
   }
 
   initAuthMask({
-    URL_AUTH_CHECK,
+    URL_AUTH_CHECK_ABBR,
     onAuthPass: ({ authRevoke, authFetch }) => {
       qS('#control-panel').appendChild(cE('button', { innerHTML: 'ReloadData', onclick: () => fetchStatState(authRevoke, authFetch) }))
       fetchStatState(authRevoke, authFetch)

@@ -32,7 +32,7 @@ const configureSampleServer = async ({
   // permission
   permissionType, permissionFunc, permissionFile,
   // file
-  fileRootPath: rootPath, fileUploadMergePath,
+  fileRootPath, fileRootPathPublic, fileUploadMergePath,
   // explorer
   explorer,
   // stat collect
@@ -54,22 +54,22 @@ const configureSampleServer = async ({
     logger, routePrefix,
     permissionType, permissionFunc, permissionFile
   })
-  const featureActionJSON = rootPath && await setupActionJSON({
+  const featureActionJSON = fileRootPath && await setupActionJSON({
     logger, routePrefix, featureAuth, featurePermission,
     actionMap: {
-      ...setupActionMapStatus({ rootPath, logger }),
-      ...setupActionMapPath({ rootPath, logger, actionCoreMap: { ...ACTION_CORE_MAP_PATH, ...ACTION_CORE_MAP_PATH_EXTRA_ARCHIVE } })
+      ...setupActionMapStatus({ rootPath: fileRootPath, logger }),
+      ...setupActionMapPath({ rootPath: fileRootPath, logger, actionCoreMap: { ...ACTION_CORE_MAP_PATH, ...ACTION_CORE_MAP_PATH_EXTRA_ARCHIVE } })
     },
     actionMapPublic: {
-      ...setupActionMapStatus({ rootPath, logger, actionCoreMap: objectPickKey(ACTION_CORE_MAP_STATUS, [ ACTION_TYPE_STATUS.STATUS_TIMESTAMP, ACTION_TYPE_STATUS.STATUS_TIME_ISO ]) })
+      ...setupActionMapStatus({ rootPath: fileRootPath, logger, actionCoreMap: objectPickKey(ACTION_CORE_MAP_STATUS, [ ACTION_TYPE_STATUS.STATUS_TIMESTAMP, ACTION_TYPE_STATUS.STATUS_TIME_ISO ]) })
     }
   })
-  const featureFile = rootPath && await setupFile({
+  const featureFile = fileRootPath && await setupFile({
     logger, routePrefix, featureAuth, featurePermission,
-    fileRootPath: rootPath, fileUploadMergePath
+    fileRootPath, fileRootPathPublic, fileUploadMergePath
   })
   const featureExplorer = explorer && await setupExplorer({
-    logger, routePrefix, featureAuth, featurePermission, featureActionJSON, featureFile
+    logger, routePrefix, featureAuth, featureActionJSON, featureFile
   })
   const featureStatCollect = statCollectPath && await setupStatCollect({
     logger, routePrefix, featureAuth,

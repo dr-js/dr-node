@@ -10,7 +10,7 @@ h2, h6 { margin: 0.5em 4px; }
 // TODO: add drag selection
 
 const initPathContent = (
-  URL_ACTION_JSON_ABBR, URL_FILE_SERVE,
+  URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR,
   IS_READ_ONLY = true, IS_EXTRA_TAR = false, IS_EXTRA_AUTO = false,
   ACTION_TYPE,
   authFetch, withConfirmModal, withPromptModal
@@ -66,10 +66,10 @@ const initPathContent = (
     await doLoadPath(pathContentStore)
   }
   const getPreviewFile = (pathContentStore, authUrl) => async (relativePath, fileName) => open(authUrl(
-    `${URL_FILE_SERVE}/${lazyEncodeURI(pathPush(relativePath, fileName))}`
+    `${URL_FILE_SERVE_ABBR}/${lazyEncodeURI(pathPush(relativePath, fileName))}`
   ))
   const getDownloadFile = (pathContentStore, authDownload) => async (relativePath, fileName) => authDownload(
-    `${URL_FILE_SERVE}/${lazyEncodeURI(pathPush(relativePath, fileName))}`,
+    `${URL_FILE_SERVE_ABBR}/${lazyEncodeURI(pathPush(relativePath, fileName))}`,
     fileName
   )
 

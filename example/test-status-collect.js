@@ -13,8 +13,8 @@ setupServer({
   statCollectUrl: 'http://127.0.0.1:8003/stat-report'
   // statCollectInterval: 2 * 1000,
 })
-  .then(async ({ exotGroup, serverExot }) => {
-    await setupServerExotGroup({ exotGroup })
+  .then(async ({ exotGroup, serverExot, loggerExot }) => {
+    await setupServerExotGroup({ exotGroup, serverExot, loggerExot })
     return serverExot.featureMap.get('feature:stat-collect').exotList[ 0 ].timer.start()
   })
   .catch(console.error)

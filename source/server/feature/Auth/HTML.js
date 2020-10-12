@@ -1,6 +1,7 @@
 const initAuthMask = ({
   IS_SKIP_AUTH = false,
-  URL_AUTH_CHECK,
+  URL_AUTH_CHECK_ABBR,
+  URL_AUTH_CHECK = URL_AUTH_CHECK_ABBR,
   onAuthPass,
   authKey = 'auth-check-code' // TODO: NOTE: should match 'DEFAULT_AUTH_KEY' from `module/Auth.js`
 }) => {

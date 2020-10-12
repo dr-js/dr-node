@@ -200,6 +200,8 @@
 >       tcp-ping list of url to find the fastest
 >   --ping-stat --ps [OPTIONAL] [ARGUMENT=1+]
 >       tcp-ping list of url and print result
+>   --quick-server-explorer --qse [OPTIONAL] [ARGUMENT=0-2]
+>       start a no-auth explorer server, for LAN use mostly, caution with public ip: -I=rootPath/cwd, $@=hostname/127.0.0.1,port/auto
 >   --host --H -H [OPTIONAL] [ARGUMENT=1]
 >       set "hostname:port"
 >     --TLS-SNI-config [ARGUMENT=1]
@@ -232,6 +234,7 @@
 >       --permission-func [ARGUMENT=1]
 >       --permission-file [ARGUMENT=1]
 >     --file-root-path [ARGUMENT=1]
+>       --file-root-path-public [ARGUMENT=1]
 >       --file-upload-merge-path [ARGUMENT=1]
 >     --explorer [ARGUMENT=0+]
 >         set to enable
@@ -279,6 +282,7 @@
 >     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+]"
 >     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+]"
+>     export DR_NODE_QUICK_SERVER_EXPLORER="[OPTIONAL] [ARGUMENT=0-2]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_TLS_SNI_CONFIG="[ARGUMENT=1]"
 >     export DR_NODE_TLS_DHPARAM="[ARGUMENT=1]"
@@ -297,6 +301,7 @@
 >     export DR_NODE_PERMISSION_FUNC="[ARGUMENT=1]"
 >     export DR_NODE_PERMISSION_FILE="[ARGUMENT=1]"
 >     export DR_NODE_FILE_ROOT_PATH="[ARGUMENT=1]"
+>     export DR_NODE_FILE_ROOT_PATH_PUBLIC="[ARGUMENT=1]"
 >     export DR_NODE_FILE_UPLOAD_MERGE_PATH="[ARGUMENT=1]"
 >     export DR_NODE_EXPLORER="[ARGUMENT=0+]"
 >     export DR_NODE_STAT_COLLECT_PATH="[ARGUMENT=1]"
@@ -342,6 +347,7 @@
 >     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+]" ],
+>     "quickServerExplorer": [ "[OPTIONAL] [ARGUMENT=0-2]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "TLSSNIConfig": [ "[ARGUMENT=1]" ],
 >     "TLSDhparam": [ "[ARGUMENT=1]" ],
@@ -360,6 +366,7 @@
 >     "permissionFunc": [ "[ARGUMENT=1]" ],
 >     "permissionFile": [ "[ARGUMENT=1]" ],
 >     "fileRootPath": [ "[ARGUMENT=1]" ],
+>     "fileRootPathPublic": [ "[ARGUMENT=1]" ],
 >     "fileUploadMergePath": [ "[ARGUMENT=1]" ],
 >     "explorer": [ "[ARGUMENT=0+]" ],
 >     "statCollectPath": [ "[ARGUMENT=1]" ],

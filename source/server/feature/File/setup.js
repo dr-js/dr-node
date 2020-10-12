@@ -15,26 +15,32 @@ const setup = async ({
   featureAuth: { authPack: { authMode }, createResponderCheckAuth },
   featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
 
-  fileRootPath: rootPath,
-  fileUploadMergePath: mergePath,
+  fileRootPath,
+  fileRootPathPublic, // can skip to deny public file access, and if set should be under fileRootPath, so upload can also reach the public path
+  fileUploadMergePath,
 
   enhanceFileChunkUploadOption = (option) => option,
 
   URL_FILE_SERVE = `${routePrefix}/file-serve`,
+  URL_FILE_SERVE_ABBR = `${routePrefix}/f`,
+  URL_FILE_SERVE_PUBLIC = `${routePrefix}/file-serve-public`,
+  URL_FILE_SERVE_PUBLIC_ABBR = `${routePrefix}/F`,
   URL_FILE_UPLOAD = `${routePrefix}/file-chunk-upload`,
 
   IS_SKIP_AUTH = authMode === AUTH_SKIP,
-  IS_READ_ONLY = !mergePath // TODO: should be decided by user permission
+  IS_READ_ONLY = !fileUploadMergePath // TODO: should be decided by user permission
 }) => {
-  const responderFileServe = createResponderServeFile({ rootPath })
+  const responderFileServe = createResponderServeFile({ rootPath: fileRootPath })
+  const responderFileServePublic = fileRootPathPublic && createResponderServeFile({ rootPath: fileRootPathPublic })
   const responderFileChunkUpload = IS_READ_ONLY
     ? (store, extraFileUploadOption) => {}
-    : await createResponderFileChunkUpload({ rootPath, mergePath, logger })
+    : await createResponderFileChunkUpload({ rootPath: fileRootPath, mergePath: fileUploadMergePath, logger })
 
   const routeList = [
-    [ `${URL_FILE_SERVE}/*`, 'GET', createResponderCheckAuth({
+    [ [ `${URL_FILE_SERVE}/*`, `${URL_FILE_SERVE_ABBR}/*` ], 'GET', createResponderCheckAuth({
       responderNext: (store) => responderFileServe(store, decodeURIComponent(getRouteParamAny(store)))
     }) ],
+    responderFileServePublic && [ [ `${URL_FILE_SERVE_PUBLIC}/*`, `${URL_FILE_SERVE_PUBLIC_ABBR}/*` ], 'GET', (store) => responderFileServePublic(store, decodeURIComponent(getRouteParamAny(store))) ],
     [ URL_FILE_UPLOAD, 'POST', createResponderCheckAuth({
       responderNext: (store) => responderFileChunkUpload(store, enhanceFileChunkUploadOption({
         onUploadStart: async ({ filePath, key }) => {
@@ -46,9 +52,16 @@ const setup = async ({
   ].filter(Boolean)
 
   return {
+    fileRootPath,
+    fileRootPathPublic,
+    fileUploadMergePath,
+
     IS_READ_ONLY,
 
     URL_FILE_SERVE,
+    URL_FILE_SERVE_PUBLIC,
+    URL_FILE_SERVE_ABBR,
+    URL_FILE_SERVE_PUBLIC_ABBR,
     URL_FILE_UPLOAD,
     routeList,
     name

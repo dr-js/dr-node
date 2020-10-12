@@ -9,7 +9,7 @@ import { getHTML } from './HTML'
 const setup = async ({
   name = 'feature:stat-collect',
   logger, routePrefix = '',
-  featureAuth: { authPack: { authFetch }, createResponderCheckAuth, URL_AUTH_CHECK },
+  featureAuth: { authPack: { authFetch }, createResponderCheckAuth, URL_AUTH_CHECK_ABBR },
 
   statCollectPath,
   statCollectUrl,
@@ -27,7 +27,7 @@ const setup = async ({
   })
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
-    URL_AUTH_CHECK,
+    URL_AUTH_CHECK_ABBR,
     URL_STAT_STATE,
     CONFIG_RENDER_PRESET: __DEV__
       ? {

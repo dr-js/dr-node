@@ -19,7 +19,7 @@ const setup = async ({
   URL_ACTION_JSON = `${routePrefix}/action-json`,
   URL_ACTION_JSON_ABBR = `${routePrefix}/ajson`,
   URL_ACTION_JSON_PUBLIC = `${routePrefix}/action-json-public`,
-  URL_ACTION_JSON_PUBLIC_ABBR = `${routePrefix}/ajson-p`,
+  URL_ACTION_JSON_PUBLIC_ABBR = `${routePrefix}/AJSON`,
 
   IS_SKIP_AUTH = authMode === AUTH_SKIP
 }) => {

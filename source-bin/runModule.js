@@ -26,6 +26,7 @@ import { fileUpload, fileDownload } from '@dr-js/node/module/server/feature/File
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
+import { runQuickSampleExplorerServer } from './runServer'
 
 const { pickOneOf, parseCompactList } = Preset
 
@@ -76,7 +77,9 @@ const ModuleFormatConfigList = parseCompactList(
 
   // TODO: currently timeout can not change, all lock to 5sec
   'ping-race,pr/AS,O|tcp-ping list of url to find the fastest',
-  'ping-stat,ps/AS,O|tcp-ping list of url and print result'
+  'ping-stat,ps/AS,O|tcp-ping list of url and print result',
+
+  'quick-server-explorer,qse/AS,O/0-2|start a no-auth explorer server, for LAN use mostly, caution with public ip: -I=rootPath/cwd, $@=hostname/127.0.0.1,port/auto'
 
   // TODO: 'batch-command,bc/AS,O/1-|run batch command use placeholder like {file} {F} {...F} {directory} {D} {...D}: $@=...commands'
 )
@@ -188,6 +191,15 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
       return outputAuto(await pingRaceUrlList(argumentList))
     case 'ping-stat':
       return outputAuto(await pingStatUrlList(argumentList))
+
+    case 'quick-server-explorer': {
+      const [ hostname = '127.0.0.1', port ] = argumentList
+      return runQuickSampleExplorerServer({
+        rootPath: inputFile || process.cwd(),
+        hostname,
+        port: port && Number(port)
+      })
+    }
   }
 }
 

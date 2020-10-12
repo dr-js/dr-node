@@ -1,7 +1,11 @@
+import { tmpdir } from 'os'
+
+import { Preset } from '@dr-js/core/module/node/module/Option/preset'
+
 import { once } from '@dr-js/core/module/common/function'
 import { createExotGroup } from '@dr-js/core/module/common/module/Exot'
 import { describeServerOption } from '@dr-js/core/module/node/server/Server'
-import { Preset } from '@dr-js/core/module/node/module/Option/preset'
+import { autoTestServerPort } from '@dr-js/core/module/node/server/function'
 import { addExitListenerAsync, addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
 
 import { configureLog } from '@dr-js/node/module/module/Log'
@@ -60,18 +64,27 @@ const runSampleServer = async (optionData) => setupServer({
   ...getWebSocketTunnelOption(optionData)
 }).then(setupServerExotGroup)
 
+const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => setupServer({
+  hostname,
+  port: port || await autoTestServerPort([ 80, 8080, 8888, 8800, 8000 ], hostname)
+}, {
+  permissionType: 'allow',
+  authSkip: true,
+  fileRootPath: rootPath,
+  fileUploadMergePath: `${tmpdir()}/${packageName}@${packageVersion}-quick-sample-explorer-merge/`,
+  explorer: true
+}).then(setupServerExotGroup)
+
 const setupServer = async (serverOption, featureOption) => {
   await configurePid(serverOption)
   const { loggerExot } = await configureLog(serverOption)
   const serverExot = await configureServerExot(serverOption)
-
   await configureSampleServer({ serverExot, logger: loggerExot, ...featureOption })
-
-  loggerExot.add(describeServerOption(
+  serverExot.describeString = describeServerOption(
     serverExot.option,
     `${packageName}@${packageVersion}`,
     Object.entries(featureOption).map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
-  ))
+  )
 
   const exotGroup = createExotGroup({
     id: 'exot:group-server',
@@ -95,15 +108,16 @@ const setupServer = async (serverOption, featureOption) => {
   }
 }
 
-const setupServerExotGroup = ({ exotGroup }) => {
+const setupServerExotGroup = async ({ exotGroup, serverExot, loggerExot }) => {
   const down = once(exotGroup.down) // trigger all exot down, the worst case those sync ones may still finish
   addExitListenerSync(down)
   addExitListenerAsync(down)
-  return exotGroup.up()
+  await exotGroup.up()
+  loggerExot.add(serverExot.describeString)
 }
 
 export {
   SampleServerFormatConfig,
-  runSampleServer,
+  runSampleServer, runQuickSampleExplorerServer,
   setupServer, setupServerExotGroup
 }

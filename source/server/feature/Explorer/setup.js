@@ -11,10 +11,9 @@ import { getHTML } from './HTML/main'
 const setup = async ({
   name = 'feature:explorer',
   logger, routePrefix = '',
-  featureAuth: { authPack: { authMode }, createResponderCheckAuth, URL_AUTH_CHECK },
-  featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
+  featureAuth: { authPack: { authMode }, URL_AUTH_CHECK_ABBR },
   featureActionJSON: { actionMap, URL_ACTION_JSON_ABBR }, // need `PATH_*` & `STATUS_SERVER_COMMON` action
-  featureFile: { IS_READ_ONLY, URL_FILE_SERVE, URL_FILE_UPLOAD },
+  featureFile: { IS_READ_ONLY, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD },
 
   URL_HTML = `${routePrefix}/explorer`,
 
@@ -29,7 +28,7 @@ const setup = async ({
   IS_EXTRA_AUTO && Object.assign(ACTION_TYPE, { PATH_COMPRESS_AUTO: ACTION_TYPE_PATH_EXTRA_ARCHIVE.PATH_COMPRESS_AUTO, PATH_EXTRACT_AUTO: ACTION_TYPE_PATH_EXTRA_ARCHIVE.PATH_EXTRACT_AUTO })
 
   const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
-    URL_AUTH_CHECK, URL_ACTION_JSON_ABBR, URL_FILE_SERVE, URL_FILE_UPLOAD,
+    URL_AUTH_CHECK_ABBR, URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD,
     IS_SKIP_AUTH, IS_READ_ONLY, IS_EXTRA_TAR, IS_EXTRA_AUTO,
     ACTION_TYPE
   })), BASIC_EXTENSION_MAP.html)

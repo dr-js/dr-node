@@ -11,8 +11,8 @@ setupServer({
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
   statReportProcessTag: SERVER_TAG
 })
-  .then(async ({ exotGroup, serverExot }) => {
-    await setupServerExotGroup({ exotGroup })
+  .then(async ({ exotGroup, serverExot, loggerExot }) => {
+    await setupServerExotGroup({ exotGroup, serverExot, loggerExot })
     setInterval(
       () => serverExot.featureMap.get('feature:stat-report')
         .reportStat('http://127.0.0.1:8002/stat-collect') // push stat

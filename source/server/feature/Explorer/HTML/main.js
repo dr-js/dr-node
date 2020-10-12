@@ -10,7 +10,7 @@ import { pathContentStyle, initPathContent } from './pathContent'
 import { initUploader } from './uploader'
 
 const getHTML = ({
-  URL_AUTH_CHECK, URL_ACTION_JSON_ABBR, URL_FILE_SERVE, URL_FILE_UPLOAD,
+  URL_AUTH_CHECK_ABBR, URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD,
   IS_SKIP_AUTH, IS_READ_ONLY, IS_EXTRA_TAR, IS_EXTRA_AUTO,
   ACTION_TYPE
 }) => COMMON_LAYOUT([
@@ -23,7 +23,7 @@ const getHTML = ({
   '<div id="main-panel" style="position: relative; overflow: auto; flex: 1; min-height: 0;"></div>',
   COMMON_SCRIPT({
     INIT: [ // NOTE: shorter after minify
-      URL_AUTH_CHECK, URL_ACTION_JSON_ABBR, URL_FILE_SERVE, URL_FILE_UPLOAD,
+      URL_AUTH_CHECK_ABBR, URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD,
       IS_SKIP_AUTH, IS_READ_ONLY, IS_EXTRA_TAR, IS_EXTRA_AUTO,
       ACTION_TYPE
     ],
@@ -42,7 +42,7 @@ const onLoadFunc = () => {
     document, URL, location,
     qS, cE, aCL,
     INIT: [
-      URL_AUTH_CHECK, URL_ACTION_JSON_ABBR, URL_FILE_SERVE, URL_FILE_UPLOAD,
+      URL_AUTH_CHECK_ABBR, URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD,
       IS_SKIP_AUTH, IS_READ_ONLY, IS_EXTRA_TAR, IS_EXTRA_AUTO,
       ACTION_TYPE
     ],
@@ -60,7 +60,7 @@ const onLoadFunc = () => {
     const { withAlertModal, withConfirmModal, withPromptModal } = initModal()
     const { initialLoadingMaskState, wrapLossyLoading, renderLoadingMask } = initLoadingMask()
     const { initialPathContentState, authFetchActionJSON, cyclePathSortType, getLoadPathAsync, getPathActionAsync, getPreviewFile, getDownloadFile, renderPathContent } = initPathContent(
-      URL_ACTION_JSON_ABBR, URL_FILE_SERVE,
+      URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR,
       IS_READ_ONLY, IS_EXTRA_TAR, IS_EXTRA_AUTO,
       ACTION_TYPE,
       authFetch, withConfirmModal, withPromptModal
@@ -123,7 +123,7 @@ const onLoadFunc = () => {
         cE('button', { innerText: 'Toggle Upload', onclick: () => uploaderStore.setState({ isActive: !uploaderStore.getState().isActive }) }),
         cE('span', { innerText: '|' }),
         cE('button', { innerText: 'Storage Status', onclick: () => showStorageStatus() }),
-        cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })
+        !IS_SKIP_AUTH && cE('button', { innerText: 'Auth Revoke', onclick: () => authRevoke().then(() => location.reload()) })
       ])
     ])
 
@@ -136,7 +136,7 @@ const onLoadFunc = () => {
 
   initAuthMask({
     IS_SKIP_AUTH,
-    URL_AUTH_CHECK,
+    URL_AUTH_CHECK_ABBR,
     onAuthPass: initExplorer
   })
 }
