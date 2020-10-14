@@ -80,7 +80,7 @@ const getPathNpm = () => {
     }
     const tryPath = (pathFrom, relativeNpm) => {
       try {
-        if (statSync(resolve(pathFrom, relativeNpm, './node_modules/libnpx/')).isDirectory()) cachePathNpm = resolve(pathFrom, relativeNpm)
+        if (statSync(resolve(pathFrom, relativeNpm, './node_modules/semver/')).isDirectory()) cachePathNpm = resolve(pathFrom, relativeNpm)
       } catch (error) { __DEV__ && console.log(`tryPath failed: ${error}`) }
     }
     !cachePathNpm && getPathNpmExecutable().endsWith('npm-cli.js') && tryPath(getPathNpmExecutable(), '../../') // linux/darwin fast hack

@@ -1,4 +1,4 @@
-const { setupServer, setupServerExotGroup } = require('../output-gitignore/bin/runServer')
+const { setupServer, upServerExotGroup } = require('../output-gitignore/bin/runServer')
 
 const SERVER_TAG = 'explorer'
 
@@ -14,5 +14,5 @@ setupServer({
   fileUploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`,
   explorer: true
 })
-  .then(setupServerExotGroup)
+  .then(upServerExotGroup)
   .catch(console.error)

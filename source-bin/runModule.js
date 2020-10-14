@@ -26,7 +26,7 @@ import { fileUpload, fileDownload } from '@dr-js/node/module/server/feature/File
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
-import { runQuickSampleExplorerServer } from './runServer'
+import { upServerExotGroup, runQuickSampleExplorerServer } from './runServer'
 
 const { pickOneOf, parseCompactList } = Preset
 
@@ -143,14 +143,14 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
 
     case 'websocket-tunnel-server-url': {
       const { authKey, generateAuthCheckCode } = await setupAuthFile()
-      const { start } = setupClientWebSocketTunnel({
+      const serverExot = setupClientWebSocketTunnel({
         log, authKey, generateAuthCheckCode, // from `module/Auth`
         url: argumentList[ 0 ],
         webSocketTunnelHost: getFirst('websocket-tunnel-host'), // hostname:port
         headers: { 'user-agent': `${packageName}@${packageVersion}` }
       })
       setupPackageSIGUSR2(packageName, packageVersion)
-      return start()
+      return upServerExotGroup({ serverExot })
     }
 
     case 'auth-gen-tag':

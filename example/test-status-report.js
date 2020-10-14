@@ -1,4 +1,4 @@
-const { setupServer, setupServerExotGroup } = require('../output-gitignore/bin/runServer')
+const { setupServer, upServerExotGroup } = require('../output-gitignore/bin/runServer')
 
 const SERVER_TAG = 'stat-report'
 
@@ -12,7 +12,7 @@ setupServer({
   statReportProcessTag: SERVER_TAG
 })
   .then(async ({ exotGroup, serverExot, loggerExot }) => {
-    await setupServerExotGroup({ exotGroup, serverExot, loggerExot })
+    await upServerExotGroup({ exotGroup, serverExot, loggerExot })
     setInterval(
       () => serverExot.featureMap.get('feature:stat-report')
         .reportStat('http://127.0.0.1:8002/stat-collect') // push stat

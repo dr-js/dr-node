@@ -54,7 +54,7 @@ describe('Node.Module.Software.npm', () => {
     info(`[getPathNpm] ${getPathNpm()}`)
 
     // dependency of npm, which is a LOT of package to borrow
-    strictEqual(require(fromNpmNodeModules('libnpx/package.json')).name, 'libnpx')
+    // strictEqual(require(fromNpmNodeModules('libnpx/package.json')).name, 'libnpx') // TODO: `npm@7` do not have a separate `npx`
     strictEqual(require(fromNpmNodeModules('semver/package.json')).name, 'semver')
     strictEqual(require(fromNpmNodeModules('tar/package.json')).name, 'tar')
     strictEqual(require(fromNpmNodeModules('https-proxy-agent/package.json')).name, 'https-proxy-agent')

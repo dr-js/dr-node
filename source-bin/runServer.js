@@ -62,7 +62,7 @@ const runSampleServer = async (optionData) => setupServer({
   ...getStatCollectOption(optionData),
   ...getStatReportOption(optionData),
   ...getWebSocketTunnelOption(optionData)
-}).then(setupServerExotGroup)
+}).then(upServerExotGroup)
 
 const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => setupServer({
   hostname,
@@ -73,7 +73,7 @@ const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => set
   fileRootPath: rootPath,
   fileUploadMergePath: `${tmpdir()}/${packageName}@${packageVersion}-quick-sample-explorer-merge/`,
   explorer: true
-}).then(setupServerExotGroup)
+}).then(upServerExotGroup)
 
 const setupServer = async (serverOption, featureOption) => {
   await configurePid(serverOption)
@@ -108,16 +108,16 @@ const setupServer = async (serverOption, featureOption) => {
   }
 }
 
-const setupServerExotGroup = async ({ exotGroup, serverExot, loggerExot }) => {
+const upServerExotGroup = async ({ serverExot, loggerExot, exotGroup = serverExot }) => {
   const down = once(exotGroup.down) // trigger all exot down, the worst case those sync ones may still finish
   addExitListenerSync(down)
   addExitListenerAsync(down)
   await exotGroup.up()
-  loggerExot.add(serverExot.describeString)
+  loggerExot && loggerExot.add(serverExot.describeString)
 }
 
 export {
   SampleServerFormatConfig,
   runSampleServer, runQuickSampleExplorerServer,
-  setupServer, setupServerExotGroup
+  setupServer, upServerExotGroup
 }

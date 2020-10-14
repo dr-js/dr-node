@@ -1,4 +1,4 @@
-const { setupServer, setupServerExotGroup } = require('../output-gitignore/bin/runServer')
+const { setupServer, upServerExotGroup } = require('../output-gitignore/bin/runServer')
 
 const SERVER_TAG = 'stat-collect'
 
@@ -14,7 +14,7 @@ setupServer({
   // statCollectInterval: 2 * 1000,
 })
   .then(async ({ exotGroup, serverExot, loggerExot }) => {
-    await setupServerExotGroup({ exotGroup, serverExot, loggerExot })
+    await upServerExotGroup({ exotGroup, serverExot, loggerExot })
     return serverExot.featureMap.get('feature:stat-collect').exotList[ 0 ].timer.start()
   })
   .catch(console.error)
