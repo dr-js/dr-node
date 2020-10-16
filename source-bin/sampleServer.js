@@ -1,10 +1,6 @@
 import { objectPickKey } from '@dr-js/core/module/common/immutable/Object'
-import { createRequestListener } from '@dr-js/core/module/node/server/Server'
-import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from '@dr-js/core/module/node/server/Responder/Common'
-import { createResponderFavicon } from '@dr-js/core/module/node/server/Responder/Send'
-import { createResponderRouter, createRouteMap, createResponderRouteListHTML } from '@dr-js/core/module/node/server/Responder/Router'
-import { enableWebSocketServer } from '@dr-js/core/module/node/server/WebSocket/WebSocketServer'
-import { createUpdateRequestListener } from '@dr-js/core/module/node/server/WebSocket/WebSocketUpgradeRequest'
+
+import { configureFeature } from '@dr-js/node/module/server/share/configure'
 
 import { setupActionMap as setupActionMapStatus, ACTION_CORE_MAP as ACTION_CORE_MAP_STATUS, ACTION_TYPE as ACTION_TYPE_STATUS } from '@dr-js/node/module/module/ActionJSON/status'
 import { setupActionMap as setupActionMapPath, ACTION_CORE_MAP as ACTION_CORE_MAP_PATH } from '@dr-js/node/module/module/ActionJSON/path'
@@ -20,9 +16,9 @@ import { setup as setupStatReport } from '@dr-js/node/module/server/feature/Stat
 import { setup as setupWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/setup'
 
 const configureSampleServer = async ({
-  serverExot, logger, routePrefix = '',
+  serverExot, loggerExot, routePrefix = '',
 
-  isDebugRoute,
+  isFavicon = true, isDebugRoute,
 
   // auth
   authKey,
@@ -44,102 +40,59 @@ const configureSampleServer = async ({
   webSocketTunnelHost
 }) => {
   const featureAuth = await setupAuth({
-    logger, routePrefix,
+    loggerExot, routePrefix,
     authKey,
     authSkip,
     authFile,
     authFileGroupPath, authFileGroupDefaultTag, authFileGroupKeySuffix
   })
   const featurePermission = await setupPermission({
-    logger, routePrefix,
+    loggerExot, routePrefix,
     permissionType, permissionFunc, permissionFile
   })
   const featureActionJSON = fileRootPath && await setupActionJSON({
-    logger, routePrefix, featureAuth, featurePermission,
+    loggerExot, routePrefix, featureAuth, featurePermission,
     actionMap: {
-      ...setupActionMapStatus({ rootPath: fileRootPath, logger }),
-      ...setupActionMapPath({ rootPath: fileRootPath, logger, actionCoreMap: { ...ACTION_CORE_MAP_PATH, ...ACTION_CORE_MAP_PATH_EXTRA_ARCHIVE } })
+      ...setupActionMapStatus({ rootPath: fileRootPath, loggerExot }),
+      ...setupActionMapPath({ rootPath: fileRootPath, loggerExot, actionCoreMap: { ...ACTION_CORE_MAP_PATH, ...ACTION_CORE_MAP_PATH_EXTRA_ARCHIVE } })
     },
     actionMapPublic: {
-      ...setupActionMapStatus({ rootPath: fileRootPath, logger, actionCoreMap: objectPickKey(ACTION_CORE_MAP_STATUS, [ ACTION_TYPE_STATUS.STATUS_TIMESTAMP, ACTION_TYPE_STATUS.STATUS_TIME_ISO ]) })
+      ...setupActionMapStatus({ rootPath: fileRootPath, loggerExot, actionCoreMap: objectPickKey(ACTION_CORE_MAP_STATUS, [ ACTION_TYPE_STATUS.STATUS_TIMESTAMP, ACTION_TYPE_STATUS.STATUS_TIME_ISO ]) })
     }
   })
   const featureFile = fileRootPath && await setupFile({
-    logger, routePrefix, featureAuth, featurePermission,
+    loggerExot, routePrefix, featureAuth, featurePermission,
     fileRootPath, fileRootPathPublic, fileUploadMergePath
   })
   const featureExplorer = explorer && await setupExplorer({
-    logger, routePrefix, featureAuth, featureActionJSON, featureFile
+    loggerExot, routePrefix, featureAuth, featureActionJSON, featureFile
   })
   const featureStatCollect = statCollectPath && await setupStatCollect({
-    logger, routePrefix, featureAuth,
+    loggerExot, routePrefix, featureAuth,
     statCollectPath, statCollectUrl, statCollectInterval
   })
   const featureStatReport = statReportProcessTag && await setupStatReport({
-    logger, routePrefix, featureAuth,
+    loggerExot, routePrefix, featureAuth,
     statReportProcessTag
   })
   const featureWebSocketTunnel = webSocketTunnelHost && await setupWebSocketTunnel({
-    logger, routePrefix, featureAuth,
+    loggerExot, routePrefix, featureAuth,
     webSocketTunnelHost
   })
 
-  serverExot.featureMap = new Map() // fill serverExot.featureMap
-  let featureUrl
-  const featureRouteList = []
-  const featureWebSocketRouteList = []
-  const appendFeature = (feature) => {
-    if (!feature) return
-    serverExot.featureMap.set(feature.name, feature)
-    if (!featureUrl) featureUrl = feature.URL_HTML
-    if (feature.routeList) featureRouteList.push(...feature.routeList)
-    if (feature.webSocketRouteList) featureWebSocketRouteList.push(...feature.webSocketRouteList)
-  }
-  appendFeature(featureAuth)
-  appendFeature(featurePermission)
-  appendFeature(featureActionJSON)
-  appendFeature(featureFile)
-  appendFeature(featureExplorer)
-  appendFeature(featureStatCollect)
-  appendFeature(featureStatReport)
-  appendFeature(featureWebSocketTunnel)
-
-  const responderLogEnd = createResponderLogEnd({ log: logger.add })
-
-  const routeMap = createRouteMap([
-    ...featureRouteList,
-    [ '/', 'GET', isDebugRoute ? createResponderRouteListHTML({ getRouteMap: () => routeMap })
-      : featureUrl ? (store) => responderEndWithRedirect(store, { redirectUrl: featureUrl })
-        : (store) => responderEndWithStatusCode(store, { statusCode: 400 })
-    ],
-    [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
-  ].filter(Boolean))
-
-  serverExot.server.on('request', createRequestListener({
-    responderList: [
-      createResponderLog({ log: logger.add }),
-      createResponderRouter({ routeMap, baseUrl: serverExot.option.baseUrl })
-    ],
-    responderEnd: (store) => {
-      responderEnd(store)
-      responderLogEnd(store)
-    }
-  }))
-
-  if (featureWebSocketTunnel) { // setup WebSocket
-    const routeMap = createRouteMap([
-      ...featureWebSocketRouteList
-    ])
-    serverExot.webSocketSet = enableWebSocketServer({ // fill `serverExot.webSocketSet`
-      server: serverExot.server,
-      onUpgradeRequest: createUpdateRequestListener({
-        responderList: [
-          createResponderLog({ log: logger.add }),
-          createResponderRouter({ routeMap, baseUrl: serverExot.option.baseUrl })
-        ]
-      })
-    })
-  }
+  configureFeature({
+    serverExot, loggerExot, routePrefix,
+    isFavicon, isDebugRoute
+  }, [
+    featureAuth,
+    featurePermission,
+    featureActionJSON,
+    featureFile,
+    featureExplorer,
+    featureStatCollect,
+    featureStatReport,
+    featureWebSocketTunnel
+  ])
 }
 
 export { configureSampleServer }

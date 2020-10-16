@@ -25,6 +25,8 @@ const setupClientWebSocketTunnel = ({
   serverExot.server.on('connection', async (socket) => {
     log && log(`- tcp connection (${serverExot.socketSet.size} total)`)
 
+    // TODO: redo with Runlet
+
     let tunnelWebSocket
     const pendingBuffer = []
     const cleanup = () => {

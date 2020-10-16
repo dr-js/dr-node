@@ -126,6 +126,8 @@
   - `WebSocketTunnelFormatConfig`, `getWebSocketTunnelOption`
 + 📄 [source/server/feature/WebSocketTunnelDev/setup.js](source/server/feature/WebSocketTunnelDev/setup.js)
   - `setup`
++ 📄 [source/server/share/configure.js](source/server/share/configure.js)
+  - `configureFeature`, `runServerExotGroup`, `setupServerExotGroup`
 + 📄 [source/server/share/option.js](source/server/share/option.js)
   - `LogFormatConfig`, `PidFormatConfig`, `getLogOption`, `getPidOption`, `getServerExotFormatConfig`, `getServerExotOption`
 + 📄 [source/server/share/HTML/LoadingMask.js](source/server/share/HTML/LoadingMask.js)

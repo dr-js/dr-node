@@ -67,7 +67,7 @@ const ACTION_CORE_MAP = { // all async
 const setupActionMap = ({
   actionCoreMap = ACTION_CORE_MAP,
   rootPath, getPath = createPathPrefixLock(rootPath),
-  logger
+  loggerExot
 }) => {
   const calcPath = (key, extraPath) => getPath(posix.normalize(posix.join(key, extraPath))) // normalize & convert to absolute path
 
@@ -76,7 +76,7 @@ const setupActionMap = ({
     keyTo, // relative path, OPTIONAL
     batchList = [ '' ] // default will be: `[ '' ]`, for simple batch action, will append path after key/keyTo
   }) => { // key/keyTo must be under rootPath
-    logger.add(`[ActionBox|${actionType}] ${key || ''}${keyTo ? `, ${keyTo}` : ''} (${batchList.join('|')})`)
+    loggerExot.add(`[ActionBox|${actionType}] ${key || ''}${keyTo ? `, ${keyTo}` : ''} (${batchList.join('|')})`)
     const resultList = []
     const errorList = []
     for (const extraPath of batchList) {

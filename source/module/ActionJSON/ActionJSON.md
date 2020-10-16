@@ -18,7 +18,7 @@ And it's common to store the simpler action core func in `ACTION_CORE_MAP`,
 const setupActionMap = async ({
   actionCoreMap = ACTION_CORE_MAP,
   ...extraConfig,
-  logger
+  loggerExot
 }) => actionMap
 ```
 

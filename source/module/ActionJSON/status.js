@@ -29,12 +29,12 @@ const setupActionMap = ({
   actionCoreMap = ACTION_CORE_MAP,
   statusCommandList = COMMON_SERVER_STATUS_COMMAND_LIST,
   rootPath,
-  logger
+  loggerExot
 }) => {
   const option = { rootPath, statusCommandList }
 
   return objectMap(actionCoreMap, (actionFunc, actionType) => async (store, actionPayload) => {
-    logger.add(`[ActionBox|${actionType}]`)
+    loggerExot.add(`[ActionBox|${actionType}]`)
     const { result, error } = await catchAsync(actionFunc, option) // NOTE: the call pattern
     return error ? { actionType, error: String(error) } : { actionType, ...result }
   })

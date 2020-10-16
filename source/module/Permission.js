@@ -22,35 +22,35 @@ const configurePermission = async ({
   permissionType, // check below switch case for types
   permissionFunc, // configurePermissionFunc
   permissionFile, // full path to JS file exporting function with name `configurePermission`
-  logger
+  loggerExot
 }) => {
   let configurePermissionFunc
   switch (permissionType) {
     // fast return
     case 'deny':
-      logger.add('use permission: deny-all')
+      loggerExot.add('use permission: deny-all')
       return { checkPermission: DENY_ALL }
     case 'allow':
-      logger.add('use permission: allow-all')
+      loggerExot.add('use permission: allow-all')
       return { checkPermission: ALLOW_ALL }
 
     // slow config
     case 'func':
       configurePermissionFunc = permissionFunc
       if (!isBasicFunction(configurePermissionFunc)) throw new Error('invalid permissionFunc')
-      logger.add('use permissionFunc')
+      loggerExot.add('use permissionFunc')
       break
     case 'file' :
       configurePermissionFunc = (tryRequire(permissionFile) || { configurePermission: null }).configurePermission
       if (!isBasicFunction(configurePermissionFunc)) throw new Error(`failed to load permissionFile: ${permissionFile}`)
-      logger.add('use permissionFile')
+      loggerExot.add('use permissionFile')
       break
 
     default:
       throw new Error(`invalid permissionType: ${permissionType}`)
   }
 
-  const permissionPack = await configurePermissionFunc({ logger })
+  const permissionPack = await configurePermissionFunc({ loggerExot })
   if (!isBasicFunction(permissionPack.checkPermission)) throw new Error('expect permissionPack.checkPermission to be function')
   return permissionPack
 }

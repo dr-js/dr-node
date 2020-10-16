@@ -6,10 +6,10 @@ import { configurePermission } from 'source/module/Permission'
 
 const setup = async ({
   name = 'feature:permission',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   permissionType, permissionFunc, permissionFile
 }) => {
-  const permissionPack = await configurePermission({ permissionType, permissionFunc, permissionFile, logger })
+  const permissionPack = await configurePermission({ permissionType, permissionFunc, permissionFile, loggerExot })
 
   return {
     permissionPack,

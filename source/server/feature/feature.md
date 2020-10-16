@@ -9,7 +9,7 @@ Most feature will have a `setup.js` like:
 ```js
 const setup = async ({
   name = 'feature:do-some-work',
-  serverExot, logger, routePrefix = '', // basic option
+  serverExot, loggerExot, routePrefix = '', // basic option
   featureDependPack0, featureDependPack1, // some other feature required for this feature, often Auth
   ...extraOption
 }) => ({

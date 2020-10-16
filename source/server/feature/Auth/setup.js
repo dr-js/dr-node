@@ -6,7 +6,7 @@ import { configureAuth } from 'source/module/Auth'
 
 const setup = async ({
   name = 'feature:auth',
-  logger: { add: log }, routePrefix = '',
+  loggerExot: { add: log }, routePrefix = '',
 
   // TODO: support `featureTokenCache` here, so `createResponderGrantAuthTokenHeader` can be supported
 

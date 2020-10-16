@@ -9,7 +9,7 @@ const PERMISSION_CHECK_ACTION_JSON_PUBLIC = 'permission:check:action-json-public
 
 const setup = async ({
   name = 'feature:action-json',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   featureAuth: { authPack: { authMode }, createResponderCheckAuth },
   featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
 

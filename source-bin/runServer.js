@@ -2,11 +2,8 @@ import { tmpdir } from 'os'
 
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { once } from '@dr-js/core/module/common/function'
-import { createExotGroup } from '@dr-js/core/module/common/module/Exot'
 import { describeServerOption } from '@dr-js/core/module/node/server/Server'
 import { autoTestServerPort } from '@dr-js/core/module/node/server/function'
-import { addExitListenerAsync, addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
 
 import { configureLog } from '@dr-js/node/module/module/Log'
 import { configurePid } from '@dr-js/node/module/module/Pid'
@@ -15,6 +12,7 @@ import {
   getServerExotOption, getLogOption, getPidOption,
   getServerExotFormatConfig, LogFormatConfig, PidFormatConfig
 } from '@dr-js/node/module/server/share/option'
+import { setupServerExotGroup, runServerExotGroup } from '@dr-js/node/module/server/share/configure'
 
 import {
   getAuthCommonOption, getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption,
@@ -49,7 +47,21 @@ const SampleServerFormatConfig = getServerExotFormatConfig([
   WebSocketTunnelFormatConfig
 ])
 
-const runSampleServer = async (optionData) => setupServer({
+const runServer = async (serverOption, featureOption) => {
+  await configurePid(serverOption)
+  const { loggerExot } = await configureLog(serverOption)
+  const serverExot = await configureServerExot(serverOption)
+  await configureSampleServer({ serverExot, loggerExot, ...featureOption })
+  serverExot.describeString = describeServerOption(
+    serverExot.option,
+    `${packageName}@${packageVersion}`,
+    Object.entries(featureOption).map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
+  )
+  setupPackageSIGUSR2(packageName, packageVersion)
+  return runServerExotGroup({ serverExot, loggerExot, serverExotGroup: setupServerExotGroup(serverExot, loggerExot) })
+}
+
+const runSampleServer = async (optionData) => runServer({
   ...getPidOption(optionData),
   ...getLogOption(optionData),
   ...getServerExotOption(optionData)
@@ -62,9 +74,9 @@ const runSampleServer = async (optionData) => setupServer({
   ...getStatCollectOption(optionData),
   ...getStatReportOption(optionData),
   ...getWebSocketTunnelOption(optionData)
-}).then(upServerExotGroup)
+})
 
-const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => setupServer({
+const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => runServer({
   hostname,
   port: port || await autoTestServerPort([ 80, 8080, 8888, 8800, 8000 ], hostname)
 }, {
@@ -73,51 +85,10 @@ const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => set
   fileRootPath: rootPath,
   fileUploadMergePath: `${tmpdir()}/${packageName}@${packageVersion}-quick-sample-explorer-merge/`,
   explorer: true
-}).then(upServerExotGroup)
-
-const setupServer = async (serverOption, featureOption) => {
-  await configurePid(serverOption)
-  const { loggerExot } = await configureLog(serverOption)
-  const serverExot = await configureServerExot(serverOption)
-  await configureSampleServer({ serverExot, logger: loggerExot, ...featureOption })
-  serverExot.describeString = describeServerOption(
-    serverExot.option,
-    `${packageName}@${packageVersion}`,
-    Object.entries(featureOption).map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
-  )
-
-  const exotGroup = createExotGroup({
-    id: 'exot:group-server',
-    getOnExotError: (exotGroup) => (error) => {
-      console.log('[exot-group-error]', error)
-      return exotGroup.down()
-    }
-  })
-
-  exotGroup.set(loggerExot)
-  for (const { exotList } of serverExot.featureMap.values()) { // NOTE: this will up all featureExot before serverExot
-    if (exotList && exotList.length) for (const exot of exotList) exotGroup.set(exot)
-  }
-  exotGroup.set(serverExot)
-
-  setupPackageSIGUSR2(packageName, packageVersion)
-
-  return {
-    exotGroup,
-    serverExot, loggerExot
-  }
-}
-
-const upServerExotGroup = async ({ serverExot, loggerExot, exotGroup = serverExot }) => {
-  const down = once(exotGroup.down) // trigger all exot down, the worst case those sync ones may still finish
-  addExitListenerSync(down)
-  addExitListenerAsync(down)
-  await exotGroup.up()
-  loggerExot && loggerExot.add(serverExot.describeString)
-}
+})
 
 export {
   SampleServerFormatConfig,
-  runSampleServer, runQuickSampleExplorerServer,
-  setupServer, upServerExotGroup
+  runServer,
+  runSampleServer, runQuickSampleExplorerServer
 }

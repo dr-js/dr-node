@@ -9,7 +9,8 @@ import { parseHostString } from 'source/module/ServerExot'
 const setupTunnel = async ({
   webSocket,
   webSocketTunnelHost,
-  log
+  loggerExot,
+  log = loggerExot && loggerExot.add
 }) => {
   // setup tcp tunnel socket
   const { hostname, port } = parseHostString(webSocketTunnelHost, '127.0.0.1')
@@ -18,6 +19,8 @@ const setupTunnel = async ({
   socket.on('error', reject)
   await promise
   socket.off('error', reject)
+
+  // TODO: redo with Runlet
 
   const cleanup = () => {
     webSocket.close()
@@ -40,7 +43,7 @@ const setupTunnel = async ({
 
 const setup = async ({
   name = 'feature:websocket-tunnel',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   featureAuth: { createResponderCheckAuth },
   webSocketTunnelHost, // hostname:port
   URL_WEBSOCKET_TUNNEL = `${routePrefix}/websocket-tunnel`
@@ -49,7 +52,7 @@ const setup = async ({
     [ URL_WEBSOCKET_TUNNEL, 'GET', createResponderCheckAuth({
       responderNext: async (store) => {
         const { webSocket } = store
-        await setupTunnel({ webSocket, webSocketTunnelHost, log: logger.add })
+        await setupTunnel({ webSocket, webSocketTunnelHost, loggerExot })
         store.setState({ protocol: webSocket.protocolList[ 0 ] }) // set protocol to allow upgrade and keep socket
       }
     }) ]

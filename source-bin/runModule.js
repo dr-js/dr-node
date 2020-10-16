@@ -20,13 +20,15 @@ import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/Ping
 import { compressAutoAsync, extractAutoAsync } from '@dr-js/node/module/module/Software/archive'
 import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
 
+import { runServerExotGroup } from '@dr-js/node/module/server/share/configure'
+
 import { getAuthCommonOption, getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
 import { actionJson } from '@dr-js/node/module/server/feature/ActionJSON/client'
 import { fileUpload, fileDownload } from '@dr-js/node/module/server/feature/File/client'
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
-import { upServerExotGroup, runQuickSampleExplorerServer } from './runServer'
+import { runQuickSampleExplorerServer } from './runServer'
 
 const { pickOneOf, parseCompactList } = Preset
 
@@ -150,7 +152,7 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
         headers: { 'user-agent': `${packageName}@${packageVersion}` }
       })
       setupPackageSIGUSR2(packageName, packageVersion)
-      return upServerExotGroup({ serverExot })
+      return runServerExotGroup({ serverExot })
     }
 
     case 'auth-gen-tag':

@@ -4,7 +4,7 @@ import { createGetStatReport } from 'source/module/Stat/StatReport' // TODO: mov
 
 const setup = async ({
   name = 'feature:stat-report',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   featureAuth: { authPack: { authFetch }, createResponderCheckAuth },
 
   statReportProcessTag,

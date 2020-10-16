@@ -16,13 +16,13 @@ const createResponderServeFile = ({
 const createResponderFileChunkUpload = async ({
   rootPath,
   mergePath,
-  logger
+  loggerExot
 }) => {
   const fileChunkUpload = await createOnFileChunkUpload({
     rootPath,
     mergePath,
     onError: (error) => {
-      logger.add(`[ERROR][FileChunkUpload] ${error}`)
+      loggerExot.add(`[ERROR][FileChunkUpload] ${error}`)
       console.error(error)
     }
   })

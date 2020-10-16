@@ -11,7 +11,7 @@ const PERMISSION_CHECK_FILE_UPLOAD_START = 'permission:check:file-upload-start'
 
 const setup = async ({
   name = 'feature:file',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   featureAuth: { authPack: { authMode }, createResponderCheckAuth },
   featurePermission: { permissionPack: { checkPermission = (type, payload) => true } }, // async (type, { store, ... }) => true/false
 
@@ -34,7 +34,7 @@ const setup = async ({
   const responderFileServePublic = fileRootPathPublic && createResponderServeFile({ rootPath: fileRootPathPublic })
   const responderFileChunkUpload = IS_READ_ONLY
     ? (store, extraFileUploadOption) => {}
-    : await createResponderFileChunkUpload({ rootPath: fileRootPath, mergePath: fileUploadMergePath, logger })
+    : await createResponderFileChunkUpload({ rootPath: fileRootPath, mergePath: fileUploadMergePath, loggerExot })
 
   const routeList = [
     [ [ `${URL_FILE_SERVE}/*`, `${URL_FILE_SERVE_ABBR}/*` ], 'GET', createResponderCheckAuth({

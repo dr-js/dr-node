@@ -8,7 +8,7 @@ import { getHTML } from './HTML'
 
 const setup = async ({
   name = 'feature:stat-collect',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   featureAuth: { authPack: { authFetch }, createResponderCheckAuth, URL_AUTH_CHECK_ABBR },
 
   statCollectPath,

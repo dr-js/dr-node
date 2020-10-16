@@ -2,8 +2,8 @@ import { createDummyExot } from '@dr-js/core/module/common/module/Exot'
 import { createLoggerExot } from '@dr-js/core/module/node/module/Logger'
 // import { addExitListenerAsync, addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
 
-const prefixLoggerTime = ({ add, ...logger }) => ({
-  ...logger,
+const prefixTime = ({ add, ...loggerExot }) => ({
+  ...loggerExot,
   add: (...args) => add(new Date().toISOString(), ...args)
 })
 
@@ -11,7 +11,7 @@ const configureLog = ({
   pathLogDirectory,
   logFilePrefix = ''
 } = {}) => ({
-  loggerExot: prefixLoggerTime(pathLogDirectory
+  loggerExot: prefixTime(pathLogDirectory
     ? createLoggerExot({
       pathLogDirectory,
       getLogFileName: () => `${logFilePrefix}${(new Date().toISOString()).replace(/\W/g, '-')}.log`,

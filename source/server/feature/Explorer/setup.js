@@ -10,7 +10,7 @@ import { getHTML } from './HTML/main'
 
 const setup = async ({
   name = 'feature:explorer',
-  logger, routePrefix = '',
+  loggerExot, routePrefix = '',
   featureAuth: { authPack: { authMode }, URL_AUTH_CHECK_ABBR },
   featureActionJSON: { actionMap, URL_ACTION_JSON_ABBR }, // need `PATH_*` & `STATUS_SERVER_COMMON` action
   featureFile: { IS_READ_ONLY, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD },
