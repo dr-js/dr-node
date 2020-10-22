@@ -33,7 +33,7 @@ white|97|107
 //   console.log(TerminalColor.fg.red(string))
 const configureTerminalColor = () => {
   const toAES = (value) => `\x1b[${value}m`
-  const createWrapper = (process.stdout.isTTY && process.stdout.hasColors())
+  const createWrapper = (process.stdout.isTTY && (process.stdout.hasColors() || process.env.CI)) // check: https://github.com/chalk/supports-color/blob/master/index.js
     ? (setAES, clearAES) => (text) => `${setAES}${text}${clearAES}` // TODO: no nesting support
     : () => (text) => text
 
