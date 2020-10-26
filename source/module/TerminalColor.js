@@ -31,9 +31,14 @@ white|97|107
 // usage:
 //   const TerminalColor = configureTerminalColor()
 //   console.log(TerminalColor.fg.red(string))
-const configureTerminalColor = () => {
+const configureTerminalColor = (
+  isEnableColor = (
+    (process.stdout.isTTY && process.stdout.hasColors()) || // very simplified, check: https://github.com/chalk/supports-color/blob/master/index.js
+    process.env.CI // for GitHub Actions, the `process.stdout` is not a `tty.WriteStream`
+  )
+) => {
   const toAES = (value) => `\x1b[${value}m`
-  const createWrapper = (process.stdout.isTTY && (process.stdout.hasColors() || process.env.CI)) // check: https://github.com/chalk/supports-color/blob/master/index.js
+  const createWrapper = isEnableColor
     ? (setAES, clearAES) => (text) => `${setAES}${text}${clearAES}` // TODO: no nesting support
     : () => (text) => text
 
