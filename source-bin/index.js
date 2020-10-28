@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { MODE_NAME_LIST, parseOption, formatUsage } from './option'
-import { runSampleServer } from './runServer'
+import { runSampleServer } from './runSampleServer'
 import { runModule } from './runModule'
 
 import { name as packageName, version as packageVersion } from '../package.json'

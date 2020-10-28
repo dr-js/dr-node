@@ -1,12 +1,12 @@
 import { createDummyExot } from '@dr-js/core/module/common/module/Exot'
 import { createLoggerExot } from '@dr-js/core/module/node/module/Logger'
-// import { addExitListenerAsync, addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
 
 const prefixTime = ({ add, ...loggerExot }) => ({
   ...loggerExot,
   add: (...args) => add(new Date().toISOString(), ...args)
 })
 
+// support `add()` before `up()`
 const configureLog = ({
   pathLogDirectory,
   logFilePrefix = ''
@@ -18,25 +18,12 @@ const configureLog = ({
       flags: 'a' // append, not reset file if exist
     })
     : {
-      ...createDummyExot({ idPrefix: 'log' }),
+      ...createDummyExot({ idPrefix: 'log-' }),
       add: console.log,
       save: () => {},
       split: () => {}
     }
   )
 })
-
-// // TODO: merge to server ExotGroup management
-// await loggerExot.up()
-// addExitListenerAsync((exitState) => {
-//   __DEV__ && console.log('>> listenerAsync')
-//   loggerExot.add(`[EXITING] ${JSON.stringify(exitState)}`)
-// })
-// addExitListenerSync((exitState) => {
-//   __DEV__ && console.log('>> listenerSync')
-//   loggerExot.add(`[EXIT] ${JSON.stringify(exitState)}`)
-//   exitState.error && loggerExot.add(`[EXIT][ERROR] ${exitState.error.stack || exitState.error}`)
-//   loggerExot.down()
-// })
 
 export { configureLog }

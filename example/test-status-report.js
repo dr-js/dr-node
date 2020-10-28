@@ -1,8 +1,9 @@
-const { setupServer } = require('../output-gitignore/bin/runServer')
+const { runServer } = require('../output-gitignore/library/server/share/configure')
+const { configureSampleServer } = require('../output-gitignore/bin/sampleServer')
 
 const SERVER_TAG = 'stat-report'
 
-setupServer({
+runServer(configureSampleServer, {
   port: 8003,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
 }, {
@@ -10,7 +11,7 @@ setupServer({
   permissionType: 'allow',
   authFile: `${__dirname}/.timed-lookup-gitignore.key`,
   statReportProcessTag: SERVER_TAG
-})
+}, SERVER_TAG)
   .then(({ serverExot }) => {
     setInterval(
       () => serverExot.featureMap.get('feature:stat-report')

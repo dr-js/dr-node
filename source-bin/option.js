@@ -1,6 +1,6 @@
 import { Preset, prepareOption } from '@dr-js/core/module/node/module/Option/preset'
 
-import { SampleServerFormatConfig } from './runServer'
+import { SampleServerFormatConfig } from './runSampleServer'
 import { CommonFormatConfigList, ModuleFormatConfigList } from './runModule'
 
 const MODE_NAME_LIST = [

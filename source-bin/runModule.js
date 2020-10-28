@@ -28,7 +28,7 @@ import { fileUpload, fileDownload } from '@dr-js/node/module/server/feature/File
 import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
-import { runQuickSampleExplorerServer } from './runServer'
+import { runQuickSampleExplorerServer } from './runSampleServer'
 
 const { pickOneOf, parseCompactList } = Preset
 

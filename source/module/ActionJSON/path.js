@@ -3,7 +3,7 @@ import { promises as fsAsync } from 'fs'
 
 import { catchAsync } from '@dr-js/core/module/common/error'
 import { objectMap } from '@dr-js/core/module/common/immutable/Object'
-import { PATH_TYPE, getPathStat, createPathPrefixLock, toPosixPath } from '@dr-js/core/module/node/file/Path'
+import { PATH_TYPE, getPathStat, existPath, toPosixPath, createPathPrefixLock } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoList, getDirInfoTree, walkDirInfoTreeAsync, createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { modifyRename, modifyCopy, modifyDelete } from '@dr-js/core/module/node/file/Modify'
 
@@ -30,7 +30,7 @@ const ACTION_TYPE = { // NOTE: should always refer action type form here
 }
 
 const ACTION_CORE_MAP = { // all async
-  [ PATH_VISIBLE ]: async (absolutePath) => fsAsync.access(absolutePath).then(() => ({ isVisible: true }), () => ({ isVisible: false })),
+  [ PATH_VISIBLE ]: async (absolutePath) => existPath(absolutePath).then((isVisible) => ({ isVisible })),
   [ PATH_STAT ]: async (absolutePath) => fsAsync.stat(absolutePath).then(({ mode, size, mtimeMs }) => ({ mode, size, mtimeMs })),
   [ PATH_COPY ]: async (absolutePath, absolutePathTo) => { await modifyCopy(absolutePath, absolutePathTo) },
   [ PATH_RENAME ]: async (absolutePath, absolutePathTo) => { await modifyRename(absolutePath, absolutePathTo) },

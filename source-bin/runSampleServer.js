@@ -2,17 +2,13 @@ import { tmpdir } from 'os'
 
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { describeServerOption } from '@dr-js/core/module/node/server/Server'
 import { autoTestServerPort } from '@dr-js/core/module/node/server/function'
 
-import { configureLog } from '@dr-js/node/module/module/Log'
-import { configurePid } from '@dr-js/node/module/module/Pid'
-import { configureServerExot } from '@dr-js/node/module/module/ServerExot'
 import {
   getServerExotOption, getLogOption, getPidOption,
   getServerExotFormatConfig, LogFormatConfig, PidFormatConfig
 } from '@dr-js/node/module/server/share/option'
-import { setupServerExotGroup, runServerExotGroup } from '@dr-js/node/module/server/share/configure'
+import { runServer } from '@dr-js/node/module/server/share/configure'
 
 import {
   getAuthCommonOption, getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption,
@@ -26,7 +22,6 @@ import { getStatReportOption, StatReportFormatConfig } from '@dr-js/node/module/
 import { getWebSocketTunnelOption, WebSocketTunnelFormatConfig } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/option'
 
 import { configureSampleServer } from './sampleServer'
-import { setupPackageSIGUSR2 } from './function'
 
 import { name as packageName, version as packageVersion } from '../package.json'
 
@@ -47,26 +42,12 @@ const SampleServerFormatConfig = getServerExotFormatConfig([
   WebSocketTunnelFormatConfig
 ])
 
-const runServer = async (serverOption, featureOption) => {
-  await configurePid(serverOption)
-  const { loggerExot } = await configureLog(serverOption)
-  const serverExot = await configureServerExot(serverOption)
-  await configureSampleServer({ serverExot, loggerExot, ...featureOption })
-  serverExot.describeString = describeServerOption(
-    serverExot.option,
-    `${packageName}@${packageVersion}`,
-    Object.entries(featureOption).map(([ key, value ]) => value !== undefined && `${key}: ${value}`)
-  )
-  setupPackageSIGUSR2(packageName, packageVersion)
-  return runServerExotGroup({ serverExot, loggerExot, serverExotGroup: setupServerExotGroup(serverExot, loggerExot) })
-}
-
-const runSampleServer = async (optionData) => runServer({
+const runSampleServer = async (optionData) => runServer(configureSampleServer, {
   ...getPidOption(optionData),
   ...getLogOption(optionData),
   ...getServerExotOption(optionData)
 }, {
-  isDebugRoute: optionData.tryGet('debug-route'),
+  packageName, packageVersion, isDebugRoute: optionData.tryGet('debug-route'),
   ...getAuthCommonOption(optionData), ...getAuthSkipOption(optionData), ...getAuthFileOption(optionData), ...getAuthFileGroupOption(optionData),
   ...getPermissionOption(optionData),
   ...getFileOption(optionData),
@@ -76,10 +57,11 @@ const runSampleServer = async (optionData) => runServer({
   ...getWebSocketTunnelOption(optionData)
 })
 
-const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => runServer({
+const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => runServer(configureSampleServer, {
   hostname,
   port: port || await autoTestServerPort([ 80, 8080, 8888, 8800, 8000 ], hostname)
 }, {
+  packageName, packageVersion,
   permissionType: 'allow',
   authSkip: true,
   fileRootPath: rootPath,
@@ -89,6 +71,5 @@ const runQuickSampleExplorerServer = async ({ rootPath, hostname, port }) => run
 
 export {
   SampleServerFormatConfig,
-  runServer,
   runSampleServer, runQuickSampleExplorerServer
 }

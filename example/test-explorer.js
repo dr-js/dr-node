@@ -1,8 +1,9 @@
-const { runServer } = require('../output-gitignore/bin/runServer')
+const { runServer } = require('../output-gitignore/library/server/share/configure')
+const { configureSampleServer } = require('../output-gitignore/bin/sampleServer')
 
 const SERVER_TAG = 'explorer'
 
-runServer({
+runServer(configureSampleServer, {
   hostname: '0.0.0.0',
   port: 8001,
   filePid: `${__dirname}/.${SERVER_TAG}-gitignore.pid`
@@ -13,5 +14,5 @@ runServer({
   fileRootPath: `${__dirname}/${SERVER_TAG}-gitignore`,
   fileUploadMergePath: `${__dirname}/${SERVER_TAG}-merge-gitignore`,
   explorer: true
-})
+}, SERVER_TAG)
   .catch(console.error)

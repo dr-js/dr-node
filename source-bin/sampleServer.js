@@ -15,10 +15,13 @@ import { setup as setupStatCollect } from '@dr-js/node/module/server/feature/Sta
 import { setup as setupStatReport } from '@dr-js/node/module/server/feature/StatReport/setup'
 import { setup as setupWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/setup'
 
+import { setupPackageSIGUSR2 } from './function'
+
 const configureSampleServer = async ({
   serverExot, loggerExot, routePrefix = '',
 
   isFavicon = true, isDebugRoute,
+  packageName, packageVersion,
 
   // auth
   authKey,
@@ -93,6 +96,8 @@ const configureSampleServer = async ({
     featureStatReport,
     featureWebSocketTunnel
   ])
+
+  packageName && setupPackageSIGUSR2(packageName, packageVersion)
 }
 
 export { configureSampleServer }
