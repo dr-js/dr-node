@@ -57,7 +57,13 @@ describe('Node.Module.Software.npm', () => {
     // strictEqual(require(fromNpmNodeModules('libnpx/package.json')).name, 'libnpx') // TODO: `npm@7` do not have a separate `npx`
     strictEqual(require(fromNpmNodeModules('semver/package.json')).name, 'semver')
     strictEqual(require(fromNpmNodeModules('tar/package.json')).name, 'tar')
+
+    strictEqual(require(fromNpmNodeModules('agent-base/package.json')).name, 'agent-base')
+    strictEqual(require(fromNpmNodeModules('http-proxy-agent/package.json')).name, 'http-proxy-agent')
     strictEqual(require(fromNpmNodeModules('https-proxy-agent/package.json')).name, 'https-proxy-agent')
+
+    // HACK: check can borrow `make-fetch-happen/agent.js` for lazy proxy agent
+    strictEqual(require(fromNpmNodeModules('make-fetch-happen/package.json')).name, 'make-fetch-happen')
 
     { // test sample usage: https://www.npmjs.com/package/semver
       const semver = require(fromNpmNodeModules('semver'))

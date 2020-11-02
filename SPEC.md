@@ -55,7 +55,7 @@
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
   - `detect`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setCommand`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
-  - `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
+  - `fetchLikeRequestWithProxy`, `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
 + 📄 [source/module/Software/npmTar.js](source/module/Software/npmTar.js)
   - `REGEXP_NPM_TAR`, `REGEXP_TGZ`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `extractPackageJson`, `getNpmTar`
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)
@@ -198,6 +198,8 @@
 >       print git branch
 >   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0+]
 >       print git commit hash
+>   --fetch --f -f [OPTIONAL] [ARGUMENT=1-4]
+>       fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0
 >   --ping-race --pr [OPTIONAL] [ARGUMENT=1+]
 >       tcp-ping list of url to find the fastest
 >   --ping-stat --ps [OPTIONAL] [ARGUMENT=1+]
@@ -255,36 +257,37 @@
 >     export DR_NODE_QUIET="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_INPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_OUTPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_FILE_UPLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_FILE_UPLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1] [ALIAS=DR_NODE_FUSU]"
 >     export DR_NODE_FILE_UPLOAD_KEY="[ARGUMENT=1]"
 >     export DR_NODE_FILE_UPLOAD_PATH="[ARGUMENT=1]"
->     export DR_NODE_FILE_DOWNLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_FILE_DOWNLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1] [ALIAS=DR_NODE_FDSU]"
 >     export DR_NODE_FILE_DOWNLOAD_KEY="[ARGUMENT=1]"
 >     export DR_NODE_FILE_DOWNLOAD_PATH="[ARGUMENT=1]"
->     export DR_NODE_PATH_ACTION_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_PATH_ACTION_SERVER_URL="[OPTIONAL] [ARGUMENT=1] [ALIAS=DR_NODE_PASU]"
 >     export DR_NODE_PATH_ACTION_TYPE="[ARGUMENT=1]"
 >     export DR_NODE_PATH_ACTION_KEY="[ARGUMENT=1]"
 >     export DR_NODE_PATH_ACTION_KEY_TO="[ARGUMENT=1]"
 >     export DR_NODE_PATH_ACTION_NAME_LIST="[ARGUMENT=1+]"
->     export DR_NODE_WEBSOCKET_TUNNEL_SERVER_URL="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_AUTH_GEN_TAG="[OPTIONAL] [ARGUMENT=1]"
+>     export DR_NODE_WEBSOCKET_TUNNEL_SERVER_URL="[OPTIONAL] [ARGUMENT=1] [ALIAS=DR_NODE_WTSU]"
+>     export DR_NODE_AUTH_GEN_TAG="[OPTIONAL] [ARGUMENT=1] [ALIAS=DR_NODE_AGT]"
 >     export DR_NODE_AUTH_GEN_SIZE="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_TOKEN_SIZE="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_TIME_GAP="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_INFO="[ARGUMENT=1]"
->     export DR_NODE_AUTH_FILE_DESCRIBE="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_AUTH_CHECK_CODE_GENERATE="[OPTIONAL] [ARGUMENT=0-1]"
->     export DR_NODE_AUTH_CHECK_CODE_VERIFY="[OPTIONAL] [ARGUMENT=1-2]"
->     export DR_NODE_FILE_LIST="[OPTIONAL] [ARGUMENT=0-1]"
->     export DR_NODE_FILE_LIST_ALL="[OPTIONAL] [ARGUMENT=0-1]"
->     export DR_NODE_FILE_TREE="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_AUTH_FILE_DESCRIBE="[OPTIONAL] [ARGUMENT=0+] [ALIAS=DR_NODE_AFD]"
+>     export DR_NODE_AUTH_CHECK_CODE_GENERATE="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_ACCG]"
+>     export DR_NODE_AUTH_CHECK_CODE_VERIFY="[OPTIONAL] [ARGUMENT=1-2] [ALIAS=DR_NODE_ACCV]"
+>     export DR_NODE_FILE_LIST="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_LS]"
+>     export DR_NODE_FILE_LIST_ALL="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_LS_R,DR_NODE_LLA]"
+>     export DR_NODE_FILE_TREE="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_TREE]"
 >     export DR_NODE_COMPRESS="[OPTIONAL] [ARGUMENT=0+]"
 >     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+]"
->     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+]"
->     export DR_NODE_QUICK_SERVER_EXPLORER="[OPTIONAL] [ARGUMENT=0-2]"
+>     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+] [ALIAS=DR_NODE_GB]"
+>     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+] [ALIAS=DR_NODE_GCH]"
+>     export DR_NODE_FETCH="[OPTIONAL] [ARGUMENT=1-4]"
+>     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+] [ALIAS=DR_NODE_PR]"
+>     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+] [ALIAS=DR_NODE_PS]"
+>     export DR_NODE_QUICK_SERVER_EXPLORER="[OPTIONAL] [ARGUMENT=0-2] [ALIAS=DR_NODE_QSE]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_TLS_SNI_CONFIG="[ARGUMENT=1]"
 >     export DR_NODE_TLS_DHPARAM="[ARGUMENT=1]"
@@ -320,36 +323,37 @@
 >     "quiet": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "inputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "outputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "fileUploadServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "fileUploadServerUrl": [ "[OPTIONAL] [ARGUMENT=1] [ALIAS=fusu]" ],
 >     "fileUploadKey": [ "[ARGUMENT=1]" ],
 >     "fileUploadPath": [ "[ARGUMENT=1]" ],
->     "fileDownloadServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "fileDownloadServerUrl": [ "[OPTIONAL] [ARGUMENT=1] [ALIAS=fdsu]" ],
 >     "fileDownloadKey": [ "[ARGUMENT=1]" ],
 >     "fileDownloadPath": [ "[ARGUMENT=1]" ],
->     "pathActionServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "pathActionServerUrl": [ "[OPTIONAL] [ARGUMENT=1] [ALIAS=pasu]" ],
 >     "pathActionType": [ "[ARGUMENT=1]" ],
 >     "pathActionKey": [ "[ARGUMENT=1]" ],
 >     "pathActionKeyTo": [ "[ARGUMENT=1]" ],
 >     "pathActionNameList": [ "[ARGUMENT=1+]" ],
->     "websocketTunnelServerUrl": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "authGenTag": [ "[OPTIONAL] [ARGUMENT=1]" ],
+>     "websocketTunnelServerUrl": [ "[OPTIONAL] [ARGUMENT=1] [ALIAS=wtsu]" ],
+>     "authGenTag": [ "[OPTIONAL] [ARGUMENT=1] [ALIAS=agt]" ],
 >     "authGenSize": [ "[ARGUMENT=1]" ],
 >     "authGenTokenSize": [ "[ARGUMENT=1]" ],
 >     "authGenTimeGap": [ "[ARGUMENT=1]" ],
 >     "authGenInfo": [ "[ARGUMENT=1]" ],
->     "authFileDescribe": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "authCheckCodeGenerate": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
->     "authCheckCodeVerify": [ "[OPTIONAL] [ARGUMENT=1-2]" ],
->     "fileList": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
->     "fileListAll": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
->     "fileTree": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "authFileDescribe": [ "[OPTIONAL] [ARGUMENT=0+] [ALIAS=afd]" ],
+>     "authCheckCodeGenerate": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=accg]" ],
+>     "authCheckCodeVerify": [ "[OPTIONAL] [ARGUMENT=1-2] [ALIAS=accv]" ],
+>     "fileList": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=ls]" ],
+>     "fileListAll": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=lsR,lla]" ],
+>     "fileTree": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=tree]" ],
 >     "compress": [ "[OPTIONAL] [ARGUMENT=0+]" ],
 >     "extract": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+]" ],
->     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+]" ],
->     "quickServerExplorer": [ "[OPTIONAL] [ARGUMENT=0-2]" ],
+>     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+] [ALIAS=gb]" ],
+>     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+] [ALIAS=gch]" ],
+>     "fetch": [ "[OPTIONAL] [ARGUMENT=1-4]" ],
+>     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+] [ALIAS=pr]" ],
+>     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+] [ALIAS=ps]" ],
+>     "quickServerExplorer": [ "[OPTIONAL] [ARGUMENT=0-2] [ALIAS=qse]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "TLSSNIConfig": [ "[ARGUMENT=1]" ],
 >     "TLSDhparam": [ "[ARGUMENT=1]" ],

@@ -14,7 +14,8 @@ import { configurePid } from 'source/module/Pid'
 import { configureServerExot } from 'source/module/ServerExot'
 
 const configureFeature = ({
-  serverExot, loggerExot, routePrefix = '',
+  serverExot, loggerExot,
+  routePrefix = '', // NOTE: this is "global" routePrefix, and will apply on feature routePrefix, so normally just use one
   isRawServer = false, // set to skip route related configure
   isFavicon = true, isDebugRoute = false, rootRouteResponder,
   preResponderList = [],

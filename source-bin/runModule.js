@@ -1,15 +1,17 @@
-import { promises as fsAsync } from 'fs'
+import { createWriteStream, promises as fsAsync } from 'fs'
 
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { time } from '@dr-js/core/module/common/format'
+import { percent, time, binary } from '@dr-js/core/module/common/format'
 import { createStepper } from '@dr-js/core/module/common/time'
 import { isBasicObject } from '@dr-js/core/module/common/check'
 import { prettyStringifyTreeNode } from '@dr-js/core/module/common/data/Tree'
+import { throttle } from '@dr-js/core/module/common/function'
 
-import { writeBufferToStreamAsync } from '@dr-js/core/module/node/data/Stream'
+import { writeBufferToStreamAsync, quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { PATH_TYPE } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoList, getDirInfoTree, getFileList } from '@dr-js/core/module/node/file/Directory'
+import { fetchWithJump } from '@dr-js/core/module/node/net'
 
 import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from '@dr-js/node/module/module/Auth'
 import { ACTION_TYPE as ACTION_TYPE_PATH } from '@dr-js/node/module/module/ActionJSON/path'
@@ -19,6 +21,7 @@ import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/Ping
 
 import { compressAutoAsync, extractAutoAsync } from '@dr-js/node/module/module/Software/archive'
 import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
+import { fetchLikeRequestWithProxy } from '@dr-js/node/module/module/Software/npm'
 
 import { runServerExotGroup } from '@dr-js/node/module/server/share/configure'
 
@@ -77,6 +80,8 @@ const ModuleFormatConfigList = parseCompactList(
   'git-branch,gb/T|print git branch',
   'git-commit-hash,gch/T|print git commit hash',
 
+  'fetch,f/AS,O/1-4|fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0',
+
   // TODO: currently timeout can not change, all lock to 5sec
   'ping-race,pr/AS,O|tcp-ping list of url to find the fastest',
   'ping-stat,ps/AS,O|tcp-ping list of url and print result',
@@ -105,6 +110,10 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
   const outputAuto = async (result) => outputFile
     ? fsAsync.writeFile(outputFile, toBuffer(result))
     : writeBufferToStreamAsync(process.stdout, toBuffer(result))
+  const outputStream = (stream) => quickRunletFromStream(
+    stream,
+    outputFile ? createWriteStream(outputFile) : process.stdout
+  )
 
   const setupAuthFile = async () => configureAuthFile({ ...getAuthCommonOption(optionData), ...getAuthFileOption(optionData), log })
 
@@ -189,6 +198,28 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
       detectGit()
       return outputAuto(getGitCommitHash())
 
+    case 'fetch': {
+      let [ initialUrl, method = 'GET', jumpMax = 4, timeout = 0 ] = argumentList
+      jumpMax = Number(jumpMax) || 0 // 0 for no jump, use 'Infinity' for unlimited jump
+      timeout = Number(timeout) || 0 // in msec, 0 for unlimited
+      const body = inputFile ? await fsAsync.readFile(inputFile) : null
+      let isDone = false
+      const response = await fetchWithJump(initialUrl, {
+        method, timeout, jumpMax, body,
+        headers: { 'accept': '*/*', 'user-agent': `${packageName}/${packageVersion}`, 'connection': 'keep-alive' }, // patch for
+        onProgressUpload: throttle((now, total) => isDone || log(`[fetch-upload] ${percent(now / total)} (${binary(now)}B / ${binary(total)}B)`)),
+        onProgressDownload: throttle((now, total) => isDone || log(`[fetch-download] ${percent(now / total)} (${binary(now)}B / ${binary(total)}B)`)),
+        preFetch: (url, jumpCount, cookieList) => log(`[fetch] <${method}>${url}, jump: ${jumpCount}/${jumpMax}, timeout: ${timeout ? time(timeout) : 'none'}, cookie: ${cookieList.length}`),
+        fetch: fetchLikeRequestWithProxy
+      })
+      if (!response.ok) throw new Error(`bad status: ${response.status}`)
+      const contentLength = Number(response.headers[ 'content-length' ])
+      log(`[fetch] get status: ${response.status}, fetch response content${contentLength ? ` (${binary(contentLength)}B)` : ''}...`)
+      await outputStream(response.stream())
+      isDone = true
+      return log('\n[fetch] done')
+    }
+
     case 'ping-race':
       return outputAuto(await pingRaceUrlList(argumentList))
     case 'ping-stat':
@@ -209,7 +240,7 @@ const prettyStringifyFileTree = async (rootPath) => {
   const { dirInfoListMap } = await getDirInfoTree(rootPath)
   const resultList = []
   prettyStringifyTreeNode(
-    ([ [ path ], level /* , hasMore */ ]) => dirInfoListMap[ path ] && dirInfoListMap[ path ].map(
+    ([ [ path ], level /* , hasMore */ ]) => dirInfoListMap.get(path)?.map(
       ({ name, path: subPath }, subIndex, { length }) => [ [ subPath, name ], level + 1, subIndex !== length - 1 ]
     ),
     [ [ rootPath, 'NAME' ], -1, false ],
