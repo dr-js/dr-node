@@ -112,12 +112,19 @@ const setupServerExotGroup = ( // NOTE: this allow put 2 serverExot with shared 
 const runServerExotGroup = async (pack) => {
   const {
     serverExot,
-    serverExotGroup = serverExot // NOTE: also allow run serverExot
+    serverExotGroup = serverExot, // NOTE: also allow run serverExot
+    loggerExot, isMuteLog = !loggerExot || false // optional
   } = pack
-  const down = once(serverExotGroup.down) // trigger all exot down, the worst case those sync ones may still finish
+  const down = once((eventPack) => {
+    isMuteLog || loggerExot.add(`[SERVER] down... ${JSON.stringify(eventPack)}${eventPack.error ? ` ${eventPack.error.stack || eventPack.error}` : ''}`)
+    return serverExotGroup.down()
+      .then(() => isMuteLog || loggerExot.add('[SERVER] down'))
+  }) // trigger all exot down, the worst case those sync ones may still finish
   addExitListenerSync(down)
   addExitListenerAsync(down)
+  isMuteLog || loggerExot.add('[SERVER] up...')
   await serverExotGroup.up()
+  isMuteLog || loggerExot.add('[SERVER] up')
   return pack // pass down pack
 }
 

@@ -140,8 +140,8 @@
 > ```
 > CLI Usage:
 >   --config --c -c [OPTIONAL] [ARGUMENT=1]
->       from ENV: set to "env" to enable, not using be default
->       from JS/JSON file: set to "path/to/file.config.js|json"
+>       from ENV: set to "env" to enable, default not use
+>       from JS/JSON: set to "path/to/config.js|json"
 >   --help --h -h [OPTIONAL] [ARGUMENT=0+]
 >       show full help
 >   --version --v -v [OPTIONAL] [ARGUMENT=0+]
