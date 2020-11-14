@@ -3,7 +3,7 @@ import { statSync, realpathSync } from 'fs'
 import { execFileSync, spawnSync } from 'child_process'
 import { resolveCommandName } from '@dr-js/core/module/node/system/ResolveCommand'
 import { fetchLikeRequest } from '@dr-js/core/module/node/net'
-import { tryRequireResolve } from '@dr-js/core/module/env/tryRequire'
+import { tryRequire, tryRequireResolve } from '@dr-js/core/module/env/tryRequire'
 
 const parsePackageNameAndVersion = (nameAndVersion) => {
   const nameAndVersionList = nameAndVersion.split('@')
@@ -94,10 +94,10 @@ const getPathNpm = () => {
 const fromNpmNodeModules = (...args) => getPathNpm() && resolve(getPathNpm(), './node_modules/', ...args) // should resolve to npm bundled package
 
 const fetchLikeRequestWithProxy = (url, option) => {
-  require('https').request.__agent_base_https_request_patched__ = true // HACK: to counter HACK part1/2: https://github.com/TooTallNate/node-agent-base/commit/33af5450
+  tryRequire('https').request.__agent_base_https_request_patched__ = true // HACK: to counter HACK part1/2: https://github.com/TooTallNate/node-agent-base/commit/33af5450
   return fetchLikeRequest(url, {
     ...option,
-    agent: require(fromNpmNodeModules('make-fetch-happen/agent'))(url, option), // https://github.com/npm/make-fetch-happen/blob/v8.0.10/index.js#L270
+    agent: tryRequire(fromNpmNodeModules('make-fetch-happen/agent'))(url, option), // https://github.com/npm/make-fetch-happen/blob/v8.0.10/index.js#L270
     secureEndpoint: new URL(url).protocol === 'https:' // HACK: to counter HACK part2/2
   })
 }
