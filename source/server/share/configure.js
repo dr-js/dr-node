@@ -15,7 +15,7 @@ import { configureServerExot } from 'source/module/ServerExot'
 
 const configureFeature = ({
   serverExot, loggerExot,
-  routePrefix = '', // NOTE: this is "global" routePrefix, and will apply on feature routePrefix, so normally just use one
+  routePrefix = '', // TODO: DEPRECATE: since all feature already accept `routePrefix`, this is just misleading // NOTE: this is "global" routePrefix, and will apply on feature routePrefix, so normally just use one
   isRawServer = false, // set to skip route related configure
   isFavicon = true, isDebugRoute = false, rootRouteResponder,
   preResponderList = [],

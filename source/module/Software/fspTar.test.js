@@ -16,8 +16,8 @@ const { describe, it, before, after, info = console.log } = global
 const TEST_TEMP = fromRoot(`test-${basename(__filename)}`)
 const fromTemp = (...args) => resolve(TEST_TEMP, ...args)
 
-before('prepare', async () => setupRoot('skip-mode-600'))
-after('clear', clearRoot)
+before(async () => setupRoot('skip-mode-600'))
+after(clearRoot)
 
 describe('Node.Module.Software.fspTar', () => {
   it('compressAsync() & extractAsync()', async () => {

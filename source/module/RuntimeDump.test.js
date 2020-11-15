@@ -7,8 +7,8 @@ const TEST_ROOT = resolve(__dirname, 'runtime-dump-gitignore/')
 
 const { describe, it, before, after } = global
 
-before('prepare', () => resetDirectory(TEST_ROOT))
-after('clear', () => modifyDelete(TEST_ROOT))
+before(() => resetDirectory(TEST_ROOT))
+after(() => modifyDelete(TEST_ROOT))
 
 describe('Node.Module.RuntimeDump', () => {
   it('dumpAsync()', async () => {

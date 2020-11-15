@@ -21,8 +21,8 @@ const { describe, it, before, after, info = console.log } = global
 const TEST_TEMP = fromRoot(`test-${basename(__filename)}`)
 const fromTemp = (...args) => resolve(TEST_TEMP, ...args)
 
-before('prepare', setupRoot)
-after('clear', clearRoot)
+before(setupRoot)
+after(clearRoot)
 
 describe('Node.Module.Software.npmTar', () => {
   it('detect()', detect)

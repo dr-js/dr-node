@@ -63,7 +63,7 @@ const basicTest = async (pathFactDirectory) => {
   return factDB.getState()
 }
 
-after('clear', () => modifyDelete(TEST_ROOT))
+after(() => modifyDelete(TEST_ROOT))
 
 describe('Node.Module.FactDatabase', () => {
   it('createFactDatabaseExot()', async () => {

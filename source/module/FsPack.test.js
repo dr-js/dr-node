@@ -22,7 +22,7 @@ const { describe, it, before, after, info = console.log } = global
 const TEST_ROOT = resolve(__dirname, './test-fs-pack-gitignore/')
 const fromRoot = (...args) => resolve(TEST_ROOT, ...args)
 
-before('prepare', async () => {
+before(async () => {
   await resetDirectory(TEST_ROOT)
   await createDirectory(fromRoot('input'))
   await fsAsync.writeFile(fromRoot('input/empty'), '')
@@ -42,7 +42,7 @@ before('prepare', async () => {
     await fsAsync.symlink('/absolute/path', fromRoot('input/dir2/symlink-absolute'))
   }
 })
-after('clear', async () => {
+after(async () => {
   await modifyDelete(TEST_ROOT)
 })
 
