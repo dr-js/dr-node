@@ -8,8 +8,8 @@ const getAuthCommonOption = ({ tryGetFirst }) => ({
 })
 
 const AuthSkipFormatConfig = parseCompact('auth-skip/T')
-const getAuthSkipOption = ({ tryGetFirst }) => ({
-  authSkip: tryGetFirst('auth-skip')
+const getAuthSkipOption = ({ getToggle }) => ({
+  authSkip: getToggle('auth-skip')
 })
 
 const AuthFileFormatConfig = parseCompact('auth-file/SP,O')

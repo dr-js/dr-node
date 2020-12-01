@@ -7,19 +7,19 @@ import { autoTestServerPort } from '@dr-js/core/module/node/server/function'
 import {
   getServerExotOption, getLogOption, getPidOption,
   getServerExotFormatConfig, LogFormatConfig, PidFormatConfig
-} from '@dr-js/node/module/server/share/option'
-import { runServer } from '@dr-js/node/module/server/share/configure'
+} from 'source/server/share/option'
+import { runServer } from 'source/server/share/configure'
 
 import {
   getAuthCommonOption, getAuthSkipOption, getAuthFileOption, getAuthFileGroupOption,
   AuthCommonFormatConfig, AuthSkipFormatConfig, AuthFileFormatConfig, AuthFileGroupFormatConfig
-} from '@dr-js/node/module/server/feature/Auth/option'
-import { getPermissionOption, PermissionFormatConfig } from '@dr-js/node/module/server/feature/Permission/option'
-import { getFileOption, FileFormatConfig } from '@dr-js/node/module/server/feature/File/option'
-import { getExplorerOption, ExplorerFormatConfig } from '@dr-js/node/module/server/feature/Explorer/option'
-import { getStatCollectOption, StatCollectFormatConfig } from '@dr-js/node/module/server/feature/StatCollect/option'
-import { getStatReportOption, StatReportFormatConfig } from '@dr-js/node/module/server/feature/StatReport/option'
-import { getWebSocketTunnelOption, WebSocketTunnelFormatConfig } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/option'
+} from 'source/server/feature/Auth/option'
+import { getPermissionOption, PermissionFormatConfig } from 'source/server/feature/Permission/option'
+import { getFileOption, FileFormatConfig } from 'source/server/feature/File/option'
+import { getExplorerOption, ExplorerFormatConfig } from 'source/server/feature/Explorer/option'
+import { getStatCollectOption, StatCollectFormatConfig } from 'source/server/feature/StatCollect/option'
+import { getStatReportOption, StatReportFormatConfig } from 'source/server/feature/StatReport/option'
+import { getWebSocketTunnelOption, WebSocketTunnelFormatConfig } from 'source/server/feature/WebSocketTunnelDev/option'
 
 import { configureSampleServer } from './sampleServer'
 
@@ -47,7 +47,7 @@ const runSampleServer = async (optionData) => runServer(configureSampleServer, {
   ...getLogOption(optionData),
   ...getServerExotOption(optionData)
 }, {
-  packageName, packageVersion, isDebugRoute: optionData.tryGet('debug-route'),
+  packageName, packageVersion, isDebugRoute: optionData.getToggle('debug-route'),
   ...getAuthCommonOption(optionData), ...getAuthSkipOption(optionData), ...getAuthFileOption(optionData), ...getAuthFileGroupOption(optionData),
   ...getPermissionOption(optionData),
   ...getFileOption(optionData),

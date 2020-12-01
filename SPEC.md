@@ -140,13 +140,15 @@
 > ```
 > CLI Usage:
 >   --config --c -c [OPTIONAL] [ARGUMENT=1]
->       from ENV: set to "env" to enable, default not use
 >       from JS/JSON: set to "path/to/config.js|json"
->   --help --h -h [OPTIONAL] [ARGUMENT=0+]
+>       from ENV: set to "env" to enable, default not check env
+>       from ENV JSON: set to "json-env:$env-name" to read the ENV string as JSON
+>       from CLI JSON: set to "json-cli:$json-string" to read the appended string as JSON
+>   --help --h -h [OPTIONAL] [ARGUMENT=0-1]
 >       show full help
->   --version --v -v [OPTIONAL] [ARGUMENT=0+]
+>   --version --v -v [OPTIONAL] [ARGUMENT=0-1]
 >       show version
->   --quiet --q -q [OPTIONAL] [ARGUMENT=0+]
+>   --quiet --q -q [OPTIONAL] [ARGUMENT=0-1]
 >       less log
 >   --input-file --I -I [OPTIONAL] [ARGUMENT=1]
 >       common option
@@ -178,7 +180,7 @@
 >     --auth-gen-token-size [ARGUMENT=1]
 >     --auth-gen-time-gap [ARGUMENT=1]
 >     --auth-gen-info [ARGUMENT=1]
->   --auth-file-describe --afd [OPTIONAL] [ARGUMENT=0+]
+>   --auth-file-describe --afd [OPTIONAL] [ARGUMENT=0-1]
 >       describe auth file: -I=authFile
 >   --auth-check-code-generate --accg [OPTIONAL] [ARGUMENT=0-1]
 >       generate checkCode from auth file: -I=authFile, $0=timestamp/now
@@ -190,13 +192,13 @@
 >       list all file: $0=path/cwd
 >   --file-tree --tree [OPTIONAL] [ARGUMENT=0-1]
 >       list all file in tree: $0=path/cwd
->   --compress --a -a [OPTIONAL] [ARGUMENT=0+]
+>   --compress --a -a [OPTIONAL] [ARGUMENT=0-1]
 >       compress tar/zip/7z/fsp: -I=inputDirectory, -O=outputFile
->   --extract --x -x [OPTIONAL] [ARGUMENT=0+]
+>   --extract --x -x [OPTIONAL] [ARGUMENT=0-1]
 >       extract tar/zip/7z/fsp: -I=inputFile, -O=outputPath
->   --git-branch --gb [OPTIONAL] [ARGUMENT=0+]
+>   --git-branch --gb [OPTIONAL] [ARGUMENT=0-1]
 >       print git branch
->   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0+]
+>   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0-1]
 >       print git commit hash
 >   --fetch --f -f [OPTIONAL] [ARGUMENT=1-4]
 >       fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0
@@ -217,17 +219,17 @@
 >           ca: Optionally override the trusted CA certificates
 >       --TLS-dhparam [ARGUMENT=1]
 >           pathOrBuffer; Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
->     --debug-route [ARGUMENT=0+]
+>     --debug-route [ARGUMENT=0-1]
 >         show debug route list on "/"
 >     --log-path [ARGUMENT=1]
 >       --log-file-prefix [ARGUMENT=1]
 >     --pid-file [ARGUMENT=1]
->       --pid-ignore-exist [ARGUMENT=0+]
->           set to enable
+>       --pid-ignore-exist [ARGUMENT=0-1]
+>           set to ANY value to enable, except "false/no/n/0"
 >     --auth-key [ARGUMENT=1]
 >         set for non-default key
->     --auth-skip [ARGUMENT=0+]
->         set to enable
+>     --auth-skip [ARGUMENT=0-1]
+>         set to ANY value to enable, except "false/no/n/0"
 >     --auth-file [ARGUMENT=1]
 >     --auth-file-group-path [ARGUMENT=1]
 >       --auth-file-group-default-tag [ARGUMENT=1]
@@ -240,8 +242,8 @@
 >     --file-root-path [ARGUMENT=1]
 >       --file-root-path-public [ARGUMENT=1]
 >       --file-upload-merge-path [ARGUMENT=1]
->     --explorer [ARGUMENT=0+]
->         set to enable
+>     --explorer [ARGUMENT=0-1]
+>         set to ANY value to enable, except "false/no/n/0"
 >     --stat-collect-path [ARGUMENT=1]
 >       --stat-collect-url [ARGUMENT=1]
 >       --stat-collect-interval [ARGUMENT=1]
@@ -252,9 +254,9 @@
 >   "
 >     #!/usr/bin/env bash
 >     export DR_NODE_CONFIG="[OPTIONAL] [ARGUMENT=1]"
->     export DR_NODE_HELP="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_VERSION="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_QUIET="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_HELP="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_VERSION="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_QUIET="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_INPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_OUTPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_FILE_UPLOAD_SERVER_URL="[OPTIONAL] [ARGUMENT=1] [ALIAS=DR_NODE_FUSU]"
@@ -274,16 +276,16 @@
 >     export DR_NODE_AUTH_GEN_TOKEN_SIZE="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_TIME_GAP="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_GEN_INFO="[ARGUMENT=1]"
->     export DR_NODE_AUTH_FILE_DESCRIBE="[OPTIONAL] [ARGUMENT=0+] [ALIAS=DR_NODE_AFD]"
+>     export DR_NODE_AUTH_FILE_DESCRIBE="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_AFD]"
 >     export DR_NODE_AUTH_CHECK_CODE_GENERATE="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_ACCG]"
 >     export DR_NODE_AUTH_CHECK_CODE_VERIFY="[OPTIONAL] [ARGUMENT=1-2] [ALIAS=DR_NODE_ACCV]"
 >     export DR_NODE_FILE_LIST="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_LS]"
 >     export DR_NODE_FILE_LIST_ALL="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_LS_R,DR_NODE_LLA]"
 >     export DR_NODE_FILE_TREE="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_TREE]"
->     export DR_NODE_COMPRESS="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=0+]"
->     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0+] [ALIAS=DR_NODE_GB]"
->     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0+] [ALIAS=DR_NODE_GCH]"
+>     export DR_NODE_COMPRESS="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_GB]"
+>     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_GCH]"
 >     export DR_NODE_FETCH="[OPTIONAL] [ARGUMENT=1-4]"
 >     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+] [ALIAS=DR_NODE_PR]"
 >     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+] [ALIAS=DR_NODE_PS]"
@@ -291,13 +293,13 @@
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_TLS_SNI_CONFIG="[ARGUMENT=1]"
 >     export DR_NODE_TLS_DHPARAM="[ARGUMENT=1]"
->     export DR_NODE_DEBUG_ROUTE="[ARGUMENT=0+]"
+>     export DR_NODE_DEBUG_ROUTE="[ARGUMENT=0-1]"
 >     export DR_NODE_LOG_PATH="[ARGUMENT=1]"
 >     export DR_NODE_LOG_FILE_PREFIX="[ARGUMENT=1]"
 >     export DR_NODE_PID_FILE="[ARGUMENT=1]"
->     export DR_NODE_PID_IGNORE_EXIST="[ARGUMENT=0+]"
+>     export DR_NODE_PID_IGNORE_EXIST="[ARGUMENT=0-1]"
 >     export DR_NODE_AUTH_KEY="[ARGUMENT=1]"
->     export DR_NODE_AUTH_SKIP="[ARGUMENT=0+]"
+>     export DR_NODE_AUTH_SKIP="[ARGUMENT=0-1]"
 >     export DR_NODE_AUTH_FILE="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_FILE_GROUP_PATH="[ARGUMENT=1]"
 >     export DR_NODE_AUTH_FILE_GROUP_DEFAULT_TAG="[ARGUMENT=1]"
@@ -308,7 +310,7 @@
 >     export DR_NODE_FILE_ROOT_PATH="[ARGUMENT=1]"
 >     export DR_NODE_FILE_ROOT_PATH_PUBLIC="[ARGUMENT=1]"
 >     export DR_NODE_FILE_UPLOAD_MERGE_PATH="[ARGUMENT=1]"
->     export DR_NODE_EXPLORER="[ARGUMENT=0+]"
+>     export DR_NODE_EXPLORER="[ARGUMENT=0-1]"
 >     export DR_NODE_STAT_COLLECT_PATH="[ARGUMENT=1]"
 >     export DR_NODE_STAT_COLLECT_URL="[ARGUMENT=1]"
 >     export DR_NODE_STAT_COLLECT_INTERVAL="[ARGUMENT=1]"
@@ -318,9 +320,9 @@
 > CONFIG Usage:
 >   {
 >     "config": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "help": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "version": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "quiet": [ "[OPTIONAL] [ARGUMENT=0+]" ],
+>     "help": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "version": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "quiet": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "inputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "outputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "fileUploadServerUrl": [ "[OPTIONAL] [ARGUMENT=1] [ALIAS=fusu]" ],
@@ -340,16 +342,16 @@
 >     "authGenTokenSize": [ "[ARGUMENT=1]" ],
 >     "authGenTimeGap": [ "[ARGUMENT=1]" ],
 >     "authGenInfo": [ "[ARGUMENT=1]" ],
->     "authFileDescribe": [ "[OPTIONAL] [ARGUMENT=0+] [ALIAS=afd]" ],
+>     "authFileDescribe": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=afd]" ],
 >     "authCheckCodeGenerate": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=accg]" ],
 >     "authCheckCodeVerify": [ "[OPTIONAL] [ARGUMENT=1-2] [ALIAS=accv]" ],
 >     "fileList": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=ls]" ],
 >     "fileListAll": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=lsR,lla]" ],
 >     "fileTree": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=tree]" ],
->     "compress": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "extract": [ "[OPTIONAL] [ARGUMENT=0+]" ],
->     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0+] [ALIAS=gb]" ],
->     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0+] [ALIAS=gch]" ],
+>     "compress": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "extract": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=gb]" ],
+>     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=gch]" ],
 >     "fetch": [ "[OPTIONAL] [ARGUMENT=1-4]" ],
 >     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+] [ALIAS=pr]" ],
 >     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+] [ALIAS=ps]" ],
@@ -357,13 +359,13 @@
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "TLSSNIConfig": [ "[ARGUMENT=1]" ],
 >     "TLSDhparam": [ "[ARGUMENT=1]" ],
->     "debugRoute": [ "[ARGUMENT=0+]" ],
+>     "debugRoute": [ "[ARGUMENT=0-1]" ],
 >     "logPath": [ "[ARGUMENT=1]" ],
 >     "logFilePrefix": [ "[ARGUMENT=1]" ],
 >     "pidFile": [ "[ARGUMENT=1]" ],
->     "pidIgnoreExist": [ "[ARGUMENT=0+]" ],
+>     "pidIgnoreExist": [ "[ARGUMENT=0-1]" ],
 >     "authKey": [ "[ARGUMENT=1]" ],
->     "authSkip": [ "[ARGUMENT=0+]" ],
+>     "authSkip": [ "[ARGUMENT=0-1]" ],
 >     "authFile": [ "[ARGUMENT=1]" ],
 >     "authFileGroupPath": [ "[ARGUMENT=1]" ],
 >     "authFileGroupDefaultTag": [ "[ARGUMENT=1]" ],
@@ -374,7 +376,7 @@
 >     "fileRootPath": [ "[ARGUMENT=1]" ],
 >     "fileRootPathPublic": [ "[ARGUMENT=1]" ],
 >     "fileUploadMergePath": [ "[ARGUMENT=1]" ],
->     "explorer": [ "[ARGUMENT=0+]" ],
+>     "explorer": [ "[ARGUMENT=0-1]" ],
 >     "statCollectPath": [ "[ARGUMENT=1]" ],
 >     "statCollectUrl": [ "[ARGUMENT=1]" ],
 >     "statCollectInterval": [ "[ARGUMENT=1]" ],

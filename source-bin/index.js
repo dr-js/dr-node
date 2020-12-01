@@ -12,8 +12,8 @@ const runMode = async (modeName, optionData) => modeName === 'host'
 
 const main = async () => {
   const optionData = await parseOption()
-  if (optionData.tryGet('version')) return console.log(JSON.stringify({ packageName, packageVersion }, null, 2))
-  if (optionData.tryGet('help')) return console.log(formatUsage())
+  if (optionData.getToggle('version')) return console.log(JSON.stringify({ packageName, packageVersion }, null, 2))
+  if (optionData.getToggle('help')) return console.log(formatUsage())
   const modeName = MODE_NAME_LIST.find((name) => optionData.tryGet(name))
   if (!modeName) throw new Error('no mode specified')
   await runMode(modeName, optionData).catch((error) => {

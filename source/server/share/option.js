@@ -50,9 +50,9 @@ const getLogOption = ({ tryGetFirst }) => ({
 const PidFormatConfig = parseCompact('pid-file/SP,O', parseCompactList(
   'pid-ignore-exist/T'
 ))
-const getPidOption = ({ tryGet, tryGetFirst }) => ({
+const getPidOption = ({ tryGetFirst, getToggle }) => ({
   filePid: tryGetFirst('pid-file'),
-  shouldIgnoreExistPid: Boolean(tryGet('pid-ignore-exist'))
+  shouldIgnoreExistPid: getToggle('pid-ignore-exist')
 })
 
 export {

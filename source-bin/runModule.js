@@ -13,22 +13,22 @@ import { PATH_TYPE } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoList, getDirInfoTree, getFileList } from '@dr-js/core/module/node/file/Directory'
 import { fetchWithJump } from '@dr-js/core/module/node/net'
 
-import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from '@dr-js/node/module/module/Auth'
-import { ACTION_TYPE as ACTION_TYPE_PATH } from '@dr-js/node/module/module/ActionJSON/path'
-import { ACTION_TYPE as ACTION_TYPE_PATH_EXTRA_ARCHIVE } from '@dr-js/node/module/module/ActionJSON/pathExtraArchive'
+import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from 'source/module/Auth'
+import { ACTION_TYPE as ACTION_TYPE_PATH } from 'source/module/ActionJSON/path'
+import { ACTION_TYPE as ACTION_TYPE_PATH_EXTRA_ARCHIVE } from 'source/module/ActionJSON/pathExtraArchive'
 
-import { pingRaceUrlList, pingStatUrlList } from '@dr-js/node/module/module/PingRace'
+import { pingRaceUrlList, pingStatUrlList } from 'source/module/PingRace'
 
-import { compressAutoAsync, extractAutoAsync } from '@dr-js/node/module/module/Software/archive'
-import { detect as detectGit, getGitBranch, getGitCommitHash } from '@dr-js/node/module/module/Software/git'
-import { fetchLikeRequestWithProxy } from '@dr-js/node/module/module/Software/npm'
+import { compressAutoAsync, extractAutoAsync } from 'source/module/Software/archive'
+import { detect as detectGit, getGitBranch, getGitCommitHash } from 'source/module/Software/git'
+import { fetchLikeRequestWithProxy } from 'source/module/Software/npm'
 
-import { runServerExotGroup } from '@dr-js/node/module/server/share/configure'
+import { runServerExotGroup } from 'source/server/share/configure'
 
-import { getAuthCommonOption, getAuthFileOption } from '@dr-js/node/module/server/feature/Auth/option'
-import { actionJson } from '@dr-js/node/module/server/feature/ActionJSON/client'
-import { fileUpload, fileDownload } from '@dr-js/node/module/server/feature/File/client'
-import { setupClientWebSocketTunnel } from '@dr-js/node/module/server/feature/WebSocketTunnelDev/client'
+import { getAuthCommonOption, getAuthFileOption } from 'source/server/feature/Auth/option'
+import { actionJson } from 'source/server/feature/ActionJSON/client'
+import { fileUpload, fileDownload } from 'source/server/feature/File/client'
+import { setupClientWebSocketTunnel } from 'source/server/feature/WebSocketTunnelDev/client'
 
 import { setupPackageSIGUSR2 } from './function'
 import { runQuickSampleExplorerServer } from './runSampleServer'
@@ -92,14 +92,14 @@ const ModuleFormatConfigList = parseCompactList(
 )
 
 const runModule = async (optionData, modeName, packageName, packageVersion) => {
-  const { tryGet, getFirst, tryGetFirst } = optionData
+  const { tryGet, getFirst, tryGetFirst, getToggle } = optionData
 
   const argumentList = tryGet(modeName) || []
   const inputFile = tryGetFirst('input-file')
   const outputFile = tryGetFirst('output-file')
 
   let log
-  if (!tryGet('quiet')) {
+  if (!getToggle('quiet')) {
     const stepper = createStepper()
     log = (...args) => console.log(...args, `(+${time(stepper())})`)
   }
