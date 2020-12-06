@@ -19,6 +19,8 @@ const setup = async ({
   fileRootPathPublic, // can skip to deny public file access, and if set should be under fileRootPath, so upload can also reach the public path
   fileUploadMergePath,
 
+  responderFallback, responderFallbackPublic, // mostly for direct script use, useful to redirect to root path, or just better log error
+
   enhanceFileChunkUploadOption = (option) => option,
 
   URL_FILE_SERVE = `${routePrefix}/file-serve`,
@@ -30,8 +32,8 @@ const setup = async ({
   IS_SKIP_AUTH = authMode === AUTH_SKIP,
   IS_READ_ONLY = !fileUploadMergePath // TODO: should be decided by user permission
 }) => {
-  const responderFileServe = createResponderServeFile({ rootPath: fileRootPath })
-  const responderFileServePublic = fileRootPathPublic && createResponderServeFile({ rootPath: fileRootPathPublic })
+  const responderFileServe = createResponderServeFile({ rootPath: fileRootPath, responderFallback })
+  const responderFileServePublic = fileRootPathPublic && createResponderServeFile({ rootPath: fileRootPathPublic, responderFallback: responderFallbackPublic })
   const responderFileChunkUpload = IS_READ_ONLY
     ? (store, extraFileUploadOption) => {}
     : await createResponderFileChunkUpload({ rootPath: fileRootPath, mergePath: fileUploadMergePath, loggerExot })

@@ -6,11 +6,14 @@ import { createOnFileChunkUpload } from '@dr-js/core/module/node/module/FileChun
 import { getRequestBuffer } from 'source/module/RequestCommon'
 
 const createResponderServeFile = ({
-  rootPath
+  rootPath,
+  responderFallback // (store, { error, relativePath }) => {}
 }) => {
   const getPath = createPathPrefixLock(rootPath)
   const responderServeStatic = createResponderServeStatic({ expireTime: 10 * 1000 }) // 10sec expire
-  return (store, relativePath) => responderServeStatic(store, getPath(relativePath))
+  return responderFallback
+    ? (store, relativePath) => responderServeStatic(store, getPath(relativePath)).catch((error) => responderFallback(store, { error, relativePath }))
+    : (store, relativePath) => responderServeStatic(store, getPath(relativePath))
 }
 
 const createResponderFileChunkUpload = async ({
