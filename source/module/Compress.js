@@ -1,24 +1,17 @@
 import { createGzip } from 'zlib'
 import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
-import { STAT_ERROR, getPathLstat } from '@dr-js/core/module/node/file/Path'
+import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
+import { existPath } from '@dr-js/core/module/node/file/Path'
 
 const compressFile = (
   inputFile,
   outputFile,
   compressStream = createGzip()
-) => new Promise((resolve, reject) => {
-  const readStream = createReadStream(inputFile)
-  const writeStream = createWriteStream(outputFile)
-  const onError = (error) => {
-    readStream.destroy()
-    writeStream.destroy()
-    reject(error)
-  }
-  readStream.on('error', onError)
-  writeStream.on('error', onError)
-  writeStream.on('finish', resolve)
-  readStream.pipe(compressStream).pipe(writeStream)
-})
+) => quickRunletFromStream(
+  createReadStream(inputFile),
+  compressStream,
+  createWriteStream(outputFile)
+)
 
 const compressFileList = async ({
   fileList,
@@ -31,7 +24,7 @@ const compressFileList = async ({
     if (filePath.endsWith(fileSuffix)) continue
     __DEV__ && console.log('[compressFileList]', filePath)
     const compressFilePath = `${filePath}${fileSuffix}`
-    if (STAT_ERROR !== await getPathLstat(compressFilePath)) await compressFile(filePath, compressFilePath, createCompressStream())
+    !await existPath(compressFilePath) && await compressFile(filePath, compressFilePath, createCompressStream()) // NOTE: do not re-compress existing file
     deleteBloat && await checkBloat(filePath, compressFilePath, bloatRatio) && await fsAsync.unlink(compressFilePath)
   }
 }

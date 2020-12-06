@@ -7,10 +7,11 @@ import { getRequestBuffer } from 'source/module/RequestCommon'
 
 const createResponderServeFile = ({
   rootPath,
-  responderFallback // (store, { error, relativePath }) => {}
+  responderFallback, // (store, { error, relativePath }) => {}
+  extraOption
 }) => {
   const getPath = createPathPrefixLock(rootPath)
-  const responderServeStatic = createResponderServeStatic({ expireTime: 10 * 1000 }) // 10sec expire
+  const responderServeStatic = createResponderServeStatic({ expireTime: 10 * 1000, ...extraOption }) // 10sec expire
   return responderFallback
     ? (store, relativePath) => responderServeStatic(store, getPath(relativePath)).catch((error) => responderFallback(store, { error, relativePath }))
     : (store, relativePath) => responderServeStatic(store, getPath(relativePath))
