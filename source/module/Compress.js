@@ -18,13 +18,14 @@ const compressFileList = async ({
   fileSuffix = '.gz',
   createCompressStream = createGzip,
   deleteBloat = false,
+  keepExist = false,
   bloatRatio = 1 // expect value >= 1, like 1.10
 }) => {
   for (const filePath of fileList) {
     if (filePath.endsWith(fileSuffix)) continue
     __DEV__ && console.log('[compressFileList]', filePath)
     const compressFilePath = `${filePath}${fileSuffix}`
-    !await existPath(compressFilePath) && await compressFile(filePath, compressFilePath, createCompressStream()) // NOTE: do not re-compress existing file
+    if (!keepExist || !await existPath(compressFilePath)) await compressFile(filePath, compressFilePath, createCompressStream()) // NOTE: do not re-compress existing file, if `keepExist` is set, careful since old gz may keep the wrong content
     deleteBloat && await checkBloat(filePath, compressFilePath, bloatRatio) && await fsAsync.unlink(compressFilePath)
   }
 }
