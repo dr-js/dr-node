@@ -200,14 +200,18 @@
 >       print git branch
 >   --git-commit-hash --gch [OPTIONAL] [ARGUMENT=0-1]
 >       print git commit hash
->   --fetch --f -f [OPTIONAL] [ARGUMENT=1-4]
->       fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0
 >   --ping-race --pr [OPTIONAL] [ARGUMENT=1+]
 >       tcp-ping list of url to find the fastest
 >   --ping-stat --ps [OPTIONAL] [ARGUMENT=1+]
 >       tcp-ping list of url and print result
 >   --quick-server-explorer --qse [OPTIONAL] [ARGUMENT=0-2]
 >       start a no-auth explorer server, for LAN use mostly, caution with public ip: -I=rootPath/cwd, $@=hostname/127.0.0.1,port/auto
+>   --eval --e -e [OPTIONAL] [ARGUMENT=0+]
+>       eval file or string: -O=outputFile, -I/$0=scriptFile/scriptString, $@=...evalArgv
+>   --repl --i -i [OPTIONAL] [ARGUMENT=0-1]
+>       start node REPL
+>   --fetch --f -f [OPTIONAL] [ARGUMENT=1-4]
+>       fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0
 >   --host --H -H [OPTIONAL] [ARGUMENT=1]
 >       set "hostname:port"
 >     --TLS-SNI-config [ARGUMENT=1]
@@ -286,10 +290,12 @@
 >     export DR_NODE_EXTRACT="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_GIT_BRANCH="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_GB]"
 >     export DR_NODE_GIT_COMMIT_HASH="[OPTIONAL] [ARGUMENT=0-1] [ALIAS=DR_NODE_GCH]"
->     export DR_NODE_FETCH="[OPTIONAL] [ARGUMENT=1-4]"
 >     export DR_NODE_PING_RACE="[OPTIONAL] [ARGUMENT=1+] [ALIAS=DR_NODE_PR]"
 >     export DR_NODE_PING_STAT="[OPTIONAL] [ARGUMENT=1+] [ALIAS=DR_NODE_PS]"
 >     export DR_NODE_QUICK_SERVER_EXPLORER="[OPTIONAL] [ARGUMENT=0-2] [ALIAS=DR_NODE_QSE]"
+>     export DR_NODE_EVAL="[OPTIONAL] [ARGUMENT=0+]"
+>     export DR_NODE_REPL="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_FETCH="[OPTIONAL] [ARGUMENT=1-4]"
 >     export DR_NODE_HOST="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_TLS_SNI_CONFIG="[ARGUMENT=1]"
 >     export DR_NODE_TLS_DHPARAM="[ARGUMENT=1]"
@@ -352,10 +358,12 @@
 >     "extract": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "gitBranch": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=gb]" ],
 >     "gitCommitHash": [ "[OPTIONAL] [ARGUMENT=0-1] [ALIAS=gch]" ],
->     "fetch": [ "[OPTIONAL] [ARGUMENT=1-4]" ],
 >     "pingRace": [ "[OPTIONAL] [ARGUMENT=1+] [ALIAS=pr]" ],
 >     "pingStat": [ "[OPTIONAL] [ARGUMENT=1+] [ALIAS=ps]" ],
 >     "quickServerExplorer": [ "[OPTIONAL] [ARGUMENT=0-2] [ALIAS=qse]" ],
+>     "eval": [ "[OPTIONAL] [ARGUMENT=0+]" ],
+>     "repl": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "fetch": [ "[OPTIONAL] [ARGUMENT=1-4]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "TLSSNIConfig": [ "[ARGUMENT=1]" ],
 >     "TLSDhparam": [ "[ARGUMENT=1]" ],

@@ -1,17 +1,11 @@
-import { createWriteStream, promises as fsAsync } from 'fs'
-
 import { Preset } from '@dr-js/core/module/node/module/Option/preset'
 
-import { percent, time, binary } from '@dr-js/core/module/common/format'
-import { createStepper } from '@dr-js/core/module/common/time'
-import { isBasicObject } from '@dr-js/core/module/common/check'
 import { prettyStringifyTreeNode } from '@dr-js/core/module/common/data/Tree'
-import { throttle } from '@dr-js/core/module/common/function'
 
-import { writeBufferToStreamAsync, quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { PATH_TYPE } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoList, getDirInfoTree, getFileList } from '@dr-js/core/module/node/file/Directory'
-import { fetchWithJump } from '@dr-js/core/module/node/net'
+
+import { sharedOption, sharedMode } from '@dr-js/core/bin/function' // NOTE: borrow bin code
 
 import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from 'source/module/Auth'
 import { ACTION_TYPE as ACTION_TYPE_PATH } from 'source/module/ActionJSON/path'
@@ -80,42 +74,30 @@ const ModuleFormatConfigList = parseCompactList(
   'git-branch,gb/T|print git branch',
   'git-commit-hash,gch/T|print git commit hash',
 
-  'fetch,f/AS,O/1-4|fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0',
-
   // TODO: currently timeout can not change, all lock to 5sec
   'ping-race,pr/AS,O|tcp-ping list of url to find the fastest',
   'ping-stat,ps/AS,O|tcp-ping list of url and print result',
 
-  'quick-server-explorer,qse/AS,O/0-2|start a no-auth explorer server, for LAN use mostly, caution with public ip: -I=rootPath/cwd, $@=hostname/127.0.0.1,port/auto'
+  'quick-server-explorer,qse/AS,O/0-2|start a no-auth explorer server, for LAN use mostly, caution with public ip: -I=rootPath/cwd, $@=hostname/127.0.0.1,port/auto',
 
   // TODO: 'batch-command,bc/AS,O/1-|run batch command use placeholder like {file} {F} {...F} {directory} {D} {...D}: $@=...commands'
+
+  // shared mode
+  'eval,e/A,O|eval file or string: -O=outputFile, -I/$0=scriptFile/scriptString, $@=...evalArgv',
+  'repl,i/T|start node REPL',
+  'fetch,f/AS,O/1-4|fetch url with http_proxy env support: -I=requestBody/null, -O=outputFile/stdout, $@=initialUrl,method/GET,jumpMax/4,timeout/0'
 )
 
 const runModule = async (optionData, modeName, packageName, packageVersion) => {
-  const { tryGet, getFirst, tryGetFirst, getToggle } = optionData
+  const sharedPack = await sharedOption(optionData, modeName)
+  const { tryGet, getFirst, tryGetFirst } = optionData
+  const { argumentList, log, inputFile, outputFile, outputValueAuto } = sharedPack
 
-  const argumentList = tryGet(modeName) || []
-  const inputFile = tryGetFirst('input-file')
-  const outputFile = tryGetFirst('output-file')
-
-  let log
-  if (!getToggle('quiet')) {
-    const stepper = createStepper()
-    log = (...args) => console.log(...args, `(+${time(stepper())})`)
-  }
-
-  const toBuffer = (value) => Buffer.isBuffer(value) ? value
-    : isBasicObject(value) ? JSON.stringify(value, null, 2)
-      : Buffer.from(value)
-  const outputAuto = async (result) => outputFile
-    ? fsAsync.writeFile(outputFile, toBuffer(result))
-    : writeBufferToStreamAsync(process.stdout, toBuffer(result))
-  const outputStream = (stream) => quickRunletFromStream(
-    stream,
-    outputFile ? createWriteStream(outputFile) : process.stdout
-  )
-
-  const setupAuthFile = async () => configureAuthFile({ ...getAuthCommonOption(optionData), ...getAuthFileOption(optionData), log })
+  const setupAuthFile = async () => configureAuthFile({
+    ...getAuthCommonOption(optionData),
+    ...getAuthFileOption(optionData),
+    log
+  })
 
   switch (modeName) {
     case 'file-upload-server-url':
@@ -138,7 +120,7 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
             key: getFirst('file-download-key')
           })
         case 'path-action-server-url':
-          return outputAuto(await actionJson({
+          return outputValueAuto(await actionJson({
             log, authFetch,
             urlActionJSON: argumentList[ 0 ],
             actionType: getFirst('path-action-type'),
@@ -174,17 +156,17 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
       })
       return log(await describeAuthFile(outputFile))
     case 'auth-file-describe':
-      return outputAuto(await describeAuthFile(inputFile))
+      return outputValueAuto(await describeAuthFile(inputFile))
     case 'auth-check-code-generate':
-      return outputAuto(await generateAuthCheckCode(inputFile, argumentList[ 0 ])) // timestamp
+      return outputValueAuto(await generateAuthCheckCode(inputFile, argumentList[ 0 ])) // timestamp
     case 'auth-check-code-verify':
       await verifyAuthCheckCode(inputFile, argumentList[ 0 ], argumentList[ 1 ] && Number(argumentList[ 1 ])) // checkCode, timestamp
-      return outputAuto('pass verify')
+      return outputValueAuto('pass verify')
 
     case 'file-list':
     case 'file-list-all':
     case 'file-tree':
-      return outputAuto(await collectFile(modeName, argumentList[ 0 ] || process.cwd()))
+      return outputValueAuto(await collectFile(modeName, argumentList[ 0 ] || process.cwd()))
 
     case 'compress':
       return compressAutoAsync(inputFile, outputFile)
@@ -193,37 +175,15 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
 
     case 'git-branch':
       detectGit()
-      return outputAuto(getGitBranch())
+      return outputValueAuto(getGitBranch())
     case 'git-commit-hash':
       detectGit()
-      return outputAuto(getGitCommitHash())
-
-    case 'fetch': {
-      let [ initialUrl, method = 'GET', jumpMax = 4, timeout = 0 ] = argumentList
-      jumpMax = Number(jumpMax) || 0 // 0 for no jump, use 'Infinity' for unlimited jump
-      timeout = Number(timeout) || 0 // in msec, 0 for unlimited
-      const body = inputFile ? await fsAsync.readFile(inputFile) : null
-      let isDone = false
-      const response = await fetchWithJump(initialUrl, {
-        method, timeout, jumpMax, body,
-        headers: { 'accept': '*/*', 'user-agent': `${packageName}/${packageVersion}`, 'connection': 'keep-alive' }, // patch for
-        onProgressUpload: throttle((now, total) => isDone || log(`[fetch-upload] ${percent(now / total)} (${binary(now)}B / ${binary(total)}B)`)),
-        onProgressDownload: throttle((now, total) => isDone || log(`[fetch-download] ${percent(now / total)} (${binary(now)}B / ${binary(total)}B)`)),
-        preFetch: (url, jumpCount, cookieList) => log(`[fetch] <${method}>${url}, jump: ${jumpCount}/${jumpMax}, timeout: ${timeout ? time(timeout) : 'none'}, cookie: ${cookieList.length}`),
-        fetch: fetchLikeRequestWithProxy
-      })
-      if (!response.ok) throw new Error(`bad status: ${response.status}`)
-      const contentLength = Number(response.headers[ 'content-length' ])
-      log(`[fetch] get status: ${response.status}, fetch response content${contentLength ? ` (${binary(contentLength)}B)` : ''}...`)
-      await outputStream(response.stream())
-      isDone = true
-      return log('\n[fetch] done')
-    }
+      return outputValueAuto(getGitCommitHash())
 
     case 'ping-race':
-      return outputAuto(await pingRaceUrlList(argumentList))
+      return outputValueAuto(await pingRaceUrlList(argumentList))
     case 'ping-stat':
-      return outputAuto(await pingStatUrlList(argumentList))
+      return outputValueAuto(await pingStatUrlList(argumentList))
 
     case 'quick-server-explorer': {
       const [ hostname = '127.0.0.1', port ] = argumentList
@@ -233,6 +193,12 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
         port: port && Number(port)
       })
     }
+
+    default:
+      return sharedMode({
+        ...sharedPack,
+        fetchUserAgent: `${packageName}/${packageVersion}`, fetchExtraOption: { fetch: fetchLikeRequestWithProxy }
+      })
   }
 }
 

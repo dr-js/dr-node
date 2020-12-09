@@ -31,7 +31,7 @@ const main = async () => {
   IS_WIN32 && await quickRun('git config core.autocrlf false')
   IS_WIN32 && await quickRun('git config core.eol lf')
   IS_WIN32 && await quickRun('git rm --cached -r .') // reset Git index, `rm .git/index` also work, check: https://stackoverflow.com/questions/5787937/git-status-shows-files-as-changed-even-though-contents-are-the-same/41041699#41041699
-  IS_WIN32 && await quickRun('git reset --hard @{upstream}')
+  IS_WIN32 && await quickRun('git reset --hard')
 
   // Patch npm
   //   set cache path to `~/.npm/` for all platform (only win32 for now)
