@@ -46,7 +46,7 @@ const setupClientWebSocketTunnel = ({
     socket.on('data', (buffer) => {
       // log && log(`  - socket data ${buffer.length} | ${tunnelWebSocket}`)
       if (tunnelWebSocket === undefined) pendingBuffer.push(buffer)
-      else tunnelWebSocket.isOpen() && tunnelWebSocket.sendBuffer(buffer)
+      else tunnelWebSocket.isOpen() && tunnelWebSocket.sendBuffer(buffer) // TODO: check size and try debounce for bigger frames?
     })
     createWebSocketClient({
       url,

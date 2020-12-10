@@ -17,12 +17,12 @@ const configureLog = ({
       getLogFileName: () => `${logFilePrefix}${(new Date().toISOString()).replace(/\W/g, '-')}.log`,
       flags: 'a' // append, not reset file if exist
     })
-    : {
-      ...createDummyExot({ idPrefix: 'log-' }),
+    : createDummyExot({
+      idPrefix: 'log-',
       add: console.log,
       save: () => {},
       split: () => {}
-    }
+    })
   )
 })
 
