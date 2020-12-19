@@ -14,7 +14,8 @@ const OPTION_CONFIG = {
     Preset.Config,
     ...Preset.parseCompactList(
       'help,h/T|show full help',
-      'version,v/T|show version'
+      'version,v/T|show version',
+      'note,N/AS,O|noop, tag for ps/htop'
     ),
     ...CommonFormatConfigList,
     ...ModuleFormatConfigList,

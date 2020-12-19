@@ -148,6 +148,8 @@
 >       show full help
 >   --version --v -v [OPTIONAL] [ARGUMENT=0-1]
 >       show version
+>   --note --N -N [OPTIONAL] [ARGUMENT=1+]
+>       noop, tag for ps/htop
 >   --quiet --q -q [OPTIONAL] [ARGUMENT=0-1]
 >       less log
 >   --input-file --I -I [OPTIONAL] [ARGUMENT=1]
@@ -260,6 +262,7 @@
 >     export DR_NODE_CONFIG="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_HELP="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_VERSION="[OPTIONAL] [ARGUMENT=0-1]"
+>     export DR_NODE_NOTE="[OPTIONAL] [ARGUMENT=1+]"
 >     export DR_NODE_QUIET="[OPTIONAL] [ARGUMENT=0-1]"
 >     export DR_NODE_INPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
 >     export DR_NODE_OUTPUT_FILE="[OPTIONAL] [ARGUMENT=1]"
@@ -328,6 +331,7 @@
 >     "config": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "help": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "version": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
+>     "note": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "quiet": [ "[OPTIONAL] [ARGUMENT=0-1]" ],
 >     "inputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "outputFile": [ "[OPTIONAL] [ARGUMENT=1]" ],
