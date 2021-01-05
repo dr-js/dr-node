@@ -29,7 +29,7 @@
 + 📄 [source/module/RuntimeDump.js](source/module/RuntimeDump.js)
   - `dumpAsync`, `getV8Extra`, `getV8HeapSnapshotReadableStream`, `setupSIGUSR2`, `writeV8HeapSnapshot`
 + 📄 [source/module/ServerExot.js](source/module/ServerExot.js)
-  - `configureServerExot`, `parseHostString`
+  - `configureServerExot`, `parseCookieString`, `parseHostString`
 + 📄 [source/module/ServerStatus.js](source/module/ServerStatus.js)
   - `COMMON_SERVER_STATUS_COMMAND_LIST`, `getCommonServerStatus`
 + 📄 [source/module/TerminalColor.js](source/module/TerminalColor.js)

@@ -10,6 +10,15 @@ const parseHostString = (host, defaultHostname) => { // for ipv6 should use host
   return { hostname, port }
 }
 
+const parseCookieString = (cookieString) => cookieString
+  .split(';')
+  .reduce((o, v) => {
+    const [ key, ...valueList ] = v.split('=')
+    const value = valueList.join('=').trim()
+    if (value !== '') o[ key.trim() ] = value
+    return o
+  }, {})
+
 __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: single', { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined })
 __DEV__ && console.log('SAMPLE_TLS_SNI_CONFIG: multi', {
   'default': { key: Buffer || String, cert: Buffer || String, ca: Buffer || String || undefined }, // default hostname
@@ -60,6 +69,6 @@ const objectMapAsync = async (object, mapFuncAsync) => {
 }
 
 export {
-  parseHostString,
+  parseHostString, parseCookieString,
   configureServerExot
 }

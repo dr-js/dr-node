@@ -25,7 +25,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Patch & log CI info
-        run: npx @dr-js/core@^0.4.3-dev.0 -eI .github/ci-patch.js
+        run: npx @dr-js/core@^0.4 -eI .github/ci-patch.js
 
       - run: npm ci
 
