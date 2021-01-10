@@ -4,6 +4,8 @@
 * [Bin Option Format](#bin-option-format)
 
 #### Export Path
++ 📄 [source/resource.js](source/resource.js)
+  - `loadJSON`, `loadLocalJSON`, `loadLocalScript`, `loadRemoteJSON`, `loadRemoteScript`, `loadScript`
 + 📄 [source/module/Auth.js](source/module/Auth.js)
   - `AUTH_FILE`, `AUTH_FILE_GROUP`, `AUTH_SKIP`, `DEFAULT_AUTH_KEY`, `configureAuth`, `configureAuthFile`, `configureAuthFileGroup`, `configureAuthSkip`, `describeAuthFile`, `generateAuthCheckCode`, `generateAuthFile`, `loadAuthFile`, `saveAuthFile`, `verifyAuthCheckCode`
 + 📄 [source/module/Compress.js](source/module/Compress.js)
