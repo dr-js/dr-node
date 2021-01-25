@@ -1,7 +1,7 @@
 import { strictEqual } from '@dr-js/core/module/common/verify'
 import {
   check, verify,
-  getGitBranch, getGitCommitHash
+  getGitBranch, getGitCommitHash, getGitCommitMessage
 } from './git'
 
 const { describe, it, info = console.log } = global
@@ -12,4 +12,5 @@ describe('Node.Module.Software.git', () => {
 
   it('getGitBranch()', () => info(`getGitBranch: ${getGitBranch()}`))
   it('getGitCommitHash()', () => info(`getGitCommitHash: ${getGitCommitHash()}`))
+  it('getGitCommitMessage()', () => info(`getGitCommitMessage: ${getGitCommitMessage()}`))
 })

@@ -57,7 +57,7 @@
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
   - `createArgListPack`, `createCommandWrap`, `createDetect`, `probeSync`, `withTempPath`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
-  - `check`, `detect`, `getArgs`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setArgs`, `setCommand`, `verify`
+  - `check`, `detect`, `getArgs`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `getGitCommitMessage`, `setArgs`, `setCommand`, `verify`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
   - `fetchLikeRequestWithProxy`, `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
 + 📄 [source/module/Software/npmTar.js](source/module/Software/npmTar.js)
