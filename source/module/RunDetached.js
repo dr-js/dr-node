@@ -2,7 +2,7 @@ import { spawn } from 'child_process'
 import { promises as fsAsync } from 'fs'
 import { getProcessListAsync, toProcessPidMap, findProcessPidMapInfo, isPidExist } from '@dr-js/core/module/node/system/Process'
 
-const runDetached = async ({ command, argList, option, logFile }) => {
+const runDetached = async ({ command, argList, option, logFile }) => { // TODO: DEPRECATE: use `runDetached` from `@dr-js/core`
   const logFh = await fsAsync.open(logFile, 'a')
   const subProcess = spawn(command, argList, {
     stdio: [ 'ignore', logFh.fd, logFh.fd ], // TODO: NOTE: should test for https://github.com/joyent/libuv/issues/923
@@ -15,13 +15,13 @@ const runDetached = async ({ command, argList, option, logFile }) => {
   return { subProcess }
 }
 
-const findDetachedProcessAsync = async (processInfo, processList) => {
+const findDetachedProcessAsync = async (processInfo, processList) => { // TODO: DEPRECATE
   if (!processInfo || !isPidExist(processInfo.pid)) return
   if (processList === undefined) processList = await getProcessListAsync()
   return findProcessPidMapInfo(processInfo, toProcessPidMap(processList))
 }
 
 export {
-  runDetached,
-  findDetachedProcessAsync
+  runDetached, // TODO: DEPRECATE: use `runDetached` from `@dr-js/core`
+  findDetachedProcessAsync // TODO: DEPRECATE
 }

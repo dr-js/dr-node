@@ -15,9 +15,8 @@ const initAuthMask = ({
         Module: { TimedLookup: { generateCheckCode, packDataArrayBuffer, parseDataArrayBuffer } }
       },
       Browser: {
-        DOM: { applyReceiveFileListListener },
-        Data: { Blob: { parseBlobAsArrayBuffer } },
-        Resource: { saveArrayBufferCache, loadArrayBufferCache, deleteArrayBufferCache, createDownload }
+        DOM: { applyReceiveFileListListener, saveArrayBufferCache, loadArrayBufferCache, deleteArrayBufferCache, createDownload },
+        Data: { Blob: { parseBlobAsArrayBuffer } }
       }
     }
   } = window

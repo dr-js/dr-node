@@ -1,4 +1,3 @@
-import { once } from '@dr-js/core/module/common/function'
 import { createExotGroup } from '@dr-js/core/module/common/module/Exot'
 
 import { responderEnd, responderEndWithStatusCode, responderEndWithRedirect, createResponderLog, createResponderLogEnd } from '@dr-js/core/module/node/server/Responder/Common'
@@ -7,7 +6,7 @@ import { createResponderFavicon } from '@dr-js/core/module/node/server/Responder
 import { createRequestListener, describeServerOption } from '@dr-js/core/module/node/server/Server'
 import { enableWebSocketServer } from '@dr-js/core/module/node/server/WebSocket/WebSocketServer'
 import { createUpdateRequestListener } from '@dr-js/core/module/node/server/WebSocket/WebSocketUpgradeRequest'
-import { addExitListenerAsync, addExitListenerSync } from '@dr-js/core/module/node/system/ExitListener'
+import { addExitListenerLossyOnce } from '@dr-js/core/module/node/system/ExitListener'
 
 import { configureLog } from 'source/module/Log'
 import { configurePid } from 'source/module/Pid'
@@ -115,13 +114,11 @@ const runServerExotGroup = async (pack) => {
     serverExotGroup = serverExot, // NOTE: also allow run serverExot
     loggerExot, isMuteLog = !loggerExot || false // optional
   } = pack
-  const down = once((eventPack) => {
+  addExitListenerLossyOnce((eventPack) => {
     isMuteLog || loggerExot.add(`[SERVER] down... ${JSON.stringify(eventPack)}${eventPack.error ? ` ${eventPack.error.stack || eventPack.error}` : ''}`)
     return serverExotGroup.down()
       .then(() => isMuteLog || loggerExot.add('[SERVER] down'))
   }) // trigger all exot down, the worst case those sync ones may still finish
-  addExitListenerSync(down)
-  addExitListenerAsync(down)
   isMuteLog || loggerExot.add('[SERVER] up...')
   await serverExotGroup.up()
   isMuteLog || loggerExot.add('[SERVER] up')
