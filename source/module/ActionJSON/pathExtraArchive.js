@@ -1,10 +1,10 @@
 import { dirname } from 'path'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
-import { run } from '@dr-js/core/module/node/system/Run'
+import { run } from '@dr-js/core/module/node/run'
 
 import { detect as detectAuto, compressAutoAsync, extractAutoAsync } from 'source/module/Software/archive'
 import { detect as detectNpmTar, compressAsync as compressNpmTarAsync, extractAsync as extractNpmTarAsync } from 'source/module/Software/npmTar'
-import { detect as detectTar, compressConfig as compressConfigTar, extractConfig as extractConfigTar } from 'source/module/Software/tar'
+import { detect as detectTar, extractArgs as compressArgsTar, extractArgs as extractArgsTar } from 'source/module/Software/tar'
 
 const PATH_COMPRESS_TAR = 'path.compress-tar'
 const PATH_EXTRACT_TAR = 'path.extract-tar'
@@ -34,11 +34,11 @@ const ACTION_CORE_MAP = ( // filled based on detect result
   detectTar(true) && { // support `.tar|.tgz` with tar
     [ PATH_COMPRESS_TAR ]: async (sourceDirectory, outputFile) => {
       await createDirectory(dirname(outputFile))
-      await run(compressConfigTar(sourceDirectory, outputFile)).promise
+      await run(compressArgsTar(sourceDirectory, outputFile)).promise
     },
     [ PATH_EXTRACT_TAR ]: async (sourceFile, outputPath) => {
       await createDirectory(outputPath)
-      await run(extractConfigTar(sourceFile, outputPath)).promise
+      await run(extractArgsTar(sourceFile, outputPath)).promise
     }
   }
 ) || {} // no support

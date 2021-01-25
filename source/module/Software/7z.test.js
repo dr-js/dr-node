@@ -1,5 +1,6 @@
 import { resolve, basename } from 'path'
-import { run } from '@dr-js/core/module/node/system/Run'
+import { strictEqual } from '@dr-js/core/module/common/verify'
+import { run } from '@dr-js/core/module/node/run'
 
 import {
   fromRoot, setupRoot, clearRoot,
@@ -7,8 +8,8 @@ import {
 } from './archive.test/function'
 
 import {
-  detect,
-  compressConfig, extractConfig
+  check, verify,
+  compressArgs, extractArgs
 } from './7z'
 
 const { describe, it, before, after, info = console.log } = global
@@ -20,21 +21,22 @@ before(setupRoot)
 after(clearRoot)
 
 describe('Node.Module.Software.7z', () => {
-  it('detect()', detect)
+  it('check()', () => strictEqual(check(), true))
+  it('verify()', verify)
 
-  it('compressConfig() & extractConfig()', async () => {
-    info('compressConfig')
+  it('compressArgs() & extractArgs()', async () => {
+    info('compressArgs')
     await Promise.all([
-      run(compressConfig(SOURCE_DIRECTORY, fromTemp('compressConfig/test.7z'))).promise,
-      run(compressConfig(SOURCE_DIRECTORY, fromTemp('compressConfig/test.zip'))).promise
+      run(compressArgs(SOURCE_DIRECTORY, fromTemp('compressArgs/test.7z'))).promise,
+      run(compressArgs(SOURCE_DIRECTORY, fromTemp('compressArgs/test.zip'))).promise
     ])
-    info('extractConfig')
+    info('extractArgs')
     await Promise.all([
-      run(extractConfig(fromTemp('compressConfig/test.7z'), fromTemp('extractConfig/test.7z-extract/'))).promise,
-      run(extractConfig(fromTemp('compressConfig/test.zip'), fromTemp('extractConfig/test.zip-extract/'))).promise
+      run(extractArgs(fromTemp('compressArgs/test.7z'), fromTemp('extractArgs/test.7z-extract/'))).promise,
+      run(extractArgs(fromTemp('compressArgs/test.zip'), fromTemp('extractArgs/test.zip-extract/'))).promise
     ])
     info('verifyOutputDirectory')
-    await verifyOutputDirectory(fromTemp('extractConfig/test.7z-extract/'))
-    await verifyOutputDirectory(fromTemp('extractConfig/test.zip-extract/'))
+    await verifyOutputDirectory(fromTemp('extractArgs/test.7z-extract/'))
+    await verifyOutputDirectory(fromTemp('extractArgs/test.zip-extract/'))
   })
 })

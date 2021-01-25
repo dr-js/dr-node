@@ -1,4 +1,5 @@
 import { resolve, basename } from 'path'
+import { strictEqual } from '@dr-js/core/module/common/verify'
 
 import {
   fromRoot, setupRoot, clearRoot,
@@ -7,7 +8,7 @@ import {
 } from './archive.test/function'
 
 import {
-  detect,
+  check, verify,
   // compress7zAsync, extract7zAsync,
   compressT7zAsync, extractT7zAsync,
   compressAutoAsync, extractAutoAsync,
@@ -23,7 +24,8 @@ before(setupRoot)
 after(clearRoot)
 
 describe('Node.Module.Software.npmTar', () => {
-  it('detect()', detect)
+  it('check()', () => strictEqual(check(), true))
+  it('verify()', verify)
 
   it('compressT7zAsync() & extractT7zAsync()', async () => {
     info('compressT7zAsync')

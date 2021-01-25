@@ -1,6 +1,6 @@
 import { binary } from '@dr-js/core/module/common/format'
 import { isString, isBasicFunction } from '@dr-js/core/module/common/check'
-import { run } from '@dr-js/core/module/node/system/Run'
+import { run } from '@dr-js/core/module/node/run'
 import { describeSystemStatus } from '@dr-js/core/module/node/system/Status'
 
 // TODO: allow user change || overwrite commands
@@ -28,7 +28,7 @@ const COMMON_SERVER_STATUS_COMMAND_LIST = [
 ].filter(Boolean)
 
 const runQuick = async (command, rootPath) => {
-  const { promise, stdoutPromise } = run({ command, option: { cwd: rootPath, shell: true }, quiet: true })
+  const { promise, stdoutPromise } = run([ command ], { cwd: rootPath, shell: true, quiet: true, describeError: true })
   await promise
   return String(await stdoutPromise)
 }

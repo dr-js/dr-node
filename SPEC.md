@@ -47,21 +47,23 @@
 + 📄 [source/module/ActionJSON/status.js](source/module/ActionJSON/status.js)
   - `ACTION_CORE_MAP`, `ACTION_TYPE`, `setupActionMap`
 + 📄 [source/module/Software/7z.js](source/module/Software/7z.js)
-  - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
+  - `check`, `compressArgs`, `compressConfig`, `detect`, `extractArgs`, `extractConfig`, `getArgs`, `getCommand`, `setArgs`, `setCommand`, `verify`
 + 📄 [source/module/Software/archive.js](source/module/Software/archive.js)
-  - `REGEXP_AUTO`, `REGEXP_T7Z`, `REGEXP_TXZ`, `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`
+  - `REGEXP_AUTO`, `REGEXP_T7Z`, `REGEXP_TXZ`, `check`, `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`, `verify`
++ 📄 [source/module/Software/docker.js](source/module/Software/docker.js)
+  - `check`, `getArgs`, `setArgs`, `verify`
 + 📄 [source/module/Software/fspTar.js](source/module/Software/fspTar.js)
   - `REGEXP_FSP_TAR`, `compressAsync`, `compressFspAsync`, `compressFspGzAsync`, `extractAsync`, `extractFspAsync`, `extractFspGzAsync`
 + 📄 [source/module/Software/function.js](source/module/Software/function.js)
-  - `createCommandWrap`, `createDetect`, `withTempPath`
+  - `createArgListPack`, `createCommandWrap`, `createDetect`, `probeSync`, `withTempPath`
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
-  - `detect`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setCommand`
+  - `check`, `detect`, `getArgs`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `setArgs`, `setCommand`, `verify`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
   - `fetchLikeRequestWithProxy`, `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
 + 📄 [source/module/Software/npmTar.js](source/module/Software/npmTar.js)
-  - `REGEXP_NPM_TAR`, `REGEXP_TGZ`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `extractPackageJson`, `getNpmTar`
+  - `REGEXP_NPM_TAR`, `REGEXP_TGZ`, `check`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `extractPackageJson`, `getNpmTar`, `verify`
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)
-  - `compressConfig`, `detect`, `extractConfig`, `getCommand`, `setCommand`
+  - `check`, `compressArgs`, `compressConfig`, `detect`, `extractArgs`, `extractConfig`, `getArgs`, `getCommand`, `setArgs`, `setCommand`, `verify`
 + 📄 [source/module/Stat/StatCollect.js](source/module/Stat/StatCollect.js)
   - `createStatCollectExot`
 + 📄 [source/module/Stat/StatReport.js](source/module/Stat/StatReport.js)

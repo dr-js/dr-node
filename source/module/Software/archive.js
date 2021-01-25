@@ -3,10 +3,16 @@ import { createGzip } from 'zlib'
 import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
 import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
-import { run } from '@dr-js/core/module/node/system/Run'
+import { run } from '@dr-js/core/module/node/run'
 
-import { detect as detect7z, compressConfig, extractConfig } from './7z'
-import { REGEXP_TGZ, REGEXP_NPM_TAR, detect as detectNpmTar, compressAsync as compressNpmTarAsync, extractAsync as extractNpmTarAsync } from './npmTar'
+import {
+  check as check7z, verify as verify7z, compressArgs, extractArgs,
+  detect as detect7z // TODO: DEPRECATE
+} from './7z'
+import {
+  REGEXP_TGZ, REGEXP_NPM_TAR, check as checkNpmTar, verify as verifyNpmTar, compressAsync as compressNpmTarAsync, extractAsync as extractNpmTarAsync,
+  detect as detectNpmTar // TODO: DEPRECATE
+} from './npmTar'
 import { REGEXP_FSP_TAR, compressAsync as compressFspTarAsync, extractAsync as extractFspTarAsync } from './fspTar'
 import { withTempPath } from './function'
 
@@ -14,10 +20,11 @@ const REGEXP_T7Z = /\.t(?:ar\.)?7z$/
 const REGEXP_TXZ = /\.t(?:ar\.)?xz$/
 const REGEXP_AUTO = /\.(?:tar|tgz|tar\.gz|t7z|tar\.7z|txz|tar\.xz|7z|zip|fsp|fsp\.gz)$/ // common supported extension
 
-const detect = (checkOnly) => detect7z(checkOnly) && detectNpmTar(checkOnly)
+const check = () => Boolean(check7z() && checkNpmTar())
+const verify = () => verify7z() && verifyNpmTar() && true
 
-const compress7zAsync = async (sourceDirectory, outputFile) => run(compressConfig(sourceDirectory, outputFile)).promise
-const extract7zAsync = async (sourceFile, outputPath) => run(extractConfig(sourceFile, outputPath)).promise
+const compress7zAsync = async (sourceDirectory, outputFile) => run(compressArgs(sourceDirectory, outputFile)).promise
+const extract7zAsync = async (sourceFile, outputPath) => run(extractArgs(sourceFile, outputPath)).promise
 
 // for `.tar.xz|.txz|.tar.7z|.t7z` with 7z, same idea: https://sourceforge.net/p/sevenzip/discussion/45797/thread/482a529a/
 // NOTE: for small files, `.txz` is smaller than `.t7z`, though repack to `.7z` is normally the smallest
@@ -65,10 +72,14 @@ const __repackTarAsync = async (fileFrom, fileTo, pathTemp) => {
   } else await compress7zAsync(pathTemp, fileTo) // `.t7z|.tar.7z` should cause 7zip to use default 7z type
 }
 
+const detect = (checkOnly) => detect7z(checkOnly) && detectNpmTar(checkOnly) // TODO: DEPRECATED
+
 export {
-  REGEXP_T7Z, REGEXP_TXZ, REGEXP_AUTO, detect,
+  REGEXP_T7Z, REGEXP_TXZ, REGEXP_AUTO, check, verify,
   compress7zAsync, extract7zAsync,
   compressT7zAsync, extractT7zAsync,
   compressAutoAsync, extractAutoAsync,
-  repackAsync, repackTarAsync
+  repackAsync, repackTarAsync,
+
+  detect // TODO: DEPRECATED
 }

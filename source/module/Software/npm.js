@@ -74,7 +74,7 @@ let cachePathNpm // npm package path
 const getPathNpm = () => {
   if (cachePathNpm === undefined) {
     { // npm help fast hack
-      const npmHelpText = String(spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm').stdout).trim()
+      const npmHelpText = String(spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm').stdout || '').trim()
       const npmHelpLastLine = npmHelpText && npmHelpText.split('\n').pop() // should be: npm@{version} {npm-full-path}
       const npmFullPath = npmHelpLastLine && npmHelpLastLine.split(' ').pop()
       if (npmFullPath) cachePathNpm = npmFullPath

@@ -6,7 +6,7 @@ import { withRunBackground } from '@dr-js/dev/module/node/run'
 import { runMain } from '@dr-js/dev/module/main'
 
 import { stringifyEqual } from '@dr-js/core/module/common/verify'
-import { run } from '@dr-js/core/module/node/system/Run'
+import { run } from '@dr-js/core/module/node/run'
 
 import { ACTION_TYPE } from 'source/module/ActionJSON/path'
 
@@ -85,18 +85,18 @@ runMain(async ({ padLog, stepLog }) => {
     await fsAsync.writeFile(FILE_CLIENT_FILE_DOWNLOAD_CONFIG, TEXT_CLIENT_FILE_DOWNLOAD_CONFIG)
     await fsAsync.writeFile(FILE_TEST, await fsAsync.readFile(fromRoot('package-lock.json')))
 
-    const command = process.execPath // node bin path
+    const commandBin = [ process.execPath, fromOutput('bin/index.js') ]
 
     padLog('create FILE_AUTH_KEY')
-    await run({ command, argList: [ fromOutput('bin/index.js'), '-O', FILE_AUTH_KEY, '--auth-gen-tag', 'TEST_SERVER_AUTH' ] }).promise
+    await run([ ...commandBin, '-O', FILE_AUTH_KEY, '--auth-gen-tag', 'TEST_SERVER_AUTH' ]).promise
 
     padLog('start server')
-    await withRunBackground({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ] }, async () => {
+    await withRunBackground({ command: process.execPath, argList: [ fromOutput('bin/index.js'), '-c', FILE_SERVER_CONFIG ] }, async () => {
       stepLog('start server done')
 
       const FILE_PATH_CONTENT_OUTPUT = fromTemp('path-content.json')
       const getPathContentJSON = async () => {
-        const { promise, stderrPromise } = run({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_PATH_ACTION_CONFIG, '-O', FILE_PATH_CONTENT_OUTPUT ] })
+        const { promise, stderrPromise } = run([ ...commandBin, '-c', FILE_CLIENT_PATH_ACTION_CONFIG, '-O', FILE_PATH_CONTENT_OUTPUT ])
         await promise.catch(async (error) => {
           console.error('[error]', error)
           console.error('[stderrString]', String(await stderrPromise))
@@ -113,11 +113,11 @@ runMain(async ({ padLog, stepLog }) => {
       stepLog('test node path action done')
 
       padLog('test node file upload')
-      await run({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_FILE_UPLOAD_CONFIG ] }).promise
+      await run([ ...commandBin, '-c', FILE_CLIENT_FILE_UPLOAD_CONFIG ]).promise
       stepLog('test node file upload done')
 
       padLog('test node file download')
-      await run({ command, argList: [ fromOutput('bin/index.js'), '-c', FILE_CLIENT_FILE_DOWNLOAD_CONFIG ] }).promise
+      await run([ ...commandBin, '-c', FILE_CLIENT_FILE_DOWNLOAD_CONFIG ]).promise
       stepLog('test node file download done')
 
       padLog('test node path action')

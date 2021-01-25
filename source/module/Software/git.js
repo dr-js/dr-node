@@ -1,25 +1,33 @@
 import { spawnSync } from 'child_process'
-import { createCommandWrap, createDetect } from './function'
-
-const { getCommand, setCommand } = createCommandWrap('git')
+import {
+  probeSync, createArgListPack,
+  createCommandWrap, createDetect
+} from './function'
 
 // $ git --version
 //   git version 2.23.0
-const detect = createDetect(
-  'git version',
-  'expect "git" in PATH',
-  getCommand, '--version'
+const { getArgs, setArgs, check, verify } = createArgListPack(
+  () => probeSync([ 'git', '--version' ], 'git version')
+    ? [ 'git' ]
+    : undefined,
+  'expect "git" in PATH'
 )
 
-const runSync = (...argList) => String(spawnSync(getCommand(), argList).stdout).replace(/\s/g, '')
+const runSync = (...args) => {
+  const [ command, ...argList ] = [ ...verify(), ...args ]
+  return String(spawnSync(command, argList).stdout || '').replace(/\s/g, '')
+}
 
-const getGitBranch = () => runSync('symbolic-ref', '--short', 'HEAD') || `detached-HEAD/${runSync('rev-parse', '--short', 'HEAD')}`
+const getGitBranch = () => runSync('symbolic-ref', '--short', 'HEAD') ||
+  `detached-HEAD/${runSync('rev-parse', '--short', 'HEAD')}`
 const getGitCommitHash = () => runSync('log', '-1', '--format=%H')
 
-export {
-  getCommand, setCommand, detect,
+const { getCommand, setCommand } = createCommandWrap('git') // TODO: DEPRECATE
+const detect = createDetect('git version', 'expect "git" in PATH', getCommand, '--version') // TODO: DEPRECATE
 
-  // TODO: NOTE: sync only, expect cwd under git repo
-  getGitBranch,
-  getGitCommitHash
+export {
+  getArgs, setArgs, check, verify,
+  getGitBranch, getGitCommitHash, // TODO: NOTE: sync only, expect cwd under git repo
+
+  getCommand, setCommand, detect // TODO: DEPRECATE
 }

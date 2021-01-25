@@ -1,6 +1,6 @@
 import { resolve, basename } from 'path'
 import { createReadStream, createWriteStream } from 'fs'
-import { doThrowAsync } from '@dr-js/core/module/common/verify'
+import { strictEqual, doThrowAsync } from '@dr-js/core/module/common/verify'
 import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 
@@ -11,7 +11,7 @@ import {
 } from './archive.test/function'
 
 import {
-  detect,
+  getNpmTar, check, verify,
   createCompressStream, createExtractStream,
   compressAsync, extractAsync
 } from './npmTar'
@@ -25,7 +25,9 @@ before(setupRoot)
 after(clearRoot)
 
 describe('Node.Module.Software.npmTar', () => {
-  it('detect()', detect)
+  it('getNpmTar()', () => strictEqual(Boolean(getNpmTar()), true))
+  it('check()', () => strictEqual(check(), true))
+  it('verify()', verify)
 
   it('createCompressStream() & createExtractStream()', async () => {
     info('createCompressStream')

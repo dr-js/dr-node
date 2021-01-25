@@ -1,7 +1,7 @@
 import { createInsideOutPromise, withTimeoutPromise } from '@dr-js/core/module/common/function'
 import { clock } from '@dr-js/core/module/common/time'
 import { requestHttp } from '@dr-js/core/module/node/net'
-import { run } from '@dr-js/core/module/node/system/Run'
+import { run } from '@dr-js/core/module/node/run'
 
 // TODO: currently `ping` is actually `tcp-ping`,
 
@@ -14,15 +14,12 @@ import { run } from '@dr-js/core/module/node/system/Run'
 //   check: https://github.com/nodejs/node/blob/v14.13.1/lib/net.js#L1038-L1040
 const getHackLookupDNS = (subProcessSet) => (hostname, option, callback) => {
   __DEV__ && console.log('[getHackLookupDNS]', { hostname, option, callback })
-  const { subProcess, promise, stdoutPromise } = run({
-    quiet: true,
-    command: process.execPath,
-    argList: [ '-e', `require('dns').lookup(${JSON.stringify(hostname)}, ${JSON.stringify(option)}, (...args) => console.log(JSON.stringify(args)))` ]
-  })
+  const { subProcess, promise, stdoutPromise } = run([
+    process.execPath, '-e', `require('dns').lookup(${JSON.stringify(hostname)}, ${JSON.stringify(option)}, (...args) => console.log(JSON.stringify(args)))`
+  ], { quiet: true, describeError: true })
   promise
-    .then(() => stdoutPromise)
-    .then((stdoutBuffer) => {
-      const args = JSON.parse(String(stdoutBuffer))
+    .then(async () => {
+      const args = JSON.parse(String(await stdoutPromise))
       __DEV__ && console.log('[getHackLookupDNS]', { hostname, args })
       callback(...args)
     })

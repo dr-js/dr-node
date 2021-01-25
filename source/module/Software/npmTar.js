@@ -9,14 +9,14 @@ const REGEXP_NPM_TAR = /\.(?:tar|tgz|tar\.gz)$/
 
 let cacheNpmTar
 const getNpmTar = () => {
-  if (cacheNpmTar === undefined) cacheNpmTar = tryRequire(fromNpmNodeModules('tar')) || null // https://npm.im/tar
+  if (cacheNpmTar === undefined) cacheNpmTar = tryRequire(fromNpmNodeModules('tar')) || null // check doc from: https://npm.im/tar
   return cacheNpmTar
 }
-
-const detect = (checkOnly) => {
-  const isDetected = Boolean(getNpmTar())
-  if (checkOnly) return isDetected
-  if (!isDetected) throw new Error('expect "npm/node_modules/tar"')
+const check = () => Boolean(getNpmTar())
+const verify = () => {
+  const npmTar = getNpmTar()
+  if (!npmTar) throw new Error('expect "npm/node_modules/tar"')
+  return npmTar
 }
 
 // TODO: NOTE: there'll be an empty `.` folder in the output tar for the default nameList, but will disappear after extract, replacing the file list to the output of readdirSync may solve this
@@ -51,9 +51,17 @@ const extractPackageJson = async (sourceFile) => { // https://github.com/npm/nod
   return JSON.parse(String(Buffer.concat(chunkList)))
 }
 
+const detect = (checkOnly) => { // TODO: DEPRECATED
+  const isDetected = Boolean(getNpmTar())
+  if (checkOnly) return isDetected
+  if (!isDetected) throw new Error('expect "npm/node_modules/tar"')
+}
+
 export {
-  REGEXP_TGZ, REGEXP_NPM_TAR, getNpmTar, detect,
+  REGEXP_TGZ, REGEXP_NPM_TAR, getNpmTar, check, verify,
   createCompressStream, createExtractStream,
   compressAsync, extractAsync, // NOTE: will not auto create output path
-  extractPackageJson
+  extractPackageJson,
+
+  detect // TODO: DEPRECATED
 }
