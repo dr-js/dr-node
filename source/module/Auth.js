@@ -8,7 +8,7 @@ import {
 import { createCacheMap } from '@dr-js/core/module/common/data/CacheMap'
 import { time, binary, prettyStringifyJSON } from '@dr-js/core/module/common/format'
 import { indentList } from '@dr-js/core/module/common/string'
-import { getEntityTagByContentHashAsync } from '@dr-js/core/module/node/module/EntityTag'
+import { getEntityTagByContentHash } from '@dr-js/core/module/node/module/EntityTag'
 
 import { fetchLikeRequest } from '@dr-js/core/module/node/net'
 import { toArrayBuffer } from '@dr-js/core/module/node/data/Buffer'
@@ -24,7 +24,7 @@ const describeAuthFile = async (pathFile) => {
     `tokenSize: ${tokenSize}B`,
     `timeGap: ${time(timeGap * 1000)}`,
     info && `info: ${prettyStringifyJSON(info)}`,
-    `dataViewEntityTag: ${await getEntityTagByContentHashAsync(Buffer.from(dataView.buffer))}`
+    `dataViewEntityTag: ${getEntityTagByContentHash(Buffer.from(dataView.buffer))}`
   ].filter(Boolean))
 }
 const generateAuthFile = async (pathFile, { tag, size, tokenSize, timeGap, info }) => {

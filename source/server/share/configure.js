@@ -18,7 +18,8 @@ const configureFeature = ({
   isRawServer = false, // set to skip route related configure
   isFavicon = true, isDebugRoute = false, rootRouteResponder,
   preResponderList = [],
-  preRouteList = []
+  preRouteList = [],
+  responderLogEnd = createResponderLogEnd({ loggerExot })
 }, featureList = []) => {
   serverExot.featureMap = new Map() // fill serverExot.featureMap
   serverExot.webSocketSet = undefined // may fill serverExot.webSocketSet
@@ -46,8 +47,6 @@ const configureFeature = ({
     return
   }
 
-  const responderLogEnd = createResponderLogEnd({ loggerExot })
-
   const routeMap = createRouteMap([
     ...preRouteList,
     ...featureRouteList,
@@ -66,7 +65,7 @@ const configureFeature = ({
     ].filter(Boolean),
     responderEnd: (store) => {
       responderEnd(store)
-      responderLogEnd(store)
+      return responderLogEnd(store) // return to allow this to be async
     }
   }))
 
@@ -126,9 +125,9 @@ const runServerExotGroup = async (pack) => {
 }
 
 const runServer = async (
-  configureServer,
-  serverOption,
-  featureOption,
+  configureServer, // async () => {} // custom configure
+  serverOption, // pid, log, host/port ...
+  featureOption, // feature only
   serverInfoTitle = !featureOption.packageName ? undefined : `${featureOption.packageName}@${featureOption.packageVersion}`
 ) => {
   await configurePid(serverOption)

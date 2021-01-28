@@ -3,12 +3,12 @@ import { roundFloat } from '@dr-js/core/module/common/math/base'
 import { transformCache } from '@dr-js/core/module/common/immutable/function'
 import { BASIC_EXTENSION_MAP } from '@dr-js/core/module/common/module/MIME'
 import { responderEndWithStatusCode } from '@dr-js/core/module/node/server/Responder/Common'
-import { responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core/module/node/server/Responder/Send'
+import { responderSendBufferCompress, prepareBufferData } from '@dr-js/core/module/node/server/Responder/Send'
 
 import { getRequestJSON } from 'source/module/RequestCommon'
 
 const createResponderStatState = ({ getStatState }) => {
-  const getBufferDataAsync = transformCache((statState) => prepareBufferDataAsync(Buffer.from(JSON.stringify(statState))), BASIC_EXTENSION_MAP.json)
+  const getBufferDataAsync = transformCache((statState) => prepareBufferData(Buffer.from(JSON.stringify(statState))), BASIC_EXTENSION_MAP.json)
   return async (store) => responderSendBufferCompress(store, await getBufferDataAsync(getStatState()))
 }
 

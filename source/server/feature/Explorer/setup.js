@@ -1,5 +1,5 @@
 import { BASIC_EXTENSION_MAP } from '@dr-js/core/module/common/module/MIME'
-import { responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core/module/node/server/Responder/Send'
+import { responderSendBufferCompress, prepareBufferData } from '@dr-js/core/module/node/server/Responder/Send'
 
 import { AUTH_SKIP } from 'source/module/Auth'
 import { ACTION_TYPE as ACTION_TYPE_PATH } from 'source/module/ActionJSON/path'
@@ -27,7 +27,7 @@ const setup = async ({
   IS_EXTRA_TAR && Object.assign(ACTION_TYPE, { PATH_COMPRESS_TAR: ACTION_TYPE_PATH_EXTRA_ARCHIVE.PATH_COMPRESS_TAR, PATH_EXTRACT_TAR: ACTION_TYPE_PATH_EXTRA_ARCHIVE.PATH_EXTRACT_TAR })
   IS_EXTRA_AUTO && Object.assign(ACTION_TYPE, { PATH_COMPRESS_AUTO: ACTION_TYPE_PATH_EXTRA_ARCHIVE.PATH_COMPRESS_AUTO, PATH_EXTRACT_AUTO: ACTION_TYPE_PATH_EXTRA_ARCHIVE.PATH_EXTRACT_AUTO })
 
-  const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
+  const HTMLBufferData = prepareBufferData(Buffer.from(getHTML({
     URL_AUTH_CHECK_ABBR, URL_ACTION_JSON_ABBR, URL_FILE_SERVE_ABBR, URL_FILE_UPLOAD,
     IS_SKIP_AUTH, IS_READ_ONLY, IS_EXTRA_TAR, IS_EXTRA_AUTO,
     ACTION_TYPE

@@ -1,5 +1,5 @@
 import { BASIC_EXTENSION_MAP } from '@dr-js/core/module/common/module/MIME'
-import { responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core/module/node/server/Responder/Send'
+import { responderSendBufferCompress, prepareBufferData } from '@dr-js/core/module/node/server/Responder/Send'
 
 import { createStatCollectExot } from 'source/module/Stat/StatCollect'
 
@@ -26,7 +26,7 @@ const setup = async ({
     authFetch
   })
 
-  const HTMLBufferData = await prepareBufferDataAsync(Buffer.from(getHTML({
+  const HTMLBufferData = prepareBufferData(Buffer.from(getHTML({
     URL_AUTH_CHECK_ABBR,
     URL_STAT_STATE,
     CONFIG_RENDER_PRESET: __DEV__
