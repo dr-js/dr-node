@@ -59,7 +59,7 @@
 + 📄 [source/module/Software/git.js](source/module/Software/git.js)
   - `check`, `detect`, `getArgs`, `getCommand`, `getGitBranch`, `getGitCommitHash`, `getGitCommitMessage`, `setArgs`, `setCommand`, `verify`
 + 📄 [source/module/Software/npm.js](source/module/Software/npm.js)
-  - `fetchLikeRequestWithProxy`, `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
+  - `fetchLikeRequestWithProxy`, `fetchWithJumpProxy`, `findUpPackageRoot`, `fromGlobalNodeModules`, `fromNpmNodeModules`, `getPathNpm`, `getPathNpmExecutable`, `getPathNpmGlobalRoot`, `parsePackageNameAndVersion`, `toPackageTgzName`
 + 📄 [source/module/Software/npmTar.js](source/module/Software/npmTar.js)
   - `REGEXP_NPM_TAR`, `REGEXP_TGZ`, `check`, `compressAsync`, `createCompressStream`, `createExtractStream`, `detect`, `extractAsync`, `extractPackageJson`, `getNpmTar`, `verify`
 + 📄 [source/module/Software/tar.js](source/module/Software/tar.js)

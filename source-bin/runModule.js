@@ -5,7 +5,7 @@ import { prettyStringifyTreeNode } from '@dr-js/core/module/common/data/Tree'
 import { PATH_TYPE } from '@dr-js/core/module/node/file/Path'
 import { getDirInfoList, getDirInfoTree, getFileList } from '@dr-js/core/module/node/file/Directory'
 
-import { sharedOption, sharedMode } from '@dr-js/core/bin/function' // NOTE: borrow bin code
+import { patchModulePath as patchModulePathCore, sharedOption, sharedMode } from '@dr-js/core/bin/function' // NOTE: borrow bin code
 
 import { describeAuthFile, generateAuthFile, generateAuthCheckCode, verifyAuthCheckCode, configureAuthFile } from 'source/module/Auth'
 import { ACTION_TYPE as ACTION_TYPE_PATH } from 'source/module/ActionJSON/path'
@@ -15,7 +15,7 @@ import { pingRaceUrlList, pingStatUrlList } from 'source/module/PingRace'
 
 import { compressAutoAsync, extractAutoAsync } from 'source/module/Software/archive'
 import { detect as detectGit, getGitBranch, getGitCommitHash } from 'source/module/Software/git'
-import { fetchLikeRequestWithProxy } from 'source/module/Software/npm'
+import { fetchWithJumpProxy } from 'source/module/Software/npm'
 
 import { runServerExotGroup } from 'source/server/share/configure'
 
@@ -24,7 +24,7 @@ import { actionJson } from 'source/server/feature/ActionJSON/client'
 import { fileUpload, fileDownload } from 'source/server/feature/File/client'
 import { setupClientWebSocketTunnel } from 'source/server/feature/WebSocketTunnelDev/client'
 
-import { setupPackageSIGUSR2 } from './function'
+import { patchModulePath, setupPackageSIGUSR2 } from './function'
 import { runQuickSampleExplorerServer } from './runSampleServer'
 
 const { pickOneOf, parseCompactList } = Preset
@@ -195,9 +195,13 @@ const runModule = async (optionData, modeName, packageName, packageVersion) => {
     }
 
     default:
-      return sharedMode({
+      return sharedMode({ // TODO: DEPRECATE: run from `@dr-js/dev`?
         ...sharedPack,
-        fetchUserAgent: `${packageName}/${packageVersion}`, fetchExtraOption: { fetch: fetchLikeRequestWithProxy }
+        patchMP: () => {
+          patchModulePath()
+          patchModulePathCore()
+        },
+        fetchWJ: fetchWithJumpProxy, fetchUA: `${packageName}/${packageVersion}`
       })
   }
 }

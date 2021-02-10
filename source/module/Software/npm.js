@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import { statSync, realpathSync } from 'fs'
 import { execFileSync, spawnSync } from 'child_process'
 import { resolveCommandName } from '@dr-js/core/module/node/system/ResolveCommand'
-import { fetchLikeRequest } from '@dr-js/core/module/node/net'
+import { fetchLikeRequest, fetchWithJump } from '@dr-js/core/module/node/net'
 import { tryRequire, tryRequireResolve } from '@dr-js/core/module/env/tryRequire'
 
 const parsePackageNameAndVersion = (nameAndVersion) => {
@@ -93,7 +93,8 @@ const getPathNpm = () => {
 }
 const fromNpmNodeModules = (...args) => getPathNpm() && resolve(getPathNpm(), './node_modules/', ...args) // should resolve to npm bundled package
 
-const fetchLikeRequestWithProxy = (url, option) => {
+const fetchLikeRequestWithProxy = (url, option = {}) => {
+  // NOTE: this is to support npm@6 which ship with agent-base@4, npm@7 do not need this
   tryRequire('https').request.__agent_base_https_request_patched__ = true // HACK: to counter HACK part1/2: https://github.com/TooTallNate/node-agent-base/commit/33af5450
   return fetchLikeRequest(url, {
     ...option,
@@ -101,6 +102,7 @@ const fetchLikeRequestWithProxy = (url, option) => {
     secureEndpoint: new URL(url).protocol === 'https:' // HACK: to counter HACK part2/2
   })
 }
+const fetchWithJumpProxy = (initialUrl, option) => fetchWithJump(initialUrl, { fetch: fetchLikeRequestWithProxy, ...option })
 
 export {
   parsePackageNameAndVersion,
@@ -111,5 +113,5 @@ export {
   getPathNpmGlobalRoot, fromGlobalNodeModules,
   getPathNpm, fromNpmNodeModules,
 
-  fetchLikeRequestWithProxy
+  fetchLikeRequestWithProxy, fetchWithJumpProxy
 }
