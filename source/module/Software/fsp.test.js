@@ -9,7 +9,7 @@ import {
 
 import {
   compressAsync, extractAsync
-} from './fspTar'
+} from './fsp'
 
 const { describe, it, before, after, info = console.log } = global
 
@@ -19,19 +19,23 @@ const fromTemp = (...args) => resolve(TEST_TEMP, ...args)
 before(async () => setupRoot('skip-mode-600'))
 after(clearRoot)
 
-describe('Node.Module.Software.fspTar', () => {
+describe('Node.Module.Software.fsp', () => {
   it('compressAsync() & extractAsync()', async () => {
     info('compressAsync')
     await createDirectory(fromTemp('compressAsync/'))
     await compressAsync(SOURCE_DIRECTORY, fromTemp('compressAsync/test.fsp'))
     await compressAsync(SOURCE_DIRECTORY, fromTemp('compressAsync/test.fsp.gz'))
+    await compressAsync(SOURCE_DIRECTORY, fromTemp('compressAsync/test.fsp.br'))
     info('extractAsync')
     await createDirectory(fromTemp('extractAsync/test.fsp-extract/'))
     await createDirectory(fromTemp('extractAsync/test.fsp.gz-extract/'))
+    await createDirectory(fromTemp('extractAsync/test.fsp.br-extract/'))
     await extractAsync(fromTemp('compressAsync/test.fsp'), fromTemp('extractAsync/test.fsp-extract/'))
     await extractAsync(fromTemp('compressAsync/test.fsp.gz'), fromTemp('extractAsync/test.fsp.gz-extract/'))
+    await extractAsync(fromTemp('compressAsync/test.fsp.br'), fromTemp('extractAsync/test.fsp.br-extract/'))
     info('verifyOutputDirectory')
     await verifyOutputDirectory(fromTemp('extractAsync/test.fsp-extract/'), 'skip-mode-600')
     await verifyOutputDirectory(fromTemp('extractAsync/test.fsp.gz-extract/'), 'skip-mode-600')
+    await verifyOutputDirectory(fromTemp('extractAsync/test.fsp.br-extract/'), 'skip-mode-600')
   })
 })

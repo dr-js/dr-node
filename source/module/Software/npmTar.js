@@ -1,11 +1,12 @@
 import { resolve } from 'path'
+import { createBrotliCompress, createBrotliDecompress } from 'zlib'
 import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
 import { tryRequire } from '@dr-js/core/module/env/tryRequire'
 import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
 import { fromNpmNodeModules } from './npm'
+import { REGEXP_TGZ, REGEXP_TBR } from './function'
 
-const REGEXP_TGZ = /\.t(?:ar\.)?gz$/
-const REGEXP_NPM_TAR = /\.(?:tar|tgz|tar\.gz)$/
+const REGEXP_NPM_TAR = /\.(?:tar|tgz|tar\.gz|tbr|tar\.br)$/
 
 let cacheNpmTar
 const getNpmTar = () => {
@@ -27,18 +28,20 @@ const createCompressStream = (sourceDirectory, option = { gzip: true }, nameList
 }
 const createExtractStream = (outputPath, option) => {
   outputPath = resolve(outputPath)
-  return getNpmTar().extract({ cwd: outputPath, ...option })
+  return getNpmTar().extract({ cwd: outputPath, ...option }) // will auto gunzip
 }
 
-// for `.tar|.tgz|.tar.gz`
-const compressAsync = async (sourceDirectory, outputFile) => quickRunletFromStream(
+// for `.tar|.tgz|.tar.gz|.tbr|.tar.br`
+const compressAsync = async (sourceDirectory, outputFile) => quickRunletFromStream.apply(null, [
   createCompressStream(sourceDirectory, { gzip: REGEXP_TGZ.test(outputFile) }, await fsAsync.readdir(sourceDirectory)),
+  REGEXP_TBR.test(outputFile) && createBrotliCompress(),
   createWriteStream(resolve(outputFile))
-)
-const extractAsync = async (sourceFile, outputPath) => quickRunletFromStream(
+].filter(Boolean))
+const extractAsync = async (sourceFile, outputPath) => quickRunletFromStream.apply(null, [
   createReadStream(resolve(sourceFile)),
+  REGEXP_TBR.test(sourceFile) && createBrotliDecompress(),
   createExtractStream(outputPath)
-)
+].filter(Boolean))
 
 const REGEXP_PACKAGE_JSON = /^[^/]+\/package\.json$/
 const extractPackageJson = async (sourceFile) => { // https://github.com/npm/node-tar/issues/181#issuecomment-492756116
@@ -57,11 +60,11 @@ const detect = (checkOnly) => { // TODO: DEPRECATED
   if (!isDetected) throw new Error('expect "npm/node_modules/tar"')
 }
 
-export {
-  REGEXP_TGZ, REGEXP_NPM_TAR, getNpmTar, check, verify,
+export { // TODO: move related to `module/Archive/`
+  REGEXP_NPM_TAR, getNpmTar, check, verify,
   createCompressStream, createExtractStream,
   compressAsync, extractAsync, // NOTE: will not auto create output path
   extractPackageJson,
 
-  detect // TODO: DEPRECATED
+  REGEXP_TGZ, REGEXP_TBR, detect // TODO: DEPRECATED
 }

@@ -1,6 +1,5 @@
-import { spawnSync } from 'child_process'
 import {
-  probeSync, createArgListPack,
+  spawnString, probeSync, createArgListPack,
   createCommandWrap, createDetect
 } from './function'
 
@@ -13,18 +12,15 @@ const { getArgs, setArgs, check, verify } = createArgListPack(
   'expect "git" in PATH'
 )
 
+const gitString = (...args) => spawnString([ ...verify(), ...args ])
 const squeeze = (string) => string.replace(/\s/g, '')
-const runSync = (...args) => {
-  const [ command, ...argList ] = [ ...verify(), ...args ]
-  return String(spawnSync(command, argList).stdout || '')
-}
 
 const getGitBranch = () => squeeze(
-  runSync('symbolic-ref', '--short', 'HEAD') ||
-  `detached-HEAD/${runSync('rev-parse', '--short', 'HEAD')}`
+  gitString('symbolic-ref', '--short', 'HEAD') ||
+  `detached-HEAD/${gitString('rev-parse', '--short', 'HEAD')}` // NOTE: fallback if no branch, mostly in CI tag build
 )
-const getGitCommitHash = (revisionRange = 'HEAD') => squeeze(runSync('log', '-1', '--format=%H', revisionRange))
-const getGitCommitMessage = (revisionRange = 'HEAD') => runSync('log', '-1', '--format=%B', revisionRange)
+const getGitCommitHash = (revisionRange = 'HEAD') => squeeze(gitString('log', '-1', '--format=%H', revisionRange))
+const getGitCommitMessage = (revisionRange = 'HEAD') => gitString('log', '-1', '--format=%B', revisionRange)
 
 const { getCommand, setCommand } = createCommandWrap('git') // TODO: DEPRECATE
 const detect = createDetect('git version', 'expect "git" in PATH', getCommand, '--version') // TODO: DEPRECATE

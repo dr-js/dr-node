@@ -4,9 +4,10 @@ import { strictEqual, stringifyEqual, doNotThrow } from '@dr-js/core/module/comm
 import {
   parsePackageNameAndVersion,
   findUpPackageRoot,
-  getPathNpmExecutable,
+  getPathNpmExecutable, getSudoArgs,
   getPathNpmGlobalRoot, fromGlobalNodeModules,
-  getPathNpm, fromNpmNodeModules
+  getPathNpm, fromNpmNodeModules,
+  hasRepoVersion
 } from './npm'
 
 const { describe, it, info = console.log } = global
@@ -41,6 +42,12 @@ describe('Node.Module.Software.npm', () => {
     info(`[getPathNpmExecutable] ${getPathNpmExecutable()}`)
   })
 
+  it('getSudoArgs()', () => {
+    doNotThrow(getSudoArgs)
+
+    info(`[getSudoArgs] ${getSudoArgs()}`)
+  })
+
   it('getPathNpmGlobalRoot()', () => {
     doNotThrow(getPathNpmGlobalRoot)
 
@@ -71,5 +78,11 @@ describe('Node.Module.Software.npm', () => {
       strictEqual(semver.valid(semver.coerce('v2')), '2.0.0')
       strictEqual(semver.valid(semver.coerce('42.6.7.9.3-alpha')), '42.6.7')
     }
+  })
+
+  it('hasRepoVersion', async () => { // TODO: kinda slow
+    strictEqual(await hasRepoVersion('@dr-js/node', '0.4.0'), true)
+    strictEqual(await hasRepoVersion('@dr-js/node', '0.4.0-version-should-not-exist'), false)
+    strictEqual(await hasRepoVersion('@dr-js/package-should-not-exist', '0.4.0'), false)
   })
 })

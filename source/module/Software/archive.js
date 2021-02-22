@@ -1,7 +1,5 @@
 import { resolve, dirname } from 'path'
-import { createGzip } from 'zlib'
-import { createReadStream, createWriteStream, promises as fsAsync } from 'fs'
-import { quickRunletFromStream } from '@dr-js/core/module/node/data/Stream'
+import { promises as fsAsync } from 'fs'
 import { createDirectory } from '@dr-js/core/module/node/file/Directory'
 import { run } from '@dr-js/core/module/node/run'
 
@@ -10,15 +8,13 @@ import {
   detect as detect7z // TODO: DEPRECATE
 } from './7z'
 import {
-  REGEXP_TGZ, REGEXP_NPM_TAR, check as checkNpmTar, verify as verifyNpmTar, compressAsync as compressNpmTarAsync, extractAsync as extractNpmTarAsync,
+  REGEXP_NPM_TAR, check as checkNpmTar, verify as verifyNpmTar, compressAsync as compressNpmTarAsync, extractAsync as extractNpmTarAsync,
   detect as detectNpmTar // TODO: DEPRECATE
 } from './npmTar'
-import { REGEXP_FSP_TAR, compressAsync as compressFspTarAsync, extractAsync as extractFspTarAsync } from './fspTar'
-import { withTempPath } from './function'
+import { REGEXP_FSP, compressAsync as compressFspAsync, extractAsync as extractFspAsync } from './fsp'
+import { REGEXP_TGZ, REGEXP_TBR, REGEXP_T7Z, REGEXP_TXZ, compressGzBrFileAsync, extractGzBrFileAsync, withTempPath } from './function'
 
-const REGEXP_T7Z = /\.t(?:ar\.)?7z$/
-const REGEXP_TXZ = /\.t(?:ar\.)?xz$/
-const REGEXP_AUTO = /\.(?:tar|tgz|tar\.gz|t7z|tar\.7z|txz|tar\.xz|7z|zip|fsp|fsp\.gz)$/ // common supported extension
+const REGEXP_AUTO = /\.(?:tar|tgz|tar\.gz|tbr|tar\.br|t7z|tar\.7z|txz|tar\.xz|7z|zip|fsp|fsp\.gz|fsp\.br)$/ // common supported extension
 
 const check = () => Boolean(check7z() && checkNpmTar())
 const verify = () => verify7z() && verifyNpmTar() && true
@@ -45,12 +41,12 @@ const __extractT7zAsync = async (sourceFile, outputPath, pathTemp) => {
 
 const compressAutoAsync = async (sourceDirectory, outputFile, pathTemp) => (REGEXP_T7Z.test(outputFile) || REGEXP_TXZ.test(outputFile)) ? compressT7zAsync(sourceDirectory, outputFile, pathTemp)
   : REGEXP_NPM_TAR.test(outputFile) ? createDirectory(dirname(outputFile)).then(() => compressNpmTarAsync(sourceDirectory, outputFile))
-    : REGEXP_FSP_TAR.test(outputFile) ? createDirectory(dirname(outputFile)).then(() => compressFspTarAsync(sourceDirectory, outputFile))
+    : REGEXP_FSP.test(outputFile) ? createDirectory(dirname(outputFile)).then(() => compressFspAsync(sourceDirectory, outputFile))
       : compress7zAsync(sourceDirectory, outputFile)
 
 const extractAutoAsync = async (sourceFile, outputPath, pathTemp) => (REGEXP_T7Z.test(sourceFile) || REGEXP_TXZ.test(sourceFile)) ? extractT7zAsync(sourceFile, outputPath, pathTemp)
   : REGEXP_NPM_TAR.test(sourceFile) ? createDirectory(outputPath).then(() => extractNpmTarAsync(sourceFile, outputPath))
-    : REGEXP_FSP_TAR.test(sourceFile) ? createDirectory(outputPath).then(() => extractFspTarAsync(sourceFile, outputPath))
+    : REGEXP_FSP.test(sourceFile) ? createDirectory(outputPath).then(() => extractFspAsync(sourceFile, outputPath))
       : extract7zAsync(sourceFile, outputPath)
 
 // not all archive info may be preserved, especially when repack on win32
@@ -60,26 +56,27 @@ const __repackAsync = async (fileFrom, fileTo, pathTemp) => {
   await compressAutoAsync(pathTemp, fileTo)
 }
 
-// only for repack between `.tgz|.txz|.t7z` but keep the inner tar, safer but may be less compressed
+// only for repack between `.tgz|.tbr|.txz|.t7z` but keep the inner tar, safer but may be less compressed than just .7z or .xz
 const repackTarAsync = async (fileFrom, fileTo, pathTemp) => withTempPath(pathTemp, __repackTarAsync, fileFrom, fileTo)
 const __repackTarAsync = async (fileFrom, fileTo, pathTemp) => {
-  await extract7zAsync(fileFrom, pathTemp) // use 7z for 1 level unpack
-  if (REGEXP_TGZ.test(fileTo)) { // use gzip
+  if (REGEXP_TGZ.test(fileFrom) || REGEXP_TBR.test(fileFrom)) await extractGzBrFileAsync(fileFrom, resolve(pathTemp, 'file.tar'))
+  else await extract7zAsync(fileFrom, pathTemp)
+  if (REGEXP_TGZ.test(fileTo) || REGEXP_TBR.test(fileTo)) {
     const nameList = await fsAsync.readdir(pathTemp)
     const tarName = nameList.find((name) => name.endsWith('.tar'))
     if (!tarName) throw new Error(`expect tar in archive, get: ${nameList.join(', ')}`)
-    await quickRunletFromStream(createReadStream(resolve(pathTemp, tarName)), createGzip(), createWriteStream(fileTo))
+    await compressGzBrFileAsync(resolve(pathTemp, tarName), fileTo)
   } else await compress7zAsync(pathTemp, fileTo) // `.t7z|.tar.7z` should cause 7zip to use default 7z type
 }
 
 const detect = (checkOnly) => detect7z(checkOnly) && detectNpmTar(checkOnly) // TODO: DEPRECATED
 
-export {
-  REGEXP_T7Z, REGEXP_TXZ, REGEXP_AUTO, check, verify,
+export { // TODO: move related to `module/Archive/`
+  REGEXP_AUTO, check, verify,
   compress7zAsync, extract7zAsync,
   compressT7zAsync, extractT7zAsync,
   compressAutoAsync, extractAutoAsync,
   repackAsync, repackTarAsync,
 
-  detect // TODO: DEPRECATED
+  REGEXP_TGZ, REGEXP_TBR, REGEXP_T7Z, REGEXP_TXZ, detect // TODO: DEPRECATED
 }

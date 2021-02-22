@@ -1,9 +1,10 @@
 import { resolve } from 'path'
 import { statSync, realpathSync } from 'fs'
-import { execFileSync, spawnSync } from 'child_process'
 import { resolveCommandName } from '@dr-js/core/module/node/system/ResolveCommand'
 import { fetchLikeRequest, fetchWithJump } from '@dr-js/core/module/node/net'
+import { run } from '@dr-js/core/module/node/run'
 import { tryRequire, tryRequireResolve } from '@dr-js/core/module/env/tryRequire'
+import { spawnString } from './function'
 
 const parsePackageNameAndVersion = (nameAndVersion) => {
   const nameAndVersionList = nameAndVersion.split('@')
@@ -62,10 +63,11 @@ const getPathNpmExecutable = () => {
   }
   return cachePathNpmExecutable
 }
+const getSudoArgs = () => process.platform === 'win32' ? [ getPathNpmExecutable() ] : [ 'sudo', getPathNpmExecutable() ]
 
 let cachePathNpmGlobalRoot // npm global package install path
 const getPathNpmGlobalRoot = () => {
-  if (cachePathNpmGlobalRoot === undefined) cachePathNpmGlobalRoot = getPathNpmExecutable() && String(execFileSync(getPathNpmExecutable(), [ 'root', '-g' ])).trim()
+  if (cachePathNpmGlobalRoot === undefined) cachePathNpmGlobalRoot = getPathNpmExecutable() && spawnString([ getPathNpmExecutable(), 'root', '-g' ]).trim()
   return cachePathNpmGlobalRoot
 }
 const fromGlobalNodeModules = (...args) => resolve(getPathNpmGlobalRoot(), ...args) // should resolve to global installed package
@@ -74,7 +76,7 @@ let cachePathNpm // npm package path
 const getPathNpm = () => {
   if (cachePathNpm === undefined) {
     { // npm help fast hack
-      const npmHelpText = String(spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm').stdout || '').trim()
+      const npmHelpText = spawnString([ getPathNpmExecutable() ]).trim()
       const npmHelpLastLine = npmHelpText && npmHelpText.split('\n').pop() // should be: npm@{version} {npm-full-path}
       const npmFullPath = npmHelpLastLine && npmHelpLastLine.split(' ').pop()
       if (npmFullPath) cachePathNpm = npmFullPath
@@ -93,6 +95,18 @@ const getPathNpm = () => {
 }
 const fromNpmNodeModules = (...args) => getPathNpm() && resolve(getPathNpm(), './node_modules/', ...args) // should resolve to npm bundled package
 
+const hasRepoVersion = async ( // NOTE: `npm view` can not return the pakument, though it's fetched, and default to filter out non-latest version
+  packageName, // name like `@dr-js/core`
+  packageVersion, // version like `0.1.0`
+  cwd = process.cwd() // set cwd to load ".npmrc" for auth
+) => {
+  try {
+    const { promise, stdoutPromise } = run([ getPathNpmExecutable(), 'view', `${packageName}@${packageVersion}`, 'versions', '--json' ], { cwd, quiet: true })
+    await promise
+    return JSON.parse(String(await stdoutPromise)).includes(packageVersion)
+  } catch (error) { return false }
+}
+
 const fetchLikeRequestWithProxy = (url, option = {}) => {
   // NOTE: this is to support npm@6 which ship with agent-base@4, npm@7 do not need this
   tryRequire('https').request.__agent_base_https_request_patched__ = true // HACK: to counter HACK part1/2: https://github.com/TooTallNate/node-agent-base/commit/33af5450
@@ -109,9 +123,11 @@ export {
   findUpPackageRoot,
   toPackageTgzName,
 
-  getPathNpmExecutable,
+  getPathNpmExecutable, getSudoArgs,
   getPathNpmGlobalRoot, fromGlobalNodeModules,
   getPathNpm, fromNpmNodeModules,
+
+  hasRepoVersion,
 
   fetchLikeRequestWithProxy, fetchWithJumpProxy
 }
