@@ -31,9 +31,19 @@ const { getArgs, setArgs, check, verify } = createArgListPack(
   () => probeSync([ 'docker', 'version' ], 'Server:') ? [ 'docker' ]
     : probeSync([ 'sudo', 'docker', 'version' ], 'Server:') ? [ 'sudo', 'docker' ]
       : undefined,
-  'expect "docker" in PATH with server up'
+  'expect "docker" in PATH, with server up'
+)
+
+const { getArgs: getArgsCompose, setArgs: setArgsCompose, check: checkCompose, verify: verifyCompose } = createArgListPack(
+  () => {
+    if (!check()) return undefined // expect docker command available
+    const argsList = [ ...getArgs().slice(0, -1), 'docker-compose' ]
+    if (probeSync([ ...argsList, 'version' ], 'docker-compose')) return argsList
+  },
+  'expect both "docker-compose" and "docker" in PATH, with server up'
 )
 
 export {
-  getArgs, setArgs, check, verify
+  getArgs, setArgs, check, verify,
+  getArgsCompose, setArgsCompose, checkCompose, verifyCompose
 }

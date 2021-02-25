@@ -51,7 +51,7 @@
 + 📄 [source/module/Software/archive.js](source/module/Software/archive.js)
   - `REGEXP_AUTO`, `REGEXP_T7Z`, `REGEXP_TBR`, `REGEXP_TGZ`, `REGEXP_TXZ`, `check`, `compress7zAsync`, `compressAutoAsync`, `compressT7zAsync`, `detect`, `extract7zAsync`, `extractAutoAsync`, `extractT7zAsync`, `repackAsync`, `repackTarAsync`, `verify`
 + 📄 [source/module/Software/docker.js](source/module/Software/docker.js)
-  - `check`, `getArgs`, `setArgs`, `verify`
+  - `check`, `checkCompose`, `getArgs`, `getArgsCompose`, `setArgs`, `setArgsCompose`, `verify`, `verifyCompose`
 + 📄 [source/module/Software/fsp.js](source/module/Software/fsp.js)
   - `REGEXP_FSP`, `compressAsync`, `compressFspAsync`, `compressFspGzBrAsync`, `extractAsync`, `extractFspAsync`, `extractFspGzBrAsync`
 + 📄 [source/module/Software/fspTar.js](source/module/Software/fspTar.js)

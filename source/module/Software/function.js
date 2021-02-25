@@ -54,7 +54,7 @@ const spawnString = ([ command, ...argList ]) => String(spawnSync(command, argLi
 const probeSync = (argList = [], expect) => spawnString(argList).includes(expect)
 
 const createArgListPack = (
-  getArgList, // () => [] || undefined // NOTE: return false to deny re-check
+  getArgList, // () => [] || undefined // NOTE: return false to deny later re-check, should not throw
   message
 ) => {
   let args // undefined, or array like [ '7z' ] and [ 'sudo', 'docker' ]
