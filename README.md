@@ -1,5 +1,7 @@
 # @dr-js/node
 
+> most code merged to [`@dr-js/core`](https://github.com/dr-js/dr-js)
+
 [![i:npm]][l:npm]
 [![i:ci]][l:ci]
 [![i:size]][l:size]
