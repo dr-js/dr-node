@@ -39,11 +39,11 @@
     "npm": ">=6.14"
   },
   "dependencies": {
-    "@dr-js/core": "^0.4.9"
+    "@dr-js/core": "^0.4.20-dev.2"
   },
   "devDependencies": {
-    "@dr-js/dev": "^0.4.9",
-    "@dr-js/dev-babel": "^0.4.9"
+    "@dr-js/dev": "^0.4.22",
+    "@dr-js/dev-babel": "^0.4.22"
   },
   "sideEffects": false
 }
