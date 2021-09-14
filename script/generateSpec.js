@@ -1,28 +1,24 @@
-import { resolve } from 'path'
-import { writeFileSync } from 'fs'
+import { writeText } from '@dr-js/core/module/node/fs/File.js'
+import { runKit } from '@dr-js/core/module/node/kit.js'
 
-import { collectSourceJsRouteMap } from '@dr-js/dev/module/node/export/parsePreset'
-import { generateExportInfo } from '@dr-js/dev/module/node/export/generate'
-import { getMarkdownFileLink, renderMarkdownBlockQuote, renderMarkdownAutoAppendHeaderLink, renderMarkdownExportPath } from '@dr-js/dev/module/node/export/renderMarkdown'
-import { runMain } from '@dr-js/dev/module/main'
+import { collectSourceJsRouteMap } from '@dr-js/dev/module/node/export/parsePreset.js'
+import { generateExportInfo } from '@dr-js/dev/module/node/export/generate.js'
+import { getMarkdownFileLink, renderMarkdownBlockQuote, renderMarkdownAutoAppendHeaderLink, renderMarkdownExportPath } from '@dr-js/dev/module/node/export/renderMarkdown.js'
 
-import { formatUsage } from 'source-bin/option'
+import { formatUsage } from 'source-bin/option.js'
 
-const PATH_ROOT = resolve(__dirname, '..')
-const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
-
-runMain(async (logger) => {
-  logger.padLog('generate exportInfoMap')
-  const sourceRouteMap = await collectSourceJsRouteMap({ pathRootList: [ fromRoot('source') ], logger })
+runKit(async (kit) => {
+  kit.padLog('generate exportInfoMap')
+  const sourceRouteMap = await collectSourceJsRouteMap({ pathRootList: [ kit.fromRoot('source') ], kit })
   const exportInfoMap = generateExportInfo({ sourceRouteMap })
 
-  logger.padLog('output: SPEC.md')
-  writeFileSync(fromRoot('SPEC.md'), [
+  kit.padLog('output: SPEC.md')
+  await writeText(kit.fromRoot('SPEC.md'), [
     '# Specification',
     '',
     ...renderMarkdownAutoAppendHeaderLink(
       '#### Export Path',
-      ...renderMarkdownExportPath({ exportInfoMap, rootPath: PATH_ROOT }),
+      ...renderMarkdownExportPath({ exportInfoMap, rootPath: kit.fromRoot() }),
       '',
       '#### Bin Option Format',
       getMarkdownFileLink('source-bin/option.js'),
@@ -30,4 +26,4 @@ runMain(async (logger) => {
     ),
     ''
   ].join('\n'))
-}, 'generate-spec')
+}, { title: 'generate-spec' })

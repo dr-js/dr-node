@@ -148,8 +148,8 @@
 >   --config --c -c [OPTIONAL] [ARGUMENT=1]
 >       from JS/JSON: set to "path/to/config.js|json"
 >       from ENV: set to "env" to enable, default not check env
->       from ENV JSON: set to "json-env:$env-name" to read the ENV string as JSON
->       from CLI JSON: set to "json-cli:$json-string" to read the appended string as JSON
+>       from ENV JSON: set to "json-env:ENV_NAME" to read the ENV string as JSON, or "jz64/jb64-env"
+>       from CLI JSON: set to "json-cli:JSON_STRING" to read the appended string as JSON, or "jz64/jb64-cli"
 >   --help --h -h [OPTIONAL] [ARGUMENT=0-1]
 >       show full help
 >   --version --v -v [OPTIONAL] [ARGUMENT=0-1]
